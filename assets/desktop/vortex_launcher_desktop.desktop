@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Vortex Launcher
-Exec=/opt/VortexLauncher/bin/vortex_launcher
-Icon=/opt/VortexLauncher/bin/ressources/imgs/icon.png
+Exec=/opt/VortexInstaller/bin/vortex_launcher
+Icon=/opt/VortexInstaller/bin/ressources/imgs/icon.png
 Terminal=false
 Type=Application
 Categories=Utility;Development;

@@ -1,8 +1,8 @@
-#include "./welcome.hpp"
+#include "./update.hpp"
 
-namespace VortexLauncher
+namespace VortexInstaller
 {
-    WelcomeWindow::WelcomeWindow(const std::string &name)
+    UpdateAppWindow::UpdateAppWindow(const std::string &name)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
         m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
@@ -58,12 +58,12 @@ namespace VortexLauncher
         std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
     }
 
-    void WelcomeWindow::AddChild(const std::string &child_name, const std::function<void()> &child)
+    void UpdateAppWindow::AddChild(const std::string &child_name, const std::function<void()> &child)
     {
         m_Childs[child_name] = child;
     }
 
-    void WelcomeWindow::RemoveChild(const std::string &child_name)
+    void UpdateAppWindow::RemoveChild(const std::string &child_name)
     {
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
@@ -72,19 +72,19 @@ namespace VortexLauncher
         }
     }
 
-    std::shared_ptr<Cherry::AppWindow> &WelcomeWindow::GetAppWindow()
+    std::shared_ptr<Cherry::AppWindow> &UpdateAppWindow::GetAppWindow()
     {
         return m_AppWindow;
     }
 
-    std::shared_ptr<WelcomeWindow> WelcomeWindow::Create(const std::string &name)
+    std::shared_ptr<UpdateAppWindow> UpdateAppWindow::Create(const std::string &name)
     {
-        auto instance = std::shared_ptr<WelcomeWindow>(new WelcomeWindow(name));
+        auto instance = std::shared_ptr<UpdateAppWindow>(new UpdateAppWindow(name));
         instance->SetupRenderCallback();
         return instance;
     }
 
-    void WelcomeWindow::SetupRenderCallback()
+    void UpdateAppWindow::SetupRenderCallback()
     {
         auto self = shared_from_this();
         m_AppWindow->SetRenderCallback([self]()
@@ -94,7 +94,7 @@ namespace VortexLauncher
             } });
     }
 
-    std::function<void()> WelcomeWindow::GetChild(const std::string &child_name)
+    std::function<void()> UpdateAppWindow::GetChild(const std::string &child_name)
     {
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
@@ -104,7 +104,7 @@ namespace VortexLauncher
         return nullptr;
     }
 
-    void WelcomeWindow::Render()
+    void UpdateAppWindow::Render()
     {
         static float leftPaneWidth = 300.0f;
         const float minPaneWidth = 50.0f;
@@ -113,7 +113,7 @@ namespace VortexLauncher
 
         ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true, ImGuiWindowFlags_NoBackground);
 
-        Cherry::TitleThree("Install Vortex");
+        Cherry::TitleThree("Update Vortex");
 
         for (const auto &child : m_Childs)
         {
