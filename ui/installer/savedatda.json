@@ -1,0 +1,43 @@
+{
+    "data": {
+        "windows": [
+            {
+                "data": {
+                    "simple_storage": [],
+                    "window_storage": []
+                },
+                "docknodeparent": "default",
+                "dockplace": "default",
+                "id": "test_window",
+                "name": "Gestionnaire de fichiers####loc.window_names.content_browser",
+                "type": "instanciable,static",
+                "win": "0"
+            },
+            {
+                "data": {
+                    "simple_storage": [],
+                    "window_storage": []
+                },
+                "docknodeparent": "default",
+                "dockplace": "default",
+                "id": "test_window",
+                "name": "indow_names.content_browser",
+                "type": "instanciable,static",
+                "win": "0"
+            },
+            {
+                "data": {
+                    "simple_storage": [],
+                    "window_storage": []
+                },
+                "docknodeparent": "default",
+                "dockplace": "default",
+                "id": "test_window",
+                "name": "indow_names.content_browser2",
+                "type": "instanciable,static",
+                "win": "0"
+            }
+        ]
+    },
+    "save": true
+}
