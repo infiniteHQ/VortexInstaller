@@ -98,8 +98,10 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
 
   if (g_Action == "install")
   {
-    std::string name = "Vortex Installer";
+    std::string name = "Installer";
     spec.Name = name;
+  spec.IconPath = Cherry::GetPath("ressources/imgs/icon_install.png");
+  spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon_install.png");
   }
   else if (g_Action == "update")
   {
@@ -108,8 +110,6 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   }
 
   spec.WindowSaves = false;
-  spec.IconPath = Cherry::GetPath("ressources/imgs/icon_update.png");
-  spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon_update.png");
 
   Cherry::Application *app = new Cherry::Application(spec);
   app->SetFavIconPath(Cherry::GetPath("ressources/imgs/favicon.png"));

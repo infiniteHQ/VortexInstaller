@@ -8,19 +8,6 @@
 
 namespace VortexInstaller
 {
-
-    struct AppChild
-    {
-        std::function<void()> m_Foo;
-        bool m_Finished;
-
-        AppChild(const std::function<void()>& foo, const bool& finished):
-        m_Foo(foo),
-        m_Finished(finished)
-        {};
-    AppChild() : m_Foo(nullptr), m_Finished(false) {};
-    };
-
     // This window can be a "subappwindow" of a parent if you use the constructor with parent parameter.
     class InstallAppWindow : public std::enable_shared_from_this<InstallAppWindow>
     {
@@ -28,7 +15,6 @@ namespace VortexInstaller
         InstallAppWindow(const std::string &name);
 
         void AddChild(const std::string &child_name, const std::function<void()> &child);
-        void SetChildState(const std::string &child_name, const bool& state);
         void RemoveChild(const std::string &child_name);
         std::function<void()> GetChild(const std::string &child_name);
 
@@ -37,7 +23,7 @@ namespace VortexInstaller
         void SetupRenderCallback();
         void Render();
 
-        std::unordered_map<std::string, AppChild> m_Childs;
+        std::unordered_map<std::string, std::function<void()>> m_Childs;
 
         std::string m_SelectedChildName;
 
