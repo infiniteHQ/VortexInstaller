@@ -1,8 +1,150 @@
 #include "./update.hpp"
+#include <thread>
+#include <future>
 
 namespace VortexInstaller
 {
-    UpdateAppWindow::UpdateAppWindow(const std::string &name)
+
+    void UpdateAppWindow::RenderUpdateVortex()
+    {
+        if (!m_Data->g_VortexLauncherOutdated)
+        {
+            Cherry::TitleThreeColored("Vortex est a jour !", "#AAAAAAFF");
+        }
+        else
+        {
+            Cherry::TitleThreeColored("Une mise a jour est disponible", "#AAAAAAFF");
+        }
+
+        {
+            std::string label = "Latest version for " + m_Data->g_Distribution + " distribution : \"" + m_Data->g_RequestVersion + "\"";
+            ImGui::Text(label.c_str());
+        }
+        {
+            std::string label = "Current version : " + m_Data->g_ManifestVersion;
+            ImGui::Text(label.c_str());
+        }
+
+        ImVec2 to_remove = ImGui::CalcTextSize("Confirm and install !");
+
+        Cherry::MenuItemTextSeparator("Install VortexLauncher from repository, or from this local installer");
+
+        ImVec2 available_size = ImGui::GetContentRegionAvail();
+        float button_width = (available_size.x - ImGui::GetStyle().ItemSpacing.x) / 2;
+
+        {
+            bool clicked = false;
+
+            std::string label = "Download and Install from net\n(VortexLauncher 1.2)";
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
+
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/net.png"));
+
+            if (m_Data->g_UseNet)
+            {
+                btn->SetBorderColorIdle("#B1FF31FF");
+            }
+
+            if (btn->Render("__1"))
+            {
+                m_Data->g_UseNet = true;
+            }
+
+            ImGui::PopTextWrapPos();
+        }
+
+        ImGui::SameLine();
+
+        {
+            bool clicked = false;
+
+            std::string label = "Install from this installer \n(Latest " + m_Data->g_Platform + " w/ " + m_Data->g_Arch + " v. " + m_Data->g_RequestVersion + ")";
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
+
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/install.png"));
+
+            if (!m_Data->g_UseNet)
+            {
+                btn->SetBorderColorIdle("#B1FF31FF");
+            }
+
+            if (btn->Render())
+            {
+                m_Data->g_UseNet = false;
+            }
+
+            ImGui::PopTextWrapPos();
+        }
+
+        Cherry::MenuItemTextSeparator("Select packages");
+        ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+        {
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("__confirm"))
+            {
+                m_SelectedChildName = "Installation";
+
+                std::thread mainThread([this]()
+                                       { 
+        if (m_Data->m_InstallCallback)
+        {
+            m_Data->m_InstallCallback();
+        } });
+
+                mainThread.detach();
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    void UpdateAppWindow::RenderUpdate()
+    {
+        float progress = static_cast<float>(m_Data->state_n) / 5.0f;
+        ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
+                                      ? Cherry::HexToRGBA("#B1FF31FF")
+                                      : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
+        ImGui::Text("Installation Progress:");
+
+        if (m_Data->result == "processing")
+        {
+            Cherry::TitleTwo("Installation of Vortex Launcher");
+        }
+        else if (m_Data->result == "success")
+        {
+            Cherry::TitleTwo("Vortex Launcher is now installed !");
+        }
+        else if (m_Data->result == "fail")
+        {
+            Cherry::TitleTwo("Oups, an error was occured");
+        }
+
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
+        ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+        ImGui::Text(m_Data->state.c_str());
+        ImGui::PopStyleColor();
+
+        if (m_Data->state_n == 5)
+        {
+            ImVec2 buttonSize = ImGui::CalcTextSize("Finish");
+
+            ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
+
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("__finish"))
+            {
+                Cherry::Application().Get().Close();
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    UpdateAppWindow::UpdateAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
         m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
@@ -36,31 +178,23 @@ namespace VortexInstaller
             }
         };
 
-        m_AppWindow->SetInternalPaddingX(10.0f);
+        m_AppWindow->SetInternalPaddingX(30.0f);
         m_AppWindow->SetInternalPaddingY(10.0f);
 
-        m_SelectedChildName = "?loc:loc.window_names.welcome.overview";
+        m_SelectedChildName = "Update Vortex";
 
-        this->AddChild("Where install ?", [this]()
-                       {
-                           //
-                       });
+        this->AddChild("Update", [this]()
+                       { RenderUpdate(); });
 
-        this->AddChild("Installation", [this]()
-                       {
-                           //
-                       });
+        this->AddChild("Update Vortex", [this]()
+                       { RenderUpdateVortex(); });
 
-        this->AddChild("Finish", [this]()
-                       {
-                           //
-                       });
         std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
     }
 
     void UpdateAppWindow::AddChild(const std::string &child_name, const std::function<void()> &child)
     {
-        m_Childs[child_name] = child;
+        m_Childs[child_name] = UpdateAppChild(child, false);
     }
 
     void UpdateAppWindow::RemoveChild(const std::string &child_name)
@@ -72,14 +206,23 @@ namespace VortexInstaller
         }
     }
 
+    void UpdateAppWindow::SetChildState(const std::string &child_name, const bool &state)
+    {
+        auto it = m_Childs.find(child_name);
+        if (it != m_Childs.end())
+        {
+            it->second.m_Finished = state;
+        }
+    }
+
     std::shared_ptr<Cherry::AppWindow> &UpdateAppWindow::GetAppWindow()
     {
         return m_AppWindow;
     }
 
-    std::shared_ptr<UpdateAppWindow> UpdateAppWindow::Create(const std::string &name)
+    std::shared_ptr<UpdateAppWindow> UpdateAppWindow::Create(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
     {
-        auto instance = std::shared_ptr<UpdateAppWindow>(new UpdateAppWindow(name));
+        auto instance = std::shared_ptr<UpdateAppWindow>(new UpdateAppWindow(name, data));
         instance->SetupRenderCallback();
         return instance;
     }
@@ -99,7 +242,7 @@ namespace VortexInstaller
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
         {
-            return it->second;
+            return it->second.m_Foo;
         }
         return nullptr;
     }
@@ -111,11 +254,13 @@ namespace VortexInstaller
         const float splitterWidth = 1.5f;
         static int selected;
 
-        ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true, ImGuiWindowFlags_NoBackground);
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToRGBA("#111111FF"));
+        ImGui::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#0000000"));
+        ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
 
-        ImGui::Image(Cherry::GetTexture(Cherry::GetPath("ressources/banner.png")), ImVec2(0,0));
-
-        Cherry::TitleThree("Update Vortex");
+        Space(25.0f);
+        Cherry::TitleThreeColored("Vortex Updater", "#B1FF31FF");
+        Space(10.0f);
 
         for (const auto &child : m_Childs)
         {
@@ -139,20 +284,19 @@ namespace VortexInstaller
                 child_name = child.first;
             }
 
-            if (Cherry::TextButtonUnderline(child_name.c_str()))
-            {
-                m_SelectedChildName = child.first;
-            }
+            Cherry::TextButtonUnderlineOptions opt;
+            opt.y_margin = 5;
+
+            bool activated = child.second.m_Finished;
+            std::string label = "###" + child_name;
+
+            CustomCheckbox(child_name.c_str(), &activated);
+            Space(10.0f);
 
             ImGui::PopStyleColor();
         }
         ImGui::EndChild();
-
-        ImGui::SameLine();
-
-        ImGui::PushStyleColor(ImGuiCol_Button, Cherry::HexToRGBA("#44444466"));
-        ImGui::Button("splitter", ImVec2(splitterWidth, -1));
-        ImGui::PopStyleVar();
+        ImGui::PopStyleColor(2);
 
         ImGui::SameLine();
         ImGui::BeginGroup();

@@ -43,7 +43,7 @@ public:
     }
     else if (installer_data->g_Action == "update")
     {
-      update_window = UpdateAppWindow::Create("?loc:loc.window_names.welcome");
+      update_window = UpdateAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(update_window->GetAppWindow());
     }
   };
@@ -112,8 +112,6 @@ void UpdateVortexInstaller()
   // Copy this VortexInstaller dist into the VortexInstaller installation path
 }
 
-
-// Cross-platform file existence check
 bool FileExists(const std::string &path)
 {
 #ifdef _WIN32
@@ -123,7 +121,6 @@ bool FileExists(const std::string &path)
 #endif
 }
 
-// Cross-platform function to delete files (Windows vs Unix)
 void DeleteFileCrossPlatform(const std::string &path)
 {
 #ifdef _WIN32
@@ -133,7 +130,6 @@ void DeleteFileCrossPlatform(const std::string &path)
 #endif
 }
 
-// Cross-platform function to download files (using Wininet on Windows)
 bool DownloadFile(const std::string &url, const std::string &outputPath)
 {
 #ifdef _WIN32
@@ -150,6 +146,39 @@ void CleanUpTemporaryDirectory(const std::string &tempDir)
   if (std::filesystem::exists(tempDir))
   {
     DeleteFileCrossPlatform(tempDir);
+  }
+}
+
+std::string getManifestVersion(const std::string &manifestPath)
+{
+  std::ifstream manifestFile(manifestPath);
+  if (!manifestFile.is_open())
+  {
+    std::cerr << "Failed to open " << manifestPath << std::endl;
+    return "";
+  }
+
+  nlohmann::json manifestJson;
+  try
+  {
+    manifestFile >> manifestJson;
+  }
+  catch (const std::exception &e)
+  {
+    std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+    return "";
+  }
+
+  manifestFile.close();
+
+  if (manifestJson.contains("version") && manifestJson["version"].is_string())
+  {
+    return manifestJson["version"];
+  }
+  else
+  {
+    std::cerr << "\"version\" field not found or not a string" << std::endl;
+    return "";
   }
 }
 
@@ -210,33 +239,32 @@ void InstallVortexLauncher()
     installerData.state_n = 3;
     installerData.state = "Extracting files...";
 
-        if (!std::filesystem::exists(installPath))
-        {
-            std::filesystem::create_directories(installPath);
-        }
+    if (!std::filesystem::exists(installPath))
+    {
+      std::filesystem::create_directories(installPath);
+    }
 
-if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
-{
-  for (const auto &entry : std::filesystem::directory_iterator(installPath))
-  {
-    DeleteFileCrossPlatform(entry.path().string());
-  }
-}
+    if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
+    {
+      for (const auto &entry : std::filesystem::directory_iterator(installPath))
+      {
+        DeleteFileCrossPlatform(entry.path().string());
+      }
+    }
 
-std::string uncompressCommand;
+    std::string uncompressCommand;
 #ifdef _WIN32
-uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #else
-uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
-if (system(uncompressCommand.c_str()) != 0)
-{
-  installerData.result = "fail";
-  installerData.state = "Error: Failed to extract tarball.";
-  CleanUpTemporaryDirectory(tempDir);
-  return;
-}
-
+    if (system(uncompressCommand.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to extract tarball.";
+      CleanUpTemporaryDirectory(tempDir);
+      return;
+    }
 
     installerData.state_n = 4;
     installerData.state = "Running vortex_launcher test...";
@@ -270,7 +298,6 @@ if (system(uncompressCommand.c_str()) != 0)
 
 Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
 {
-
   Cherry::ApplicationSpecification spec;
   std::shared_ptr<Layer> layer = std::make_shared<Layer>();
 
@@ -294,6 +321,8 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   {
     std::string name = "Vortex Updater";
     spec.Name = name;
+    spec.IconPath = Cherry::GetPath("ressources/imgs/icon_update.png");
+    spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon_update.png");
   }
 
   g_InstallerData->m_InstallCallback = InstallVortexLauncher;
@@ -313,93 +342,6 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   app->SetMenubarCallback([app, layer]() {
 
   });
-
-  DetectPlatform();
-  DetectArch();
-
-  std::cout << "Arch" << g_InstallerData->g_Arch << std::endl;
-  std::cout << "Platform : " << g_InstallerData->g_Platform << std::endl;
-
-  std::string dist = "stable_" + g_InstallerData->g_Platform;
-
-  std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
-
-  std::cout << url << std::endl;
-  RestClient::Response r = RestClient::get(url);
-
-  if (r.code != 200)
-  {
-    g_InstallerData->g_Request = false;
-  }
-  else
-  {
-    g_InstallerData->g_Request = true;
-    try
-    {
-      g_InstallerData->jsonResponse = nlohmann::json::parse(r.body);
-
-      if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array())
-      {
-        // Extract the "values" field from the first element
-        std::string values_str = g_InstallerData->jsonResponse[0]["values"];
-
-        // Parse "values" string into a JSON object
-        g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
-
-        std::cout << "Formatted JSON Values:\n"
-                  << g_InstallerData->g_RequestValues.dump(4) << std::endl;
-
-        // Ensure the keys exist and assign them to your strings
-        if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string())
-        {
-          g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
-          std::cout << "Tarball Path: " << g_InstallerData->g_RequestTarballPath << std::endl;
-        }
-        else
-        {
-          std::cout << "Error: 'path' key missing or not a string" << std::endl;
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string())
-        {
-          g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
-          std::cout << "Sum Path: " << g_InstallerData->g_RequestSumPath << std::endl;
-        }
-        else
-        {
-          std::cout << "Error: 'sum' key missing or not a string" << std::endl;
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("version") && g_InstallerData->g_RequestValues["version"].is_string())
-        {
-          g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
-          std::cout << "Version: " << g_InstallerData->g_RequestVersion << std::endl;
-        }
-        else
-        {
-          std::cout << "Error: 'version' key missing or not a string" << std::endl;
-        }
-      }
-      else
-      {
-        std::cout << "Unexpected JSON format or empty response." << std::endl;
-      }
-    }
-    catch (nlohmann::json::parse_error &e)
-    {
-      std::cerr << "JSON Parse Error: " << e.what() << std::endl;
-    }
-  }
-
-  if (g_InstallerData->g_Request)
-  {
-    std::cout << r.body << std::endl;
-  }
-  else
-  {
-
-    std::cout << "OUPSIII" << std::endl;
-  }
 
   c_Launcher = std::make_shared<Launcher>(g_InstallerData);
   return app;
