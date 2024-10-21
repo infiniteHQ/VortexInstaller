@@ -15,19 +15,19 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
     }
 
     if (path.empty()) {
-        path = g_DefaultPath;
+        path = g_InstallerData->g_DefaultInstallPath;
     }
 }
 
 int main(int argc, char *argv[])
 {
-    g_WorkingPath = g_DefaultPath;
+    g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
 
-            g_Action = "update";
-    parseArguments(argc, argv, g_Action, g_WorkingPath);
+            g_InstallerData->g_Action = "update";
+    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
 
-    std::cout << "Action: " << g_Action << std::endl;
-    std::cout << "Path: " << g_WorkingPath << std::endl;
+    std::cout << "Action: " << g_InstallerData->g_Action << std::endl;
+    std::cout << "Path: " << g_InstallerData->g_WorkingPath << std::endl;
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });

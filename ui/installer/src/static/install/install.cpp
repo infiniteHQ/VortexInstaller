@@ -1,4 +1,6 @@
 #include "./install.hpp"
+#include <thread>
+#include <future>
 
 namespace VortexInstaller
 {
@@ -23,7 +25,215 @@ namespace VortexInstaller
         return buffer.str();
     }
 
-    InstallAppWindow::InstallAppWindow(const std::string &name)
+    void InstallAppWindow::RenderInstallVortex()
+    {
+        Space(30.0f);
+        Cherry::TitleThreeColored("Welcome to Vortex !", "#AAAAAAFF");
+        ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
+        ImGui::TextWrapped("We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. After installation, you will be able to create your projects and explore all the amazing features and capabilities that Vortex provides. Enjoy your experience!");
+
+        ImGui::PopStyleColor();
+
+        Space(20.0f);
+        std::shared_ptr<std::string> val = std::make_shared<std::string>(m_Data->g_DefaultInstallPath);
+
+        Cherry::TitleFiveColored("Please select the installation path", "#787878FF");
+        {
+            auto input = std::make_shared<Cherry::SimpleStringInput>("Select", val, "Select install path");
+            input->Render("__blank");
+        }
+
+        ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
+        ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+
+        {
+            auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close", "Close");
+            if (deny->Render())
+            {
+                Cherry::Application().Get().Close();
+            }
+        }
+
+        ImGui::SameLine();
+
+        {
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Continue");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("sec"))
+            {
+
+                m_SelectedChildName = "Accept Licence Agreement";
+                this->SetChildState("Install Vortex", true);
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    void InstallAppWindow::RenderLicenseAgreement()
+    {
+        static std::string file_content = ReadFile(Cherry::GetPath("ressources/license/apache2.txt"));
+
+        const float button_height = 30.0f;
+        const float spacing = 10.0f;
+
+        float available_height = ImGui::GetContentRegionAvail().y - button_height - spacing;
+
+        ImGui::BeginChild("TextZone", ImVec2(0, available_height), true, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::TextUnformatted(file_content.c_str());
+        ImGui::EndChild();
+
+        ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
+
+        ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+
+        {
+            auto deny = std::make_shared<Cherry::CustomButtonSimple>("Deny", "Deny");
+            if (deny->Render())
+            {
+                Cherry::Application().Get().Close();
+            }
+        }
+
+        ImGui::SameLine();
+
+        {
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept", "Accept");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("__another"))
+            {
+                m_SelectedChildName = "Summary";
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    void InstallAppWindow::RenderSummary()
+    {
+        Cherry::TitleThreeColored("Select your packages to install", "#AAAAAAFF");
+        ImVec2 to_remove = ImGui::CalcTextSize("Confirm and install !");
+
+        Cherry::MenuItemTextSeparator("Install VortexLauncher from repository, or from this local installer");
+
+        ImVec2 available_size = ImGui::GetContentRegionAvail();
+        float button_width = (available_size.x - ImGui::GetStyle().ItemSpacing.x) / 2;
+
+        {
+            bool clicked = false;
+
+            std::string label = "Download and Install from net\n(VortexLauncher 1.2)";
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
+
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/net.png"));
+
+            if (m_Data->g_UseNet)
+            {
+                btn->SetBorderColorIdle("#B1FF31FF");
+            }
+
+            if (btn->Render("__1"))
+            {
+                m_Data->g_UseNet = true;
+            }
+
+            ImGui::PopTextWrapPos();
+        }
+
+        ImGui::SameLine();
+
+        {
+            bool clicked = false;
+
+            std::string label = "Install from this installer \n(Latest " + m_Data->g_Platform + " w/ " + m_Data->g_Arch + " v. " + m_Data->g_RequestVersion + ")";
+            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
+
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/install.png"));
+
+            if (!m_Data->g_UseNet)
+            {
+                btn->SetBorderColorIdle("#B1FF31FF");
+            }
+
+            if (btn->Render())
+            {
+                m_Data->g_UseNet = false;
+            }
+
+            ImGui::PopTextWrapPos();
+        }
+
+        Cherry::MenuItemTextSeparator("Select packages");
+        ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+        {
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("__confirm"))
+            {
+                m_SelectedChildName = "Installation";
+
+                std::thread mainThread([this]()
+                                       { 
+        if (m_Data->m_InstallCallback)
+        {
+            m_Data->m_InstallCallback();
+        } });
+
+                mainThread.detach();
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    void InstallAppWindow::RenderInstall()
+    {
+        float progress = static_cast<float>(m_Data->state_n) / 5.0f;                          
+    ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing") 
+                                ? Cherry::HexToRGBA("#B1FF31FF") 
+                                : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
+        ImGui::Text("Installation Progress:");
+
+        if(m_Data->result == "processing")
+        {
+            Cherry::TitleTwo("Installation of Vortex Launcher");
+        }
+        else if(m_Data->result == "success")
+        {
+            Cherry::TitleTwo("Vortex Launcher is now installed !");
+        }
+        else if(m_Data->result == "fail")
+        {
+            Cherry::TitleTwo("Oups, an error was occured");
+        }
+
+        ImGui::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
+        ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+        ImGui::Text(m_Data->state.c_str());
+        ImGui::PopStyleColor();
+
+        if (m_Data->state_n == 5)
+        {
+            ImVec2 buttonSize = ImGui::CalcTextSize("Finish");
+
+            ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
+
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
+            accept->SetProperty("bg", "#B1FF31FF");
+            accept->SetProperty("bg_hovered", "#C3FF53FF");
+            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+            if (accept->Render("__finish"))
+            {
+                Cherry::Application().Get().Close();
+            }
+            ImGui::PopStyleColor();
+        }
+    }
+
+    InstallAppWindow::InstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
         m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
@@ -63,130 +273,17 @@ namespace VortexInstaller
         m_SelectedChildName = "Install Vortex";
 
         this->AddChild("Installation", [this]()
-                       {
-    {
-    ImVec2 to_remove = ImGui::CalcTextSize("Finish");
-
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
-
-        auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish","Finish");
-            accept->SetProperty("bg", "#B1FF31FF");
-             accept->SetProperty("bg_hovered", "#C3FF53FF");
-             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-        if(accept->Render("__finish"))
-        {
-            Cherry::Application().Get().Close();
-        }
-        ImGui::PopStyleColor();
-
-    } });
+                       { RenderInstall(); });
 
         this->AddChild("Summary", [this]()
-                       {
-
-    ImVec2 to_remove = ImGui::CalcTextSize("Confirm and install !");
-
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
-
-    {
-        auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm","Confirm and install !");
-            accept->SetProperty("bg", "#B1FF31FF");
-             accept->SetProperty("bg_hovered", "#C3FF53FF");
-             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-        if(accept->Render("__confirm"))
-        {
-             m_SelectedChildName = "Installation";
-        }
-        ImGui::PopStyleColor();
-
-    } });
+                       { RenderSummary(); });
 
         this->AddChild("Accept Licence Agreement", [this]()
-                       {
-    static std::string file_content = ReadFile(Cherry::GetPath("ressources/license/apache2.txt"));
-
-    const float button_height = 30.0f;
-    const float spacing = 10.0f;
-
-    float available_height = ImGui::GetContentRegionAvail().y - button_height - spacing;
-
-    ImGui::BeginChild("TextZone", ImVec2(0, available_height), true, ImGuiWindowFlags_HorizontalScrollbar);
-    ImGui::TextUnformatted(file_content.c_str());
-    ImGui::EndChild();
-
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
-
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
-
-    {
-        auto deny = std::make_shared<Cherry::CustomButtonSimple>("Deny","Deny");
-        if(deny->Render())
-        {
-            Cherry::Application().Get().Close();
-        }
-    }
-
-    ImGui::SameLine();
-
-    {
-        auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept","Accept");
-            accept->SetProperty("bg", "#B1FF31FF");
-             accept->SetProperty("bg_hovered", "#C3FF53FF");
-             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-        if(accept->Render("__another"))
-        {
-             m_SelectedChildName = "Summary";
-        }
-        ImGui::PopStyleColor();
-
-    } });
+                       { RenderLicenseAgreement(); });
 
         this->AddChild("Install Vortex", [this]()
-                       { 
-                        Space(30.0f);
-Cherry::TitleThreeColored("Welcome to Vortex !", "#AAAAAAFF");
-ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
-ImGui::TextWrapped("We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. After installation, you will be able to create your projects and explore all the amazing features and capabilities that Vortex provides. Enjoy your experience!");
-                       
-                        ImGui::PopStyleColor();
+                       { RenderInstallVortex(); });
 
-                         Space(20.0f);
-    std::shared_ptr<std::string> val = std::make_shared<std::string>("C:/Program Files/VortexLauncher");
-
-Cherry::TitleFiveColored("Please select the installation path", "#787878FF");
-    {
-        auto input = std::make_shared<Cherry::SimpleStringInput>("Select", val, "Select install path");
-        input->Render("__blank");
-    }
-
-
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
-
-    {
-        auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close","Close");
-        if(deny->Render())
-        {
-            Cherry::Application().Get().Close();
-        }
-    }
-
-    ImGui::SameLine();
-    
-    {
-        auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue","Continue");
-            accept->SetProperty("bg", "#B1FF31FF");
-             accept->SetProperty("bg_hovered", "#C3FF53FF");
-             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-        if(accept->Render("sec"))
-        {
-
-        m_SelectedChildName = "Accept Licence Agreement";
-            this->SetChildState("Install Vortex", true);
-        }
-        ImGui::PopStyleColor();
-
-    } });
         std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
     }
 
@@ -218,9 +315,9 @@ Cherry::TitleFiveColored("Please select the installation path", "#787878FF");
         return m_AppWindow;
     }
 
-    std::shared_ptr<InstallAppWindow> InstallAppWindow::Create(const std::string &name)
+    std::shared_ptr<InstallAppWindow> InstallAppWindow::Create(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
     {
-        auto instance = std::shared_ptr<InstallAppWindow>(new InstallAppWindow(name));
+        auto instance = std::shared_ptr<InstallAppWindow>(new InstallAppWindow(name, data));
         instance->SetupRenderCallback();
         return instance;
     }
