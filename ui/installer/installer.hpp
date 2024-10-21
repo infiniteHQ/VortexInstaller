@@ -215,27 +215,28 @@ void InstallVortexLauncher()
             std::filesystem::create_directories(installPath);
         }
 
-    if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
-    {
-      for (const auto &entry : std::filesystem::directory_iterator(installPath))
-      {
-        DeleteFileCrossPlatform(entry.path().string());
-      }
-    }
+if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
+{
+  for (const auto &entry : std::filesystem::directory_iterator(installPath))
+  {
+    DeleteFileCrossPlatform(entry.path().string());
+  }
+}
 
-    std::string uncompressCommand;
+std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand = "tar -xzf " + tarballFile + " -C " + installPath;
+uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #else
-    uncompressCommand = "tar -xzf " + tarballFile + " -C " + installPath;
+uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
-    if (system(uncompressCommand.c_str()) != 0)
-    {
-      installerData.result = "fail";
-      installerData.state = "Error: Failed to extract tarball.";
-      CleanUpTemporaryDirectory(tempDir);
-      return;
-    }
+if (system(uncompressCommand.c_str()) != 0)
+{
+  installerData.result = "fail";
+  installerData.state = "Error: Failed to extract tarball.";
+  CleanUpTemporaryDirectory(tempDir);
+  return;
+}
+
 
     installerData.state_n = 4;
     installerData.state = "Running vortex_launcher test...";
