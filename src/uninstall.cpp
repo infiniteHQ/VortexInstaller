@@ -27,13 +27,33 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
 
 int main(int argc, char *argv[])
 {
+    g_InstallerData = std::make_shared<VortexInstallerData>();
     g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
 
-            g_InstallerData->g_Action = "update";
+            g_InstallerData->g_Action = "uninstall";
     parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
+
+
+    if (g_InstallerData->g_WorkingPath.empty())
+    {
+        g_InstallerData->g_WorkingPath = CookPath("");
+        std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
+    }
 
     std::cout << "Action: " << g_InstallerData->g_Action << std::endl;
     std::cout << "Path: " << g_InstallerData->g_WorkingPath << std::endl;
+
+     std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
+    if (!manifestPath.empty())
+    {
+        std::cout << "Found manifest.json at: " << manifestPath << std::endl;
+    g_InstallerData->g_WorkingPath = manifestPath.substr(0, manifestPath.find_last_of("/\\"));
+       
+    }
+    else
+    {
+        std::cerr << "manifest.json not found!" << std::endl;
+    }
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });

@@ -25,88 +25,58 @@ namespace VortexInstaller
             ImGui::Text(label.c_str());
         }
 
-        ImVec2 to_remove = ImGui::CalcTextSize("Confirm and install !");
+                std::string label = "Update to \n(Vortex Launcher \"" + m_Data->g_RequestVersion + "\")";
+        ImVec2 to_remove = ImGui::CalcTextSize(label.c_str());
 
-        Cherry::MenuItemTextSeparator("Install VortexLauncher from repository, or from this local installer");
 
-        ImVec2 available_size = ImGui::GetContentRegionAvail();
-        float button_width = (available_size.x - ImGui::GetStyle().ItemSpacing.x) / 2;
-
+        if (m_Data->g_VortexLauncherOutdated)
         {
-            bool clicked = false;
-
-            std::string label = "Download and Install from net\n(VortexLauncher 1.2)";
-            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
-
-            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/net.png"));
-
-            if (m_Data->g_UseNet)
+            ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
             {
-                btn->SetBorderColorIdle("#B1FF31FF");
-            }
+                auto accept = std::make_shared<Cherry::CustomButtonSimple>(label.c_str(), label.c_str());
+                accept->SetProperty("bg", "#B1FF31FF");
+                accept->SetProperty("bg_hovered", "#C3FF53FF");
+                ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+                if (accept->Render("__confirm"))
+                {
+                    m_SelectedChildName = "Update";
 
-            if (btn->Render("__1"))
-            {
-                m_Data->g_UseNet = true;
-            }
-
-            ImGui::PopTextWrapPos();
-        }
-
-        ImGui::SameLine();
-
+                    std::thread mainThread([this]()
+                                           { 
+        if (m_Data->m_UpdateCallback)
         {
-            bool clicked = false;
-
-            std::string label = "Install from this installer \n(Latest " + m_Data->g_Platform + " w/ " + m_Data->g_Arch + " v. " + m_Data->g_RequestVersion + ")";
-            ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
-
-            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/install.png"));
-
-            if (!m_Data->g_UseNet)
-            {
-                btn->SetBorderColorIdle("#B1FF31FF");
-            }
-
-            if (btn->Render())
-            {
-                m_Data->g_UseNet = false;
-            }
-
-            ImGui::PopTextWrapPos();
-        }
-
-        Cherry::MenuItemTextSeparator("Select packages");
-        ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
-        {
-            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
-            accept->SetProperty("bg", "#B1FF31FF");
-            accept->SetProperty("bg_hovered", "#C3FF53FF");
-            ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-            if (accept->Render("__confirm"))
-            {
-                m_SelectedChildName = "Installation";
-
-                std::thread mainThread([this]()
-                                       { 
-        if (m_Data->m_InstallCallback)
-        {
-            m_Data->m_InstallCallback();
+            m_Data->m_UpdateCallback();
         } });
 
-                mainThread.detach();
+                    mainThread.detach();
+                }
+                ImGui::PopStyleColor();
             }
-            ImGui::PopStyleColor();
+        }
+        else
+        {
+            ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+            {
+                auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Close");
+                accept->SetProperty("bg", "#B1FF31FF");
+                accept->SetProperty("bg_hovered", "#C3FF53FF");
+                ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+                if (accept->Render("__confirm"))
+                {
+                    Cherry::Application::Get().Close();
+                }
+                ImGui::PopStyleColor();
+            }
         }
     }
 
     void UpdateAppWindow::RenderUpdate()
     {
-        float progress = static_cast<float>(m_Data->state_n) / 5.0f;
+        float progress = static_cast<float>(m_Data->state_n) / 10.0f;
         ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
                                       ? Cherry::HexToRGBA("#B1FF31FF")
                                       : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
-        ImGui::Text("Installation Progress:");
+        ImGui::Text("Update Progress:");
 
         if (m_Data->result == "processing")
         {
