@@ -14,11 +14,13 @@ mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 cd ..
 
 mkdir build\dist
-copy ..\icon.png build\bin\
-copy ..\main.py build\bin\
+copy ..\misc\windows\icon.png build\bin\
+copy ..\misc\windows\main.py build\bin\
+copy ..\misc\windows\admin_manifest.xml build\bin\
 
 cd build\bin
-pyinstaller --onefile --name VortexInstaller --icon=icon.png --add-data "vortex_installer.exe;." --add-data "ressources;ressources" --add-binary "libglm_shared.dll;." --add-binary "librestclient-cpp.dll;." --add-binary "libspdlog.dll;." --add-binary "SDL2.dll;." main.py
+
+pyinstaller --onefile --name VortexInstaller --icon=icon.png --add-data "vortex_installer.exe;." --add-data "ressources;ressources" --add-binary "libglm_shared.dll;." --add-binary "librestclient-cpp.dll;." --add-binary "libspdlog.dll;." --add-binary "SDL2.dll;." --manifest=admin_manifest.xml main.py
 
 cd ..
 cd ..
@@ -26,3 +28,5 @@ cd ..
 mkdir shipping\windows
 
 copy build\bin\dist\VortexInstaller.exe shipping\windows\
+
+:: TODO : "Publish" the app on the system

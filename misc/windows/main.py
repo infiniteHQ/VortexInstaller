@@ -1,8 +1,19 @@
+import ctypes
 import os
-import subprocess
 import sys
+import subprocess
+
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 def main():
+    if not is_admin():
+        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
+        sys.exit()
+
     if getattr(sys, 'frozen', False):
         app_path = sys._MEIPASS
     else:
@@ -13,7 +24,7 @@ def main():
     try:
         subprocess.run([exe_path], check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Error while executing the Vortex Installer :( {exe_path}: {e}")
+        print(f"Error while executing the Vortex Installer: {exe_path}: {e}")
     except FileNotFoundError:
         print(f"Executable not found: {exe_path}")
 

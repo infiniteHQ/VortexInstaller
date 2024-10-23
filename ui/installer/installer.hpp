@@ -7,6 +7,7 @@
 #include "src/static/uninstall/uninstall.hpp"
 
 #include "../../lib/restcpp/include/restclient-cpp/restclient.h"
+#include "../../lib/restcpp/include/restclient-cpp/connection.h"
 #include "../../src/base.hpp"
 
 #include <thread>
@@ -132,6 +133,7 @@ bool DownloadFile(const std::string &url, const std::string &outputPath)
 #ifdef _WIN32
     HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), outputPath.c_str(), 0, NULL);
     if (hr != S_OK) {
+      std::cout << "url : " << url << std::endl;
         std::cerr << "Error downloading file: " << hr << std::endl; // Affiche l'erreur
     }
     return hr == S_OK;
@@ -467,8 +469,14 @@ bool InstallVortexLauncher()
     std::string sumpath = installerData.g_RequestSumPath;
     std::string installPath = installerData.g_DefaultInstallPath;
 
+
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
+
+    std::cout << "dlpath" << dlpath<< std::endl;
+    std::cout << "sumpath" << sumpath<< std::endl;
+    std::cout << "tarballFile" << tarballFile<< std::endl;
+    std::cout << "sumFile" << sumFile<< std::endl;
 
     if (!DownloadFile(dlpath, tarballFile) || !DownloadFile(sumpath, sumFile))
     {

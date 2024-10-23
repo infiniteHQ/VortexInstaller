@@ -1,1 +1,5 @@
-:: TODO : Build the build.bat script and rebuild links with another call of build.bat.
+cd ..\build
+
+::First static build
+
+::Second misc build & other elements
