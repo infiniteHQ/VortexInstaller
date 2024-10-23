@@ -1,9 +1,13 @@
+#!/bin/sh
 mkdir build_spdlog
 mkdir build
 
 cd build_spdlog && cmake ../../lib/spdlog && make -j$(nproc) install
 cd ../build && cmake ../.. && make -j$(nproc) install
 cd ..
+
+# TODO : Make dist and package the installer with pyinstaller
+# Cpy into shipping/linux
 
 sudo chown root:root ./build/bin/vortex_installer
 sudo chown root:root ./build/bin/vortex_uninstall

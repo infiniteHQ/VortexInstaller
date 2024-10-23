@@ -1,3 +1,4 @@
+#define SDL_MAIN_HANDLED
 #include <iostream>
 #include <string>
 #include <thread>

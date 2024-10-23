@@ -16,6 +16,7 @@
 #include <filesystem>
 #ifdef _WIN32
 #include <windows.h>
+#include <fileapi.h>
 #include <urlmon.h>
 #pragma comment(lib, "urlmon.lib")
 #else
@@ -67,8 +68,8 @@ void DetectPlatform()
 {
 #if defined(_WIN32) || defined(_WIN64)
   g_InstallerData->g_Platform = "windows";
-  g_InstallerData->g_DefaultInstallPath = "C:\\Program Files\\VortexLauncher";
-  g_InstallerData->g_DefaultInstallPath = "C:\\Program Files\\Vortex";
+  g_InstallerData->g_DefaultInstallPath = "C:/Program Files/VortexLauncher";
+  g_InstallerData->g_DefaultInstallPath = "C:/Program Files/Vortex";
   g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
 #elif defined(__APPLE__) && defined(__MACH__)
   g_InstallerData->g_Platform = "macos";
@@ -114,11 +115,7 @@ void DetectArch()
 
 bool FileExists(const std::string &path)
 {
-#ifdef _WIN32
-  return PathFileExistsA(path.c_str());
-#else
-  return access(path.c_str(), F_OK) != -1;
-#endif
+    return std::filesystem::exists(path);
 }
 
 void DeleteFileCrossPlatform(const std::string &path)
@@ -133,11 +130,14 @@ void DeleteFileCrossPlatform(const std::string &path)
 bool DownloadFile(const std::string &url, const std::string &outputPath)
 {
 #ifdef _WIN32
-  HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), outputPath.c_str(), 0, NULL);
-  return hr == S_OK;
+    HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), outputPath.c_str(), 0, NULL);
+    if (hr != S_OK) {
+        std::cerr << "Error downloading file: " << hr << std::endl; // Affiche l'erreur
+    }
+    return hr == S_OK;
 #else
-  std::string downloadCommand = "curl -o " + outputPath + " " + url;
-  return system(downloadCommand.c_str()) == 0;
+    std::string downloadCommand = "curl -o " + outputPath + " " + url;
+    return system(downloadCommand.c_str()) == 0;
 #endif
 }
 
@@ -481,6 +481,7 @@ bool InstallVortexLauncher()
     installerData.state_n++;
     installerData.state = "Verifying integrity...";
 
+
     std::filesystem::current_path(tempDir);
 
     std::string checkSumCommand;
@@ -513,12 +514,15 @@ bool InstallVortexLauncher()
       }
     }
 
-    std::string uncompressCommand;
+std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
+                        "\" --strip-components=1 -C \"" + installPath + "\" dist/\"";
 #else
     uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
+
+std::cout << "Cmd: " << uncompressCommand << std::endl;
     if (system(uncompressCommand.c_str()) != 0)
     {
       installerData.result = "fail";
