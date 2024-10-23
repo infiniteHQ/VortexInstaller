@@ -6,6 +6,7 @@
 
 #include "../ui/installer/installer.hpp"
 
+
 void parseArguments(int argc, char *argv[], std::string &action, std::string &path)
 {
     for (int i = 1; i < argc; ++i)
@@ -40,7 +41,6 @@ int main(int argc, char *argv[])
     std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
     std::string url = "https://api.infinite.si";
 
-    std::cout << url << std::endl;
     RestClient::Connection *conn = new RestClient::Connection(url);
 
     conn->SetTimeout(5);
@@ -59,10 +59,8 @@ int main(int argc, char *argv[])
     RestClient::Response r = conn->get("/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch);
     if (r.code != 200)
     {
-        std::cerr << "Error: " << r.code << " - " << r.body << std::endl;
+        VXI_LOG("Error: " << r.code << " - " << r.body);
     }
-
-    std::cout << r.code << std::endl;
 
     if (r.code != 200)
     {
@@ -84,47 +82,47 @@ int main(int argc, char *argv[])
                 if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string())
                 {
                     g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
-                    std::cout << "Tarball Path: " << g_InstallerData->g_RequestTarballPath << std::endl;
+                    VXI_LOG("Tarball Path: " << g_InstallerData->g_RequestTarballPath);
                 }
                 else
                 {
-                    std::cout << "Error: 'path' key missing or not a string" << std::endl;
+                    VXI_LOG("Error: 'path' key missing or not a string");
                 }
 
                 if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string())
                 {
                     g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
-                    std::cout << "Sum Path: " << g_InstallerData->g_RequestSumPath << std::endl;
+                    VXI_LOG("Sum Path: " << g_InstallerData->g_RequestSumPath);
                 }
                 else
                 {
-                    std::cout << "Error: 'sum' key missing or not a string" << std::endl;
+                    VXI_LOG("Error: 'sum' key missing or not a string");
                 }
 
                 if (g_InstallerData->g_RequestValues.contains("version") && g_InstallerData->g_RequestValues["version"].is_string())
                 {
                     g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
-                    std::cout << "Version: " << g_InstallerData->g_RequestVersion << std::endl;
+                    VXI_LOG("Version: " << g_InstallerData->g_RequestVersion);
                 }
                 else
                 {
-                    std::cout << "Error: 'version' key missing or not a string" << std::endl;
+                    VXI_LOG("Error: 'version' key missing or not a string");
                 }
             }
             else
             {
-                std::cout << "Unexpected JSON format or empty response." << std::endl;
+                VXI_LOG("Unexpected JSON format or empty response.");
             }
         }
         catch (nlohmann::json::parse_error &e)
         {
-            std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+            VXI_LOG("JSON Parse Error: " << e.what());
         }
     }
 
     if (g_InstallerData->g_Request)
     {
-        std::cout << r.body << std::endl;
+        VXI_LOG(r.body);
     }
     else
     {
@@ -133,8 +131,8 @@ int main(int argc, char *argv[])
 
     parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
 
-    std::cout << "Action: " << g_InstallerData->g_Action << std::endl;
-    std::cout << "Path: " << g_InstallerData->g_WorkingPath << std::endl;
+    VXI_LOG("Action: " << g_InstallerData->g_Action);
+    VXI_LOG("Path: " << g_InstallerData->g_WorkingPath);
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });

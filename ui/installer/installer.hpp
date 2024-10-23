@@ -24,6 +24,12 @@
 #include <unistd.h>
 #endif
 
+#if defined(VXI_LOGS) 
+#define VXI_LOG(log) std::cout << log << std::endl;
+#else
+#define VXI_LOG(log)
+#endif 
+
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 
 using namespace VortexInstaller;
@@ -133,8 +139,8 @@ bool DownloadFile(const std::string &url, const std::string &outputPath)
 #ifdef _WIN32
     HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), outputPath.c_str(), 0, NULL);
     if (hr != S_OK) {
-      std::cout << "url : " << url << std::endl;
-        std::cerr << "Error downloading file: " << hr << std::endl; // Affiche l'erreur
+      VXI_LOG("url : " + url);
+       // std::cerr << "Error downloading file: " << hr); // Affiche l'erreur
     }
     return hr == S_OK;
 #else
@@ -156,7 +162,7 @@ std::string getManifestVersion(const std::string &manifestPath)
   std::ifstream manifestFile(manifestPath);
   if (!manifestFile.is_open())
   {
-    std::cerr << "Failed to open " << manifestPath << std::endl;
+    //std::cerr << "Failed to open " << manifestPath);
     return "";
   }
 
@@ -167,7 +173,7 @@ std::string getManifestVersion(const std::string &manifestPath)
   }
   catch (const std::exception &e)
   {
-    std::cerr << "Failed to parse JSON: " << e.what() << std::endl;
+    //std::cerr << "Failed to parse JSON: " << e.what());
     return "";
   }
 
@@ -179,7 +185,7 @@ std::string getManifestVersion(const std::string &manifestPath)
   }
   else
   {
-    std::cerr << "\"version\" field not found or not a string" << std::endl;
+    //std::cerr << "\"version\" field not found or not a string");
     return "";
   }
 }
@@ -200,32 +206,29 @@ std::string RevertOldVortexLauncher(const std::string &path)
 
   if (endsWith(installPath, "VortexLauncherOld") || endsWith(installPath, "VortexLauncherOld/"))
   {
-    std::cout << "Le chemin se termine par VortexLauncherOld ou VortexLauncherOld/." << std::endl;
-
     if (std::filesystem::exists(manifestPath))
     {
-      std::cout << "Fichier manifest.json trouvé à : " << manifestPath << std::endl;
+      VXI_LOG("manifest.json finded at : " + manifestPath);
 
       newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncher";
 
       try
       {
         std::filesystem::rename(installPath, newPath);
-        std::cout << "Dossier renommé avec succès en : " << newPath << std::endl;
       }
       catch (const std::filesystem::filesystem_error &e)
       {
-        std::cerr << "Erreur lors du renommage du dossier : " << e.what() << std::endl;
+        //std::cerr << "Error while renaming : " << e.what());
       }
     }
     else
     {
-      std::cerr << "Erreur : manifest.json introuvable dans " << installPath << std::endl;
+      //std::cerr << "Error : manifest.json not found in " << installPath);
     }
   }
   else
   {
-    std::cerr << "Erreur : Le chemin ne se termine pas par VortexLauncher ou VortexLauncher/." << std::endl;
+    //std::cerr << "Error : This directory not end with VortexLauncher or VortexLauncher/.");
   }
 
   return newPath;
@@ -251,7 +254,6 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
 
   if (endsWith(installPath, "VortexLauncher") || endsWith(installPath, "VortexLauncher/"))
   {
-    std::cout << "Le chemin se termine par VortexLauncher ou VortexLauncher/." << std::endl;
 
     if (std::filesystem::exists(manifestPath))
     {
@@ -259,7 +261,7 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
       installerData.state_n++;
       installerData.state = "Checking if path exist...";
 
-      std::cout << "Fichier manifest.json trouvé à : " << manifestPath << std::endl;
+      VXI_LOG("manifest.json finded at : " + manifestPath);
 
       newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncherOld";
 
@@ -268,21 +270,21 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
         installerData.state_n++;
         installerData.state = "Rename path to old...";
         std::filesystem::rename(installPath, newPath);
-        std::cout << "Dossier renommé avec succès en : " << newPath << std::endl;
+        VXI_LOG("Folder renamed to : " + newPath);
       }
       catch (const std::filesystem::filesystem_error &e)
       {
-        std::cerr << "Erreur lors du renommage du dossier : " << e.what() << std::endl;
+       VXI_LOG("Error while renaming folder : " << e.what());
       }
     }
     else
     {
-      std::cerr << "Erreur : manifest.json introuvable dans " << installPath << std::endl;
+      VXI_LOG("manifest.json not found " << installPath);
     }
   }
   else
   {
-    std::cerr << "Erreur : Le chemin ne se termine pas par VortexLauncher ou VortexLauncher/." << std::endl;
+    VXI_LOG("Error : This directory not end with VortexLauncher or VortexLauncher/.");
   }
 
   return newPath;
@@ -299,23 +301,23 @@ void DeleteOldVortexLauncher(const std::string &path)
         installerData.state = "Check old vortex folder...";
   if (std::filesystem::exists(manifestPath))
   {
-    std::cout << "Found manifest.json at: " << manifestPath << std::endl;
-    std::cout << "Deleting folder: " << installPath << std::endl;
+    VXI_LOG("Found manifest.json at: " + manifestPath);
+    VXI_LOG("Deleting folder: " + installPath);
     try
     {
         installerData.state_n++;
         installerData.state = "Delete old vortex folder...";
       std::filesystem::remove_all(installPath);
-      std::cout << "Successfully deleted the folder: " << installPath << std::endl;
+      VXI_LOG("Successfully deleted the folder: "<< installPath);
     }
     catch (const std::filesystem::filesystem_error &e)
     {
-      std::cerr << "Error deleting the folder: " << e.what() << std::endl;
+      VXI_LOG("Error deleting the folder: " << e.what());
     }
   }
   else
   {
-    std::cerr << "Error: manifest.json not found in " << installPath << std::endl;
+    VXI_LOG("Error: manifest.json not found in " << installPath);
   }
 }
 
@@ -340,17 +342,17 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
     installerData.state = "Vérification du Vortex Launcher...";
     if (std::filesystem::exists(manifestPath))
     {
-      std::cout << "Fichier manifest.json trouvé à : " << manifestPath << std::endl;
-      std::cout << "Suppression du dossier : " << installPath << std::endl;
+      VXI_LOG("Fichier manifest.json finded at : " << manifestPath);
+      VXI_LOG("Deleting folder : " << installPath);
 
       installerData.state_n++;
-      installerData.state = "Suppression du Vortex Launcher...";
+      installerData.state = "Deleting Vortex Launcher...";
       try
       {
         if (isValidPath(installPath))
         {
           std::filesystem::remove_all(installPath);
-          std::cout << "Dossier supprimé avec succès : " << installPath << std::endl;
+          VXI_LOG("Folder deleted : " << installPath);
         }
         else
         {
@@ -359,18 +361,17 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
       }
       catch (const std::filesystem::filesystem_error &e)
       {
-        std::cerr << "Erreur lors de la suppression du dossier : " << e.what() << std::endl;
         installerData.result = "fail";
         failed = true;
-        installerData.state = "Erreur : Échec de la suppression du Vortex Launcher.";
+        installerData.state = "Error while deleting the Vortex Launcher folder";
       }
     }
     else
     {
-      std::cerr << "Erreur : manifest.json introuvable dans " << installPath << std::endl;
+      //std::cerr << "manifest.json not found " << installPath);
       installerData.result = "fail";
       failed = true;
-      installerData.state = "Erreur : Chemin du Vortex Launcher invalide.";
+      installerData.state = "Error: Path to Vortex Launcher invalid !";
     }
   }
 
@@ -378,30 +379,29 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
   {
     std::string installPath = installerData.g_VortexPath;
     installerData.state_n++;
-    installerData.state = "Suppression de Vortex...";
+    installerData.state = "Deleting Vortex...";
 
     if (isValidPath(installPath))
     {
       try
       {
-        std::cout << "Suppression du dossier : " << installPath << std::endl;
         std::filesystem::remove_all(installPath);
-        std::cout << "Dossier Vortex supprimé avec succès : " << installPath << std::endl;
+        VXI_LOG("Deleted with success :  " << installPath);
       }
       catch (const std::filesystem::filesystem_error &e)
       {
-        std::cerr << "Erreur lors de la suppression du dossier Vortex : " << e.what() << std::endl;
+        //std::cerr << "Error while deleting Vortex Launcher folder : " << e.what());
         installerData.result = "fail";
         failed = true;
-        installerData.state = "Erreur : Échec de la suppression de Vortex.";
+        installerData.state = "Failed while deleting the Vortex Launcher folder !";
       }
     }
     else
     {
-      std::cerr << "Erreur : Chemin Vortex invalide ou inexistant : " << installPath << std::endl;
+      //std::cerr << "Vortex Launcher not found at path : " << installPath);
       installerData.result = "fail";
       failed = true;
-      installerData.state = "Erreur : Chemin Vortex invalide.";
+      installerData.state = "Failed ! Vortex Launcher path is invalid !";
     }
   }
 
@@ -409,37 +409,34 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
   {
     std::string installPath = installerData.g_VortexDataPath;
     installerData.state_n++;
-    installerData.state = "Suppression des données de Vortex...";
+    installerData.state = "Deleting Vortex datas...";
 
     if (isValidPath(installPath))
     {
       try
       {
-        std::cout << "Suppression du dossier : " << installPath << std::endl;
         std::filesystem::remove_all(installPath);
-        std::cout << "Dossier des données de Vortex supprimé avec succès : " << installPath << std::endl;
+        VXI_LOG("Deleted with success :  " << installPath);
       }
       catch (const std::filesystem::filesystem_error &e)
       {
-        std::cerr << "Erreur lors de la suppression du dossier des données Vortex : " << e.what() << std::endl;
         installerData.result = "fail";
         failed = true;
-        installerData.state = "Erreur : Échec de la suppression des données Vortex.";
+        installerData.state = "Failed while deleting Vortex datas !";
       }
     }
     else
     {
-      std::cerr << "Erreur : Chemin des données Vortex invalide ou inexistant : " << installPath << std::endl;
       installerData.result = "fail";
       failed = true;
-      installerData.state = "Erreur : Chemin des données Vortex invalide.";
+      installerData.state = "Path to Vortex datas is invalid";
     }
   }
 
   if (!failed)
   {
     installerData.state_n++;
-    installerData.state = "Suppression réussie.";
+    installerData.state = "Deleted succefully !";
     installerData.result = "success";
   }
 }
@@ -472,11 +469,6 @@ bool InstallVortexLauncher()
 
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
-
-    std::cout << "dlpath" << dlpath<< std::endl;
-    std::cout << "sumpath" << sumpath<< std::endl;
-    std::cout << "tarballFile" << tarballFile<< std::endl;
-    std::cout << "sumFile" << sumFile<< std::endl;
 
     if (!DownloadFile(dlpath, tarballFile) || !DownloadFile(sumpath, sumFile))
     {
@@ -530,7 +522,6 @@ std::string uncompressCommand;
     uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
 
-std::cout << "Cmd: " << uncompressCommand << std::endl;
     if (system(uncompressCommand.c_str()) != 0)
     {
       installerData.result = "fail";
