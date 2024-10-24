@@ -12,15 +12,6 @@ set(BUNDLE_EXECUTABLE true)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ui/installer ui_installer_build)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/restcpp restcpp_build)
 
-if (MSVC)
-    set(MANIFEST_FILE "${CMAKE_SOURCE_DIR}/VortexInstaller.manifest")
-    set_target_properties(vortex_installer PROPERTIES
-        LINK_FLAGS "/MANIFEST /MANIFESTFILE:${MANIFEST_FILE}"
-    )
-else()
-    message(STATUS "Skipping manifest file generation for non-MSVC toolchains.")
-endif()
-
 add_executable(vortex_installer src/installer.cpp)
 target_link_libraries(vortex_installer PUBLIC installer restclient-cpp spdlog cherry)
 

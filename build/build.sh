@@ -2,17 +2,33 @@
 mkdir build_spdlog
 mkdir build
 
-cd build_spdlog && cmake ../../lib/spdlog && make -j$(nproc) install
-cd ../build && cmake ../.. && make -j$(nproc) install
+cd build_spdlog
+cmake ../../lib/spdlog
+make -j$(nproc)
+
+cd ../build
+cmake ../.. 
+make -j$(nproc)
+
 cd ..
 
-# TODO : Make dist and package the installer with pyinstaller
-# Cpy into shipping/linux
+mkdir build/dist
 
-sudo chown root:root ./build/bin/vortex_installer
-sudo chown root:root ./build/bin/vortex_uninstall
-sudo chown root:root ./build/bin/vortex_update
+cp ../misc/linux/icon.png build/bin/
+cp ../misc/linux/main.py build/bin/
 
-sudo chmod u+s ./build/bin/vortex_installer
-sudo chmod u+s ./build/bin/vortex_uninstall
-sudo chmod u+s ./build/bin/vortex_update
+cd build/bin
+
+pyinstaller --onefile --name VortexInstaller --icon=icon.png \
+    --add-data "vortex_installer:." \
+    --add-data "ressources:ressources" \
+    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
+    --add-binary "../restcpp_build/librestclient-cpp.so:." \
+    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
+    main.py
+
+cd ../..
+
+mkdir -p shipping/linux
+
+cp build/bin/dist/VortexInstaller shipping/linux/
