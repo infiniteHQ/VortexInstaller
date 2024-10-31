@@ -149,9 +149,10 @@ int main(int argc, char *argv[])
         v.name = item["name"].get<std::string>();
         v.arch = item["arch"].get<std::string>();
         v.dist = item["dist"].get<std::string>();
-        v.link = item["link"].get<std::string>();
-        g_InstallerData->g_RequestTarballPath = v.link;
-        g_InstallerData->g_RequestSumPath = v.link; // TODO
+        v.path = item["path"].get<std::string>();
+        v.sum = item["sum"].get<std::string>();
+        g_InstallerData->g_RequestTarballPath = v.path;
+        g_InstallerData->g_RequestSumPath = v.sum; // TODO
         v.platform = item["platform"].get<std::string>();
         v.date = item["date"].get<std::string>();
         v.created_at = item["created_at"].get<std::string>();

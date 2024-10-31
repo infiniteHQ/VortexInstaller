@@ -651,6 +651,8 @@ std::string uncompressCommand;
     uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
 
+std::cout << "INSTALL PATH : " << uncompressCommand << std::endl; 
+
     if (system(uncompressCommand.c_str()) != 0)
     {
       installerData.result = "fail";

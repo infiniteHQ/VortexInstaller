@@ -43,7 +43,6 @@ namespace VortexInstaller
             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
             if (accept->Render("sec"))
             {
-
                 m_SelectedChildName = "Accept Licence Agreement";
                 this->SetChildState("Install Vortex", true);
             }
@@ -85,10 +84,12 @@ namespace VortexInstaller
             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
             if (accept->Render("__another"))
             {
+                std::thread([this](){
                 if(m_Data->m_InstallVortexCallback)
                 {
                     m_Data->m_InstallVortexCallback();
                 }   
+                }).detach();
                 m_SelectedChildName = "Installation";
             }
             ImGui::PopStyleColor();

@@ -173,7 +173,8 @@ struct VortexVersion
     std::string name;
     std::string arch;
     std::string dist;
-    std::string link;
+    std::string path;
+    std::string sum;
     std::string platform;
     std::string date;
     std::string created_at;
