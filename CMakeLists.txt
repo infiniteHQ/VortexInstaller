@@ -30,3 +30,17 @@ target_link_libraries(vortex_uninstall PUBLIC installer restclient-cpp spdlog ch
 if (WIN32)
     target_link_libraries(vortex_uninstall PUBLIC urlmon)
 endif()
+
+add_executable(vxinstaller src/vxinstaller.cpp)
+target_link_libraries(vxinstaller PUBLIC installer restclient-cpp spdlog cherry)
+if (WIN32)
+    target_link_libraries(vxinstaller PUBLIC urlmon)
+endif()
+
+add_executable(vxuninstall src/vxuninstall.cpp)
+target_link_libraries(vxuninstall PUBLIC installer restclient-cpp spdlog cherry)
+if (WIN32)
+    target_link_libraries(vxuninstall PUBLIC urlmon)
+endif()
+
+

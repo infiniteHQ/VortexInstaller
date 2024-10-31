@@ -165,6 +165,20 @@ static std::string GetHomeDirectory()
 
   throw std::runtime_error("Unknown platform: Unable to determine home directory");
 }
+
+struct VortexVersion
+{
+    int id;
+    std::string version;
+    std::string name;
+    std::string arch;
+    std::string dist;
+    std::string link;
+    std::string platform;
+    std::string date;
+    std::string created_at;
+};
+
 struct VortexInstallerData
 {
     std::string g_VortexDataPath = "";
@@ -175,26 +189,27 @@ struct VortexInstallerData
     std::string g_Action = "install";
     std::string g_Platform = "";
     std::string g_Arch = "";
-    bool g_Request = false;
-    bool g_UseNet = true;
-    nlohmann::json jsonResponse;
     std::string g_ManifestVersion = "";
-    nlohmann::json g_RequestValues;
     std::string g_RequestVersion = "";
     std::string g_RequestTarballPath = "";
     std::string g_RequestSumPath = "";
-
-    bool g_VortexLauncherOutdated = false;
-
-    int state_n = 0;
     std::string state = "Unknown";
     std::string result = "processing";
+    nlohmann::json jsonResponse;
+    nlohmann::json g_RequestValues;
+    bool g_Request = false;
+    bool g_UseNet = true;
+    bool g_VortexLauncherOutdated = false;
     bool finished = false;
-
+    int state_n = 0;
     std::function<void()> m_InstallCallback;
     std::function<void()> m_UpdateCallback;
     std::function<void()> m_DowngradeCallback;
+    std::function<void()> m_InstallVortexCallback;
     std::function<void(const bool &vxlauncher, const bool &vx, const bool &vxdata)> m_DeleteCallback;
+
+    VortexVersion m_SelectedVortexVersion;
+    std::vector<std::string> m_VortexPools;
 };
 
 #endif // BASE_VORTEXINSTALLER_H

@@ -5,6 +5,7 @@
 #include "src/static/install/install.hpp"
 #include "src/static/update/update.hpp"
 #include "src/static/uninstall/uninstall.hpp"
+#include "src/static/install_vx/install_vx.hpp"
 
 #include "../../lib/restcpp/include/restclient-cpp/restclient.h"
 #include "../../lib/restcpp/include/restclient-cpp/connection.h"
@@ -50,6 +51,11 @@ public:
       install_window = InstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(install_window->GetAppWindow());
     }
+    else if (installer_data->g_Action == "vxinstall")
+    {
+      installer_vx = VortexInstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
+      Cherry::AddAppWindow(installer_vx->GetAppWindow());
+    }
     else if (installer_data->g_Action == "update")
     {
       update_window = UpdateAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
@@ -66,6 +72,7 @@ private:
   std::shared_ptr<InstallAppWindow> install_window;
   std::shared_ptr<UpdateAppWindow> update_window;
   std::shared_ptr<UninstallAppWindow> uninstall_window;
+  std::shared_ptr<VortexInstallAppWindow> installer_vx;
   std::shared_ptr<VortexInstallerData> installer_data;
 };
 
@@ -86,7 +93,7 @@ void DetectPlatform()
 #elif defined(__linux__)
   g_InstallerData->g_Platform = "linux";
   g_InstallerData->g_DefaultInstallPath = "/opt/VortexLauncher";
-  g_InstallerData->g_VortexPath = "/opt/Vortex";
+  g_InstallerData->g_VortexPath = "/opt/Vortex"; // TODO : Pools
   g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
 #elif defined(__FreeBSD__)
   g_InstallerData->g_Platform = "freebsd";
@@ -561,6 +568,128 @@ std::string uncompressCommand;
   return true;
 }
 
+// 5 Steps
+bool InstallVortexVersion()
+{
+  auto &installerData = *g_InstallerData;
+
+  // installerData.state_n++;
+  installerData.state = "Initialization...";
+
+  std::string tempDir;
+#ifdef _WIN32
+  tempDir = std::filesystem::temp_directory_path().string() + "\\vortex_installer";
+#else
+  tempDir = "/tmp/vortex_installer";
+#endif
+  std::filesystem::create_directories(tempDir);
+
+  if (installerData.g_UseNet)
+  {
+    installerData.state_n++;
+    installerData.state = "Downloading files...";
+
+    std::string dlpath = installerData.g_RequestTarballPath;
+    std::string sumpath = installerData.g_RequestSumPath;
+    std::string installPath = installerData.g_DefaultInstallPath;
+
+
+    std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
+    std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
+
+    if (!DownloadFile(dlpath, tarballFile) || !DownloadFile(sumpath, sumFile))
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to download files.";
+      CleanUpTemporaryDirectory(tempDir);
+      return false;
+    }
+
+    installerData.state_n++;
+    installerData.state = "Verifying integrity...";
+
+    // TODO SUM, ARCH, VERSION , PERMS, UNINSTALL
+
+
+    std::filesystem::current_path(tempDir);
+
+    std::string checkSumCommand;
+#ifdef _WIN32
+    checkSumCommand = "CertUtil -hashfile " + tarballFile + " SHA256";
+#else
+    checkSumCommand = "sha256sum -c " + sumFile;
+#endif
+    if (system(checkSumCommand.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Integrity check failed.";
+      CleanUpTemporaryDirectory(tempDir);
+      return false;
+    }
+
+    installerData.state_n++;
+    installerData.state = "Extracting files...";
+
+    if (!std::filesystem::exists(installPath))
+    {
+      std::filesystem::create_directories(installPath);
+    }
+
+    if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
+    {
+      for (const auto &entry : std::filesystem::directory_iterator(installPath))
+      {
+        DeleteFileCrossPlatform(entry.path().string());
+      }
+    }
+
+std::string uncompressCommand;
+#ifdef _WIN32
+    uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
+                        "\" --strip-components=1 -C \"" + installPath + "\" dist/\"";
+#else
+    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+#endif
+
+    if (system(uncompressCommand.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to extract tarball.";
+      CleanUpTemporaryDirectory(tempDir);
+      return false;
+    }
+
+    installerData.state_n++;
+    installerData.state = "Running vortex_launcher test...";
+
+    std::string testLauncher;
+#ifdef _WIN32
+    testLauncher = installPath + "\\bin\\vortex_launcher.exe --test";
+#else
+    testLauncher = installPath + "/bin/vortex_launcher --test";
+#endif
+    if (system(testLauncher.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Launcher test failed.";
+      CleanUpTemporaryDirectory(tempDir);
+      return false;
+    }
+
+    installerData.state_n++;
+    installerData.state = "Installation completed successfully.";
+    installerData.result = "success";
+  }
+  else
+  {
+    installerData.result = "fail";
+    installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
+  }
+
+  CleanUpTemporaryDirectory(tempDir);
+  return true;
+}
+
 void UpdateVortexLauncher()
 {
   auto &installerData = *g_InstallerData;
@@ -606,6 +735,13 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
     spec.IconPath = Cherry::GetPath("ressources/imgs/icon_install.png");
     spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon_install.png");
   }
+  else if (g_InstallerData->g_Action == "vxinstall")
+  {
+    std::string name = "Vortex Installer";
+    spec.Name = name;
+    spec.IconPath = Cherry::GetPath("ressources/imgs/icon.png");
+    spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon.png");
+  }
   else if (g_InstallerData->g_Action == "update")
   {
     std::string name = "Vortex Updater";
@@ -624,6 +760,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   g_InstallerData->m_InstallCallback = InstallVortexLauncher;
   g_InstallerData->m_DeleteCallback = DeleteVortexLauncher;
   g_InstallerData->m_UpdateCallback = UpdateVortexLauncher;
+  g_InstallerData->m_InstallVortexCallback = InstallVortexVersion;
 
   spec.WindowSaves = false;
 
