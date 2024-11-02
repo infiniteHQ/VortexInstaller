@@ -207,6 +207,7 @@ struct VortexInstallerData
     std::function<void()> m_UpdateCallback;
     std::function<void()> m_DowngradeCallback;
     std::function<void()> m_InstallVortexCallback;
+    std::function<void()> m_UninstallVortexCallback;
     std::function<void(const bool &vxlauncher, const bool &vx, const bool &vxdata)> m_DeleteCallback;
 
     VortexVersion m_SelectedVortexVersion;

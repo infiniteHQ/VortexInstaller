@@ -1,10 +1,10 @@
-#include "./uninstall.hpp"
+#include "./uninstall_vx.hpp"
 #include <thread>
 #include <future>
 
 namespace VortexInstaller
 {
-    void UninstallAppWindow::RenderUninstallVortex()
+    void VortexUninstallAppWindow::RenderUninstallVortex()
     {
         Space(30.0f);
         Cherry::TitleThreeColored("Vortex uninstallation wizard", "#AAAAAAFF");
@@ -14,26 +14,8 @@ namespace VortexInstaller
         ImGui::PopStyleColor();
 
         Space(20.0f);
-
-        {
-            ImGui::Checkbox("Uninstall Vortex Launcher", &this->m_DeleteVortexLauncher);
-            std::string label = "This action will delete the current Vortex Launcher regitered at \"" + m_Data->g_DefaultInstallPath + "\"";
-            ImGui::Text(label.c_str());
-            Cherry::MenuItemTextSeparator("");
-        }
-
-        {
-            ImGui::Checkbox("Uninstall Vortex versions", &this->m_DeleteVortex);
-            std::string label = "This action will delete the current Vortex versions installed and regitered by default at \"/opt/Vortex/...\"";
-            ImGui::Text(label.c_str());
-            Cherry::MenuItemTextSeparator("");
-        }
-
-        {
-            ImGui::Checkbox("Uninstall Vortex datas", &this->m_DeleteVortexDatas);
-            std::string label = "This action will delete all data from your .vx folder (WARNING: this will delete all modules, plugins, contents & configs registered here.)";
-            ImGui::Text(label.c_str());
-        }
+        std::string label = "This action will delete the current Vortex Launcher regitered at \"" + m_Data->g_WorkingPath + "\"";
+        ImGui::Text(label.c_str());
 
         ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
         ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
@@ -49,20 +31,23 @@ namespace VortexInstaller
         ImGui::SameLine();
 
         {
-            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Continue");
+            auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Uninstall");
             accept->SetProperty("bg", "#B1FF31FF");
             accept->SetProperty("bg_hovered", "#C3FF53FF");
             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
             if (accept->Render("sec"))
             {
-                m_SelectedChildName = "Confirm action";
-                this->SetChildState("Confirm action", true);
+                std::thread([this](){
+                    m_Data->m_UninstallVortexCallback();
+                }).detach();
+                m_SelectedChildName = "Uninstallation";
+                this->SetChildState("Uninstallation", true);
             }
             ImGui::PopStyleColor();
         }
     }
 
-    void UninstallAppWindow::RenderConfirmAction()
+    void VortexUninstallAppWindow::RenderConfirmAction()
     {
         const float button_height = 30.0f;
         const float spacing = 10.0f;
@@ -122,31 +107,30 @@ namespace VortexInstaller
         }
     }
 
-    void UninstallAppWindow::RenderUninstallation()
-    {  
+    void VortexUninstallAppWindow::RenderUninstallation()
+    {
         float total = 1.0f;
 
-        if(this->m_DeleteVortexLauncher)
+        if (this->m_DeleteVortexLauncher)
         {
             total += 2.0f;
         }
-        
 
-        float progress = static_cast<float>(m_Data->state_n) /total;                          
-    ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing") 
-                                ? Cherry::HexToRGBA("#B1FF31FF") 
-                                : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
+        float progress = static_cast<float>(m_Data->state_n) / total;
+        ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
+                                      ? Cherry::HexToRGBA("#B1FF31FF")
+                                      : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
         ImGui::Text("Installation Progress:");
 
-        if(m_Data->result == "processing")
+        if (m_Data->result == "processing")
         {
             Cherry::TitleTwo("Uninstallation...");
         }
-        else if(m_Data->result == "success")
+        else if (m_Data->result == "success")
         {
             Cherry::TitleTwo("Uninstallation well done !");
         }
-        else if(m_Data->result == "fail")
+        else if (m_Data->result == "fail")
         {
             Cherry::TitleTwo("Oups, an error was occured");
         }
@@ -174,7 +158,7 @@ namespace VortexInstaller
         }
     }
 
-    UninstallAppWindow::UninstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
+    VortexUninstallAppWindow::VortexUninstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
         m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
@@ -211,26 +195,23 @@ namespace VortexInstaller
         m_AppWindow->SetInternalPaddingX(30.0f);
         m_AppWindow->SetInternalPaddingY(10.0f);
 
-        m_SelectedChildName = "Uninstall Vortex";
+        m_SelectedChildName = "Confirm action";
 
         this->AddChild("Uninstallation", [this]()
                        { RenderUninstallation(); });
 
         this->AddChild("Confirm action", [this]()
-                       { RenderConfirmAction(); });
-
-        this->AddChild("Uninstall Vortex", [this]()
                        { RenderUninstallVortex(); });
 
         std::shared_ptr<Cherry::AppWindow> win = m_AppWindow;
     }
 
-    void UninstallAppWindow::AddChild(const std::string &child_name, const std::function<void()> &child)
+    void VortexUninstallAppWindow::AddChild(const std::string &child_name, const std::function<void()> &child)
     {
-        m_Childs[child_name] = UninstallAppChild(child, false);
+        m_Childs[child_name] = UninstallVortexAppChild(child, false);
     }
 
-    void UninstallAppWindow::RemoveChild(const std::string &child_name)
+    void VortexUninstallAppWindow::RemoveChild(const std::string &child_name)
     {
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
@@ -239,7 +220,7 @@ namespace VortexInstaller
         }
     }
 
-    void UninstallAppWindow::SetChildState(const std::string &child_name, const bool &state)
+    void VortexUninstallAppWindow::SetChildState(const std::string &child_name, const bool &state)
     {
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
@@ -248,19 +229,19 @@ namespace VortexInstaller
         }
     }
 
-    std::shared_ptr<Cherry::AppWindow> &UninstallAppWindow::GetAppWindow()
+    std::shared_ptr<Cherry::AppWindow> &VortexUninstallAppWindow::GetAppWindow()
     {
         return m_AppWindow;
     }
 
-    std::shared_ptr<UninstallAppWindow> UninstallAppWindow::Create(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
+    std::shared_ptr<VortexUninstallAppWindow> VortexUninstallAppWindow::Create(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
     {
-        auto instance = std::shared_ptr<UninstallAppWindow>(new UninstallAppWindow(name, data));
+        auto instance = std::shared_ptr<VortexUninstallAppWindow>(new VortexUninstallAppWindow(name, data));
         instance->SetupRenderCallback();
         return instance;
     }
 
-    void UninstallAppWindow::SetupRenderCallback()
+    void VortexUninstallAppWindow::SetupRenderCallback()
     {
         auto self = shared_from_this();
         m_AppWindow->SetRenderCallback([self]()
@@ -270,7 +251,7 @@ namespace VortexInstaller
             } });
     }
 
-    std::function<void()> UninstallAppWindow::GetChild(const std::string &child_name)
+    std::function<void()> VortexUninstallAppWindow::GetChild(const std::string &child_name)
     {
         auto it = m_Childs.find(child_name);
         if (it != m_Childs.end())
@@ -280,7 +261,7 @@ namespace VortexInstaller
         return nullptr;
     }
 
-    void UninstallAppWindow::Render()
+    void VortexUninstallAppWindow::Render()
     {
         static float leftPaneWidth = 300.0f;
         const float minPaneWidth = 50.0f;

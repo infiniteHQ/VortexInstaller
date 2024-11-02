@@ -6,6 +6,7 @@
 #include "src/static/update/update.hpp"
 #include "src/static/uninstall/uninstall.hpp"
 #include "src/static/install_vx/install_vx.hpp"
+#include "src/static/uninstall_vx/uninstall_vx.hpp"
 
 #include "../../lib/restcpp/include/restclient-cpp/restclient.h"
 #include "../../lib/restcpp/include/restclient-cpp/connection.h"
@@ -56,6 +57,11 @@ public:
       installer_vx = VortexInstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(installer_vx->GetAppWindow());
     }
+    else if (installer_data->g_Action == "vxuninstall")
+    {
+      uninstaller_vx = VortexUninstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
+      Cherry::AddAppWindow(uninstaller_vx->GetAppWindow());
+    }
     else if (installer_data->g_Action == "update")
     {
       update_window = UpdateAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
@@ -73,6 +79,7 @@ private:
   std::shared_ptr<UpdateAppWindow> update_window;
   std::shared_ptr<UninstallAppWindow> uninstall_window;
   std::shared_ptr<VortexInstallAppWindow> installer_vx;
+  std::shared_ptr<VortexUninstallAppWindow> uninstaller_vx;
   std::shared_ptr<VortexInstallerData> installer_data;
 };
 
@@ -143,6 +150,7 @@ void DeleteFileCrossPlatform(const std::string &path)
 
 bool DownloadFile(const std::string &url, const std::string &outputPath)
 {
+  std::cout << "DKL " << url << std::endl;
 #ifdef _WIN32
     HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), outputPath.c_str(), 0, NULL);
     if (hr != S_OK) {
@@ -448,6 +456,63 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
   }
 }
 
+void DeleteVortexVersion()
+{
+  auto &installerData = *g_InstallerData;
+  bool failed = false;
+
+  DetectPlatform();
+
+  auto isValidPath = [](const std::string &path) -> bool
+  {
+    return !path.empty() && path != "/" && std::filesystem::exists(path);
+  };
+
+    std::string installPath = installerData.g_WorkingPath;
+    std::string manifestPath = installPath + "/manifest.json";
+    std::cout << installPath << std::endl;
+
+    installerData.state_n++;
+    installerData.state = "Verify Vortex Launcher...";
+    if (std::filesystem::exists(manifestPath))
+    {
+      installerData.state_n++;
+      installerData.state = "Deleting Vortex Launcher...";
+      try
+      {
+        if (isValidPath(installPath))
+        {
+          VXI_LOG("Folder deleted : " << installPath);
+          std::filesystem::remove_all(installPath);
+        }
+        else
+        {
+          throw std::filesystem::filesystem_error("Invalid path", std::error_code());
+        }
+      }
+      catch (const std::filesystem::filesystem_error &e)
+      {
+        installerData.result = "fail";
+        failed = true;
+        installerData.state = "Error while deleting the Vortex Launcher folder";
+      }
+    }
+    else
+    {
+      //std::cerr << "manifest.json not found " << installPath);
+      installerData.result = "fail";
+      failed = true;
+      installerData.state = "Error: Path to Vortex Launcher invalid !";
+    }
+
+  if (!failed)
+  {
+    installerData.state_n++;
+    installerData.state = "Deleted succefully !";
+    installerData.result = "success";
+  }
+}
+
 // 5 Steps
 bool InstallVortexLauncher()
 {
@@ -529,6 +594,7 @@ std::string uncompressCommand;
     uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
 
+std::cout << "INSTALL PATH : " << uncompressCommand << std::endl; 
     if (system(uncompressCommand.c_str()) != 0)
     {
       installerData.result = "fail";
@@ -578,9 +644,9 @@ bool InstallVortexVersion()
 
   std::string tempDir;
 #ifdef _WIN32
-  tempDir = std::filesystem::temp_directory_path().string() + "\\vortex_installer";
+  tempDir = std::filesystem::temp_directory_path().string() + "\\vx_installer";
 #else
-  tempDir = "/tmp/vortex_installer";
+  tempDir = "/tmp/vx_installer";
 #endif
   std::filesystem::create_directories(tempDir);
 
@@ -607,9 +673,6 @@ bool InstallVortexVersion()
 
     installerData.state_n++;
     installerData.state = "Verifying integrity...";
-
-    // TODO SUM, ARCH, VERSION , PERMS, UNINSTALL
-
 
     std::filesystem::current_path(tempDir);
 
@@ -648,10 +711,8 @@ std::string uncompressCommand;
     uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
                         "\" --strip-components=1 -C \"" + installPath + "\" dist/\"";
 #else
-    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    uncompressCommand = "sudo tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
 #endif
-
-std::cout << "INSTALL PATH : " << uncompressCommand << std::endl; 
 
     if (system(uncompressCommand.c_str()) != 0)
     {
@@ -744,6 +805,13 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
     spec.IconPath = Cherry::GetPath("ressources/imgs/icon.png");
     spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon.png");
   }
+  else if (g_InstallerData->g_Action == "vxuninstall")
+  {
+    std::string name = "Vortex Uninstaller";
+    spec.Name = name;
+    spec.IconPath = Cherry::GetPath("ressources/imgs/icon.png");
+    spec.FavIconPath = Cherry::GetPath("ressources/imgs/icon.png");
+  }
   else if (g_InstallerData->g_Action == "update")
   {
     std::string name = "Vortex Updater";
@@ -763,6 +831,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   g_InstallerData->m_DeleteCallback = DeleteVortexLauncher;
   g_InstallerData->m_UpdateCallback = UpdateVortexLauncher;
   g_InstallerData->m_InstallVortexCallback = InstallVortexVersion;
+  g_InstallerData->m_UninstallVortexCallback = DeleteVortexVersion;
 
   spec.WindowSaves = false;
 

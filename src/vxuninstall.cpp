@@ -8,16 +8,12 @@
 
 static std::string g_OldLauncherVersion;
 
-void parseArguments(int argc, char *argv[], std::string &action, std::string &path) {
+void parseArguments(int argc, char *argv[], std::string &path) {
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
 
         if (arg.find("--path=") == 0) {
             path = arg.substr(7);
-        }
-        
-        if (arg.find("--oldv=") == 0) {
-            g_OldLauncherVersion = arg.substr(7);
         }
     }
 
@@ -31,8 +27,8 @@ int main(int argc, char *argv[])
     g_InstallerData = std::make_shared<VortexInstallerData>();
     g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
 
-            g_InstallerData->g_Action = "uninstall";
-    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
+    g_InstallerData->g_Action = "vxuninstall";
+    parseArguments(argc, argv, g_InstallerData->g_WorkingPath);
 
 
     if (g_InstallerData->g_WorkingPath.empty())
@@ -48,6 +44,7 @@ int main(int argc, char *argv[])
     if (!manifestPath.empty())
     {
         std::cout << "Found manifest.json at: " << manifestPath << std::endl;
+        
     g_InstallerData->g_WorkingPath = manifestPath.substr(0, manifestPath.find_last_of("/\\"));
        
     }
@@ -58,6 +55,7 @@ int main(int argc, char *argv[])
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });
+
 
     while (g_ApplicationRunning)
     {

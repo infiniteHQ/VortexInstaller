@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef UNINSTALL_WINDOW_H
-#define UNINSTALL_WINDOW_H
+#ifndef UNINSTALLVX_WINDOW_H
+#define UNINSTALLVX_WINDOW_H
 
 #define CHERRY_V1
 #include "../../../../../lib/cherry/cherry.hpp"
@@ -9,23 +9,23 @@
 
 namespace VortexInstaller
 {
-    struct UninstallAppChild
+    struct UninstallVortexAppChild
     {
         std::function<void()> m_Foo;
         bool m_Finished;
 
-        UninstallAppChild(const std::function<void()>& foo, const bool& finished):
+        UninstallVortexAppChild(const std::function<void()>& foo, const bool& finished):
         m_Foo(foo),
         m_Finished(finished)
         {};
-    UninstallAppChild() : m_Foo(nullptr), m_Finished(false) {};
+    UninstallVortexAppChild() : m_Foo(nullptr), m_Finished(false) {};
     };
 
     // This window can be a "subappwindow" of a parent if you use the constructor with parent parameter.
-    class UninstallAppWindow : public std::enable_shared_from_this<UninstallAppWindow>
+    class VortexUninstallAppWindow : public std::enable_shared_from_this<VortexUninstallAppWindow>
     {
     public:
-        UninstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData>& data);
+        VortexUninstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData>& data);
 
         void AddChild(const std::string &child_name, const std::function<void()> &child);
         void SetChildState(const std::string &child_name, const bool& state);
@@ -33,7 +33,7 @@ namespace VortexInstaller
         std::function<void()> GetChild(const std::string &child_name);
 
         std::shared_ptr<Cherry::AppWindow> &GetAppWindow();
-        static std::shared_ptr<UninstallAppWindow> Create(const std::string &name,  const std::shared_ptr<VortexInstallerData>&data);
+        static std::shared_ptr<VortexUninstallAppWindow> Create(const std::string &name,  const std::shared_ptr<VortexInstallerData>&data);
         void SetupRenderCallback();
         void Render();
 
@@ -45,7 +45,7 @@ namespace VortexInstaller
         bool m_DeleteVortex = false;
         bool m_DeleteVortexDatas = false;
 
-        std::unordered_map<std::string, UninstallAppChild> m_Childs;
+        std::unordered_map<std::string, UninstallVortexAppChild> m_Childs;
 
         std::string m_SelectedChildName;
         std::shared_ptr<VortexInstallerData> m_Data;
@@ -54,4 +54,4 @@ namespace VortexInstaller
     };
 }
 
-#endif // UNINSTALL_WINDOW_H
+#endif // UNINSTALLVX_WINDOW_H

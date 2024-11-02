@@ -55,8 +55,9 @@ int main(int argc, char *argv[])
 
     conn->FollowRedirects(true);
     conn->FollowRedirects(true, 3);
-
+    
     RestClient::Response r = conn->get("/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch);
+    
     if (r.code != 200)
     {
         VXI_LOG("Error: " << r.code << " - " << r.body);
