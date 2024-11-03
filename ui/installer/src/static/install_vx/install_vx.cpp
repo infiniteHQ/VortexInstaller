@@ -18,7 +18,8 @@ namespace VortexInstaller
 
         Cherry::TitleFiveColored("Choose a pool for Vortex", "#787878FF");
         {
-            auto cp_ComboOne = std::make_shared<Cherry::ComboSimple>("combo_1", "SuperCombo", m_Data->m_VortexPools, 0);
+            static auto cp_ComboOne = std::make_shared<Cherry::ComboSimple>("combo_1", "SuperCombo", m_Data->m_VortexPools, 0);
+            ImGui::SetNextItemWidth(300);
             cp_ComboOne->Render("combo_1");
             m_Data->g_DefaultInstallPath = cp_ComboOne->GetData("selected_string");
         }

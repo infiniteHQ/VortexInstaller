@@ -130,17 +130,35 @@ int main(int argc, char *argv[])
     RefreshEnvironmentVortexVersionsPools();
     g_InstallerData->m_VortexPools = version_pools;
 
-    std::string url = "http://api.infinite.si:9000/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version ;
-    RestClient::Response r = RestClient::get(url);
+    std::string url = "http://api.infinite.si:9000";
+    RestClient::Connection *conn = new RestClient::Connection(url);
+     conn->SetTimeout(5);
+    conn->SetUserAgent("foo/cool");
 
+    RestClient::HeaderFields headers;
+    headers["Accept"] = "application/json";
+    conn->SetHeaders(headers);
+
+    conn->SetVerifyPeer(false);
+    conn->SetCAInfoFilePath("non-existent file");
+
+    conn->FollowRedirects(true);
+    conn->FollowRedirects(true, 3);
+
+    RestClient::Response r = conn->get("/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version );
+std::cout << "/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version << std::endl;
     if (r.code != 200)
     {
         //
     }
 
+std::cout << r.code << std::endl;
+std::cout << r.body << std::endl;
+        std::cout << "44" << std::endl;
     auto json_response = nlohmann::json::parse(r.body);
     std::vector<VortexVersion> versions;
 
+        std::cout << "44" << std::endl;
     for (const auto &item : json_response)
     {
         VortexVersion v;
@@ -165,6 +183,7 @@ int main(int argc, char *argv[])
             break;
         }
     }
+        std::cout << "55" << std::endl;
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });
