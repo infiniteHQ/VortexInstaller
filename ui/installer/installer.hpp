@@ -92,58 +92,68 @@ std::string GetUncompressCommand(const std::string &tarballFile, const std::stri
   return command;
 }
 
-std::string GetTopLevelDir(const std::string &tarballFile) {
-    std::string command = "tar -tzf " + tarballFile;
-    std::array<char, 128> buffer;
-    std::string line;
+std::string GetTopLevelDir(const std::string &tarballFile)
+{
+  std::string command = "tar -tzf " + tarballFile;
+  std::array<char, 128> buffer;
+  std::string line;
 
-    FILE* pipe = popen(command.c_str(), "r");
-    if (!pipe) {
-        std::cerr << "Failed to open pipe for command." << std::endl;
-        return "";
-    }
-
-    std::regex distDirPattern(R"(^dist/([^/]+)/)");
-    std::smatch match;
-
-    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-        line = buffer.data();
-        if (std::regex_search(line, match, distDirPattern)) {
-            pclose(pipe);
-            return match.str(1);
-        }
-    }
-
-    pclose(pipe);
-    std::cerr << "No top-level directory found under 'dist/' in the tarball." << std::endl;
+  FILE *pipe = popen(command.c_str(), "r");
+  if (!pipe)
+  {
+    std::cerr << "Failed to open pipe for command." << std::endl;
     return "";
+  }
+
+  std::regex distDirPattern(R"(^dist/([^/]+)/)");
+  std::smatch match;
+
+  while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
+  {
+    line = buffer.data();
+    if (std::regex_search(line, match, distDirPattern))
+    {
+      pclose(pipe);
+      return match.str(1);
+    }
+  }
+
+  pclose(pipe);
+  std::cerr << "No top-level directory found under 'dist/' in the tarball." << std::endl;
+  return "";
 }
 
-std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath) {
-    std::string topLevelDir = GetTopLevelDir(tarballFile);
-    if (topLevelDir.empty()) {
-        std::cerr << "Failed to find top-level directory in tarball." << std::endl;
-        return "";
-    }
+std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath)
+{
+  std::string topLevelDir = GetTopLevelDir(tarballFile);
+  if (topLevelDir.empty())
+  {
+    std::cerr << "Failed to find top-level directory in tarball." << std::endl;
+    return "";
+  }
 
-    std::string finalPath = installPath + "/" + topLevelDir;
+  std::string finalPath = installPath + "/" + topLevelDir;
 
-    std::string command = GetUncompressCommand(tarballFile, installPath);
+  std::string command = GetUncompressCommand(tarballFile, installPath);
 
-    int result = std::system(command.c_str());
+  int result = std::system(command.c_str());
 
-    if (result != 0) {
-        std::cerr << "Failed to uncompress tarball." << std::endl;
-        return "";
-    }
-    
-    if (std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath)) {
-        std::cout << "Successfully uncompressed to: " << finalPath << std::endl;
-        return finalPath;
-    } else {
-        std::cerr << "Uncompression failed or destination path does not exist." << std::endl;
-        return "";
-    }
+  if (result != 0)
+  {
+    std::cerr << "Failed to uncompress tarball." << std::endl;
+    return "";
+  }
+
+  if (std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath))
+  {
+    std::cout << "Successfully uncompressed to: " << finalPath << std::endl;
+    return finalPath;
+  }
+  else
+  {
+    std::cerr << "Uncompression failed or destination path does not exist." << std::endl;
+    return "";
+  }
 }
 
 class Layer : public Cherry::Layer
@@ -256,11 +266,10 @@ bool DownloadFile(const std::string &url, const std::string &outputPath)
   if (hr != S_OK)
   {
     VXI_LOG("url : " + url);
-    // std::cerr << "Error downloading file: " << hr); // Affiche l'erreur
   }
   return hr == S_OK;
 #else
-  std::string downloadCommand = "curl -o " + outputPath + " " + url;
+  std::string downloadCommand = "pkexec curl -o " + outputPath + " " + url;
   return system(downloadCommand.c_str()) == 0;
 #endif
 }
@@ -270,12 +279,12 @@ void CleanUpTemporaryDirectory(const std::string &tempDir)
   if (std::filesystem::exists(tempDir))
   {
 
-  if (!IsSafePath(tempDir))
-  {
-    std::cerr << "Cannot delete this path: " << tempDir << std::endl;
-    return;
-  }
-  
+    if (!IsSafePath(tempDir))
+    {
+      std::cerr << "Cannot delete this path: " << tempDir << std::endl;
+      return;
+    }
+
     std::string command = "rm -rf " + tempDir;
     system(command.c_str());
   }
@@ -591,7 +600,16 @@ void DeleteVortexVersion()
       if (isValidPath(installPath))
       {
         VXI_LOG("Folder deleted : " << installPath);
-        std::filesystem::remove_all(installPath);
+        if (IsSafePath(installPath))
+        {
+          std::string cmd = "pkexec rm -rf " + installPath;
+          if (system(cmd.c_str()) != 0)
+          {
+            installerData.result = "fail";
+            failed = true;
+            installerData.state = "Error while deleting the Vortex Launcher folder";
+          }
+        }
       }
       else
       {
@@ -607,7 +625,6 @@ void DeleteVortexVersion()
   }
   else
   {
-    // std::cerr << "manifest.json not found " << installPath);
     installerData.result = "fail";
     failed = true;
     installerData.state = "Error: Path to Vortex Launcher invalid !";
@@ -679,8 +696,8 @@ bool InstallVortexLauncher()
     installerData.state_n++;
     installerData.state = "Extracting files...";
 
-    /* TODO : Link this suppr with uncompress cmd 
-    
+    /* TODO : Link this suppr with uncompress cmd
+
     if (!std::filesystem::exists(installPath))
     {
       std::filesystem::create_directories(installPath);
@@ -694,15 +711,25 @@ bool InstallVortexLauncher()
       }
     }*/
 
+    std::string createCommand = "pkexec mkdir " + installPath;
+    if (system(createCommand.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create folder.";
+      CleanUpTemporaryDirectory(tempDir);
+      return false;
+    }
+
     std::string uncompressCommand;
 #ifdef _WIN32
     uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
                         "\" --strip-components=1 -C \"" + installPath + "\" dist/\"";
 #else
-    uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    // uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
+    GetFinalLink(tarballFile, installPath);
 #endif
 
-    std::cout << "INSTALL PATH : " << uncompressCommand << std::endl;
+    std::cout << "INSTALL PATH : " << installPath << std::endl;
     if (system(uncompressCommand.c_str()) != 0)
     {
       installerData.result = "fail";
@@ -806,7 +833,7 @@ bool InstallVortexVersion()
     uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
                         "\" --strip-components=1 -C \"" + installPath + "\" dist/\"";
 #else
- finalLink = GetFinalLink(tarballFile, installPath);
+    finalLink = GetFinalLink(tarballFile, installPath);
 #endif
 
     if (system(uncompressCommand.c_str()) != 0)

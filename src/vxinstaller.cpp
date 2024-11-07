@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 
     std::string url = "http://api.infinite.si:9000";
     RestClient::Connection *conn = new RestClient::Connection(url);
-     conn->SetTimeout(5);
+    conn->SetTimeout(5);
     conn->SetUserAgent("foo/cool");
 
     RestClient::HeaderFields headers;
@@ -145,20 +145,16 @@ int main(int argc, char *argv[])
     conn->FollowRedirects(true);
     conn->FollowRedirects(true, 3);
 
-    RestClient::Response r = conn->get("/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version );
-std::cout << "/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version << std::endl;
+    RestClient::Response r = conn->get("/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version);
+    std::cout << "/api/vortexupdates/get_filtered_v_versions?platform=" + platform + "&dist=" + dist + "&arch=" + arch + "&version=" + version << std::endl;
     if (r.code != 200)
     {
         //
     }
 
-std::cout << r.code << std::endl;
-std::cout << r.body << std::endl;
-        std::cout << "44" << std::endl;
     auto json_response = nlohmann::json::parse(r.body);
     std::vector<VortexVersion> versions;
 
-        std::cout << "44" << std::endl;
     for (const auto &item : json_response)
     {
         VortexVersion v;
@@ -177,13 +173,14 @@ std::cout << r.body << std::endl;
         versions.push_back(v);
     }
 
-    for (auto& v : versions) {
-        if (v.version == version && v.arch == arch) {
+    for (auto &v : versions)
+    {
+        if (v.version == version && v.arch == arch)
+        {
             g_InstallerData->m_SelectedVortexVersion = v;
             break;
         }
     }
-        std::cout << "55" << std::endl;
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });
