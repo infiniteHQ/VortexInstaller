@@ -102,7 +102,6 @@ int main(int argc, char *argv[])
     std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
     std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
 
-    std::cout << url << std::endl;
     RestClient::Response r = RestClient::get(url);
 
     if (r.code != 200)
@@ -111,6 +110,7 @@ int main(int argc, char *argv[])
     }
     else
     {
+    std::cout << "qsd" << std::endl;
         g_InstallerData->g_Request = true;
         try
         {
@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
         }
     }
 
+    std::cout << "123" << std::endl;
     if (g_InstallerData->g_Request)
     {
         std::cout << r.body << std::endl;
@@ -171,6 +172,7 @@ int main(int argc, char *argv[])
     {
         //
     }
+    std::cout << "456" << std::endl;
 
     if (g_InstallerData->g_WorkingPath.empty())
     {
@@ -178,7 +180,9 @@ int main(int argc, char *argv[])
         std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
     }
 
+    std::cout << "789" << std::endl;
     std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
+    std::cout << "132" << std::endl;
     if (!manifestPath.empty())
     {
         std::cout << "Found manifest.json at: " << manifestPath << std::endl;
@@ -186,6 +190,7 @@ int main(int argc, char *argv[])
         g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
         if (!g_InstallerData->g_ManifestVersion.empty())
         {
+    std::cout << "132" << std::endl;
             g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
             std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
 
@@ -214,9 +219,11 @@ int main(int argc, char *argv[])
         std::cerr << "manifest.json not found!" << std::endl;
     }
 
+    std::cout << "132" << std::endl;
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });
 
+    std::cout << "321" << std::endl;
     while (g_ApplicationRunning)
     {
         //

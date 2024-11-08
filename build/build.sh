@@ -28,16 +28,21 @@ pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
+rm VortexInstaller.spec
 rm icon.png main.py
 cd ../..
 
-cp ../misc/linux/vxinstaller/icon.png build/bin/
-cp ../misc/linux/vxinstaller/main.py build/bin/
-cp ../misc/linux/vxinstaller/org.vortex.vxinstaller.policy build/bin/
+cp ../misc/linux/updater/icon.png build/bin/
+cp ../misc/linux/updater/main.py build/bin/
+cp ../misc/linux/updater/start_vortex.sh build/bin/
+cp ../misc/linux/updater/org.vortex.updater.policy build/bin/
 cd build/bin
-pyinstaller --onefile --name VxInstaller --icon=icon.png \
-    --add-data "vxinstaller:." \
-    --add-data "ressources:ressources" --add-data "org.vortex.vxinstaller.policy:." \
+chmod +x start_vortex.sh
+
+pyinstaller --onefile --name VortexUpdater --icon=icon.png \
+    --add-data "vortex_update:." \
+    --add-data "start_vortex.sh:." \
+    --add-data "ressources:ressources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
@@ -45,6 +50,15 @@ pyinstaller --onefile --name VxInstaller --icon=icon.png \
 
 rm icon.png main.py
 cd ../..
+
+#cp build/bin/dist/* build/bin
+#rm -rf build/bin/build
+#rm -rf build/bin/dist
+#rm build/bin/vortex_installer
+#rm build/bin/vortex_update
+#rm build/bin/org.vortex.vxinstaller.policy
+#rm build/bin/VortexUpdater.spec
+#rm build/bin/VxInstaller.spec
 
 mkdir -p shipping/linux
 
