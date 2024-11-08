@@ -4,52 +4,24 @@
 #include <thread>
 #include <fstream>
 
-#include "../ui/installer/installer.hpp"
+#include "../ui/installer/app.hpp"
 
 static std::string version;
 static std::string dist;
 static std::string arch;
 static std::string platform;
+static std::string home_dir;
 static std::vector<std::string> version_pools;
-
-std::string getHomeDirectory()
-{
-#if defined(__linux__) || defined(__APPLE__)
-    const char *homePath = std::getenv("HOME");
-    if (homePath == nullptr)
-    {
-        throw std::runtime_error("HOME environment variable not set");
-    }
-    return std::string(homePath);
-#endif
-
-#if defined(_WIN32) || defined(_WIN64)
-    const char *homePath = std::getenv("USERPROFILE");
-    if (homePath == nullptr)
-    {
-        const char *homeDrive = std::getenv("HOMEDRIVE");
-        const char *homePathEnv = std::getenv("HOMEPATH");
-        if (homeDrive == nullptr || homePathEnv == nullptr)
-        {
-            throw std::runtime_error("HOME environment variables not set");
-        }
-        return std::string(homeDrive) + std::string(homePathEnv);
-    }
-    return std::string(homePath);
-#endif
-
-    throw std::runtime_error("Unknown platform: Unable to determine home directory");
-}
 
 void RefreshEnvironmentVortexVersionsPools()
 {
     std::string path;
 #if defined(_WIN32) || defined(_WIN64)
-    path = getHomeDirectory() + "\\.vx\\configs\\";
+    path = g_InstallerData->g_HomeDirectory + "\\.vx\\configs\\";
 #endif
 
 #if defined(__linux__) || defined(__APPLE__)
-    path = getHomeDirectory() + "/.vx/configs/";
+    path = g_InstallerData->g_HomeDirectory + "/.vx/configs/";
 #endif
 
     std::string json_file;
@@ -114,6 +86,11 @@ void parseArguments(int argc, char *argv[])
         if (arg.find("--version=") == 0)
         {
             version = arg.substr(10);
+        }
+
+        if (arg.find("--home=") == 0)
+        {
+            g_InstallerData->g_HomeDirectory = arg.substr(7);
         }
     }
 }

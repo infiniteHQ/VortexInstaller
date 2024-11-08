@@ -4,10 +4,10 @@
 #include <thread>
 #include <fstream>
 
-#include "../ui/installer/installer.hpp"
+#include "../ui/installer/app.hpp"
 
 
-void parseArguments(int argc, char *argv[], std::string &action, std::string &path)
+void parseArguments(int argc, char *argv[], std::string &action, std::string &path, std::string &home)
 {
     for (int i = 1; i < argc; ++i)
     {
@@ -16,6 +16,11 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
         if (arg.find("--path=") == 0)
         {
             path = arg.substr(7);
+        }
+
+        if (arg.find("--home=") == 0)
+        {
+            home = arg.substr(7);
         }
     }
 
@@ -130,7 +135,7 @@ int main(int argc, char *argv[])
         //
     }
 
-    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
+    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 
     VXI_LOG("Action: " << g_InstallerData->g_Action);
     VXI_LOG("Path: " << g_InstallerData->g_WorkingPath);

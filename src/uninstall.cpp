@@ -4,7 +4,7 @@
 #include <thread>
 #include <fstream>
 
-#include "../ui/installer/installer.hpp"
+#include "../ui/installer/app.hpp"
 
 static std::string g_OldLauncherVersion;
 

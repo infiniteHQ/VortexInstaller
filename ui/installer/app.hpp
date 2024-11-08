@@ -211,22 +211,22 @@ void DetectPlatform()
   g_InstallerData->g_Platform = "windows";
   g_InstallerData->g_DefaultInstallPath = "C:/Program Files/VortexLauncher";
   g_InstallerData->g_DefaultInstallPath = "C:/Program Files/Vortex";
-  g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
+  g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #elif defined(__APPLE__) && defined(__MACH__)
   g_InstallerData->g_Platform = "macos";
   g_InstallerData->g_DefaultInstallPath = "/Applications/VortexLauncher";
   g_InstallerData->g_VortexPath = "/Applications/Vortex";
-  g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
+  g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #elif defined(__linux__)
   g_InstallerData->g_Platform = "linux";
   g_InstallerData->g_DefaultInstallPath = "/opt/VortexLauncher";
   g_InstallerData->g_VortexPath = "/opt/Vortex"; // TODO : Pools
-  g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
+  g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #elif defined(__FreeBSD__)
   g_InstallerData->g_Platform = "freebsd";
   g_InstallerData->g_DefaultInstallPath = "/opt/VortexLauncher";
   g_InstallerData->g_VortexPath = "/opt/Vortex";
-  g_InstallerData->g_VortexDataPath = GetHomeDirectory() + "/.vx";
+  g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #else
   g_InstallerData->g_Platform = "unknown";
   g_InstallerData->g_DefaultInstallPath = "?";

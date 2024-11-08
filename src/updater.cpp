@@ -7,7 +7,7 @@
 #include <memory>
 #include <mutex>
 
-#include "../ui/installer/installer.hpp"
+#include "../ui/installer/app.hpp"
 
 namespace fs = std::filesystem;
 

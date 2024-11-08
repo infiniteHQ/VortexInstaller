@@ -120,8 +120,6 @@ static std::string findManifestJson(const std::filesystem::path &startPath)
 {
     std::filesystem::path currentPath = startPath;
 
-    std::cout << "132" << std::endl;
-    std::cout << "132" << std::endl;
         std::filesystem::path manifestPath = currentPath / "manifest.json";
 
         if (std::filesystem::exists(manifestPath))
@@ -133,37 +131,6 @@ static std::string findManifestJson(const std::filesystem::path &startPath)
     
 
     return "";
-}
-
-static std::string GetHomeDirectory()
-{
-#if defined(__APPLE__) && defined(__MACH__) || defined(__linux__)
-  const char *homePath = std::getenv("HOME");
-  if (homePath == nullptr)
-  {
-    throw std::runtime_error("HOME environment variable not set");
-  }
-  return std::string(homePath);
-#endif
-
-#if defined(_WIN32) || defined(_WIN64)
-  {
-    const char *homePath = std::getenv("USERPROFILE");
-    if (homePath == nullptr)
-    {
-      const char *homeDrive = std::getenv("HOMEDRIVE");
-      const char *homePathEnv = std::getenv("HOMEPATH");
-      if (homeDrive == nullptr || homePathEnv == nullptr)
-      {
-        throw std::runtime_error("HOME environment variables not set");
-      }
-      return std::string(homeDrive) + std::string(homePathEnv);
-    }
-    return std::string(homePath);
-  }
-#endif
-
-  throw std::runtime_error("Unknown platform: Unable to determine home directory");
 }
 
 struct VortexVersion
@@ -186,6 +153,7 @@ struct VortexInstallerData
     std::string g_VortexPath = "";
     std::string g_DefaultInstallPath = "";
     std::string g_WorkingPath = "";
+    std::string g_HomeDirectory = "";
     std::string g_Distribution = "stable";
     std::string g_Action = "install";
     std::string g_Platform = "";
