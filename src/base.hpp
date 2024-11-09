@@ -120,6 +120,8 @@ static std::string findManifestJson(const std::filesystem::path &startPath)
 {
     std::filesystem::path currentPath = startPath;
 
+    while (!currentPath.empty())
+    {
         std::filesystem::path manifestPath = currentPath / "manifest.json";
 
         if (std::filesystem::exists(manifestPath))
@@ -128,7 +130,7 @@ static std::string findManifestJson(const std::filesystem::path &startPath)
         }
 
         currentPath = currentPath.parent_path();
-    
+    }
 
     return "";
 }

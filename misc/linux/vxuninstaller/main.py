@@ -7,7 +7,7 @@ def is_admin():
 
 def main():
     if not is_admin():
-        print("This application needs to run as administrator to delete the Vortex.")
+        print("This application needs to run as administrator to install a version of Vortex.")
         try:
             subprocess.run(f'pkexec env DISPLAY=$DISPLAY XAUTHORITY=$XAUTHORITY XDG_RUNTIME_DIR=/run/user/$(id -u) {sys.executable} {" ".join(sys.argv)}', shell=True, check=True)
         except subprocess.CalledProcessError as e:
@@ -15,6 +15,7 @@ def main():
             sys.exit(1)
         sys.exit()
 
+    # Determine the path to the `vxinstaller` executable
     if getattr(sys, 'frozen', False):
         app_path = sys._MEIPASS
     else:
@@ -22,12 +23,16 @@ def main():
 
     exe_path = os.path.join(app_path, "vxuninstall")
 
+    # Prepare to forward the arguments
+    vxinstaller_args = [exe_path] + sys.argv[1:]  # Append all arguments passed to the Python script
+
     try:
-        subprocess.run([exe_path], check=True)
+        # Run `vxinstaller` with all arguments passed to this Python script
+        subprocess.run(vxinstaller_args, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error while executing Vortex Installer: {exe_path}: {e}")
     except FileNotFoundError:
-        print(f"Exec file not found: {exe_path}")
+        print(f"Executable file not found: {exe_path}")
 
 if __name__ == "__main__":
     main()

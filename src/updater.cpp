@@ -26,6 +26,11 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
         {
             g_InstallerData->g_Distribution = arg.substr(7);
         }
+
+        if (arg.find("--workdir=") == 0)
+        {
+            path = arg.substr(10);
+        }
     }
 
     if (path.empty())
@@ -110,7 +115,6 @@ int main(int argc, char *argv[])
     }
     else
     {
-    std::cout << "qsd" << std::endl;
         g_InstallerData->g_Request = true;
         try
         {
@@ -181,6 +185,8 @@ int main(int argc, char *argv[])
     }
 
     std::cout << "789" << std::endl;
+
+    std::cout << " finding moduless"<< g_InstallerData->g_WorkingPath << std::endl;
     std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
     std::cout << "132" << std::endl;
     if (!manifestPath.empty())

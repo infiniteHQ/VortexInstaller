@@ -17,8 +17,6 @@ mkdir build/dist
 cp ../misc/linux/installer/icon.png build/bin/
 cp ../misc/linux/installer/main.py build/bin/
 
-# TODO : fix the vx installer (dl and decompression), uninstaller, contents managment + modules/templates/plugins clarifications !
-
 cd build/bin
 pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-data "vortex_installer:." \
