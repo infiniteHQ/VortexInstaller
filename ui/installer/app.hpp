@@ -210,7 +210,7 @@ void DetectPlatform()
 #if defined(_WIN32) || defined(_WIN64)
   g_InstallerData->g_Platform = "windows";
   g_InstallerData->g_DefaultInstallPath = "C:/Program Files/VortexLauncher";
-  g_InstallerData->g_DefaultInstallPath = "C:/Program Files/Vortex";
+  g_InstallerData->g_VortexPath = "C:/Program Files/Vortex";
   g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #elif defined(__APPLE__) && defined(__MACH__)
   g_InstallerData->g_Platform = "macos";
