@@ -5,12 +5,12 @@ mkdir build_spdlog
 mkdir build
 
 cd build_spdlog
-call cmake.exe ../../lib/spdlog
-call nmake -j%NUMBER_OF_PROCESSORS%
+call cmake.exe ..\..\lib\spdlog -G "MinGW Makefiles"
+call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 
 cd ..\build
-call cmake.exe ..\..
-call nmake -j%NUMBER_OF_PROCESSORS%
+call cmake.exe ..\.. -G "MinGW Makefiles"
+call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 
 cd ..
 mkdir build\dist
@@ -23,6 +23,7 @@ cd build\bin
 call pyinstaller --onefile --name VortexInstaller --icon=icon.png ^
     --add-data "vortex_installer.exe;." ^
     --add-data "ressources;ressources" ^
+    --add-data "builtin;builtin" ^
     --manifest=admin_manifest.xml ^
     main.py
 
