@@ -149,6 +149,15 @@ struct VortexVersion
     std::string created_at;
 };
 
+struct VortexBuiltinLauncher
+{
+    std::string version;
+    std::string arch;
+    std::string platform;
+    std::string tarball;
+    std::string sum;
+};
+
 struct VortexInstallerData
 {
     std::string g_VortexDataPath = "";
@@ -181,6 +190,8 @@ struct VortexInstallerData
     std::function<void(const bool &vxlauncher, const bool &vx, const bool &vxdata)> m_DeleteCallback;
 
     VortexVersion m_SelectedVortexVersion;
+    VortexBuiltinLauncher m_BuiltinLauncher;
+    bool m_BuiltinLauncherExist = false;
     std::vector<std::string> m_VortexPools;
 };
 

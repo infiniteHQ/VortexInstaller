@@ -97,13 +97,37 @@ namespace VortexInstaller
 
         Cherry::MenuItemTextSeparator("Install VortexLauncher from repository, or from this local installer");
 
+        if (m_Data->m_BuiltinLauncherExist)
+        {
+            ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), "The built-in launcher version is newer. We recommend installing it for better performance.");
+        }
+
         ImVec2 available_size = ImGui::GetContentRegionAvail();
         float button_width = (available_size.x - ImGui::GetStyle().ItemSpacing.x) / 2;
+
+        if (!m_Data->g_Request)
+        {
+            m_Data->g_UseNet = false;
+            ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), "Offline mode, the web installation is not available.");
+        }
+
+        if (!m_Data->m_BuiltinLauncherExist)
+        {
+            m_Data->g_UseNet = true;
+            ImGui::TextColored(Cherry::HexToRGBA("#FF3535FF"), "No builtin launcher, you need to have internet connexion.");
+        }
+
+        if (!m_Data->m_BuiltinLauncherExist && !m_Data->g_Request)
+        {
+            m_Data->result = "fail";
+            m_Data->state = "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation.";
+            m_SelectedChildName = "Installation";
+        }
 
         {
             bool clicked = false;
 
-            std::string label = "Download and Install from net\n(VortexLauncher 1.2)";
+            std::string label = "Download and Install from net \n(VortexLauncher " + m_Data->g_RequestVersion + ")";
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
 
             auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/net.png"));
@@ -126,12 +150,23 @@ namespace VortexInstaller
         {
             bool clicked = false;
 
-            std::string label = "Install from this installer \n(Latest " + m_Data->g_Platform + " w/ " + m_Data->g_Arch + " v. " + m_Data->g_RequestVersion + ")";
+            std::string label = "No local Launcher to install...";
+
+            if (m_Data->m_BuiltinLauncherExist)
+            {
+                label = "Install from this installer \n(Latest " + m_Data->m_BuiltinLauncher.platform + " w/ " + m_Data->m_BuiltinLauncher.arch + " v. " + m_Data->m_BuiltinLauncher.version + ")";
+            }
+
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
+
+            if (!m_Data->m_BuiltinLauncherExist)
+            {
+                ImGui::BeginDisabled();
+            }
 
             auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/install.png"));
 
-            if (!m_Data->g_UseNet)
+            if (!m_Data->g_UseNet && m_Data->m_BuiltinLauncherExist)
             {
                 btn->SetBorderColorIdle("#B1FF31FF");
             }
@@ -141,10 +176,15 @@ namespace VortexInstaller
                 m_Data->g_UseNet = false;
             }
 
+            if (!m_Data->m_BuiltinLauncherExist)
+            {
+                ImGui::EndDisabled();
+            }
             ImGui::PopTextWrapPos();
         }
 
         Cherry::MenuItemTextSeparator("Select packages");
+            ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), "Installer prebuilt packages will be available soon...");
         ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
         {
             auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
@@ -170,21 +210,21 @@ namespace VortexInstaller
 
     void InstallAppWindow::RenderInstall()
     {
-        float progress = static_cast<float>(m_Data->state_n) / 5.0f;                          
-    ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing") 
-                                ? Cherry::HexToRGBA("#B1FF31FF") 
-                                : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
+        float progress = static_cast<float>(m_Data->state_n) / 5.0f;
+        ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
+                                      ? Cherry::HexToRGBA("#B1FF31FF")
+                                      : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
         ImGui::Text("Installation Progress:");
 
-        if(m_Data->result == "processing")
+        if (m_Data->result == "processing")
         {
             Cherry::TitleTwo("Installation of Vortex Launcher");
         }
-        else if(m_Data->result == "success")
+        else if (m_Data->result == "success")
         {
             Cherry::TitleTwo("Vortex Launcher is now installed !");
         }
-        else if(m_Data->result == "fail")
+        else if (m_Data->result == "fail")
         {
             Cherry::TitleTwo("Oups, an error was occured");
         }

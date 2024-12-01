@@ -7,6 +7,46 @@
 #include "../ui/installer/app.hpp"
 
 
+std::vector<int> SeparateVersion(const std::string &version)
+{
+    std::vector<int> versionParts;
+    std::stringstream ss(version);
+    std::string part;
+
+    while (std::getline(ss, part, '.'))
+    {
+        versionParts.push_back(std::stoi(part));
+    }
+
+    while (versionParts.size() < 3)
+    {
+        versionParts.push_back(0);
+    }
+
+    return versionParts;
+}
+
+bool CompareVersions(const std::string &version, const std::string &comparate_version)
+{
+    std::vector<int> v1 = SeparateVersion(version);
+    std::vector<int> v2 = SeparateVersion(comparate_version);
+
+    for (size_t i = 0; i < 3; ++i)
+    {
+        if (v2[i] > v1[i])
+        {
+            return true;
+        }
+        else if (v2[i] < v1[i])
+        {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+
 void parseArguments(int argc, char *argv[], std::string &action, std::string &path, std::string &home)
 {
     for (int i = 1; i < argc; ++i)
@@ -60,9 +100,9 @@ int main(int argc, char *argv[])
 
     conn->FollowRedirects(true);
     conn->FollowRedirects(true, 3);
-    
+
     RestClient::Response r = conn->get("/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch);
-    
+
     if (r.code != 200)
     {
         VXI_LOG("Error: " << r.code << " - " << r.body);
@@ -134,11 +174,47 @@ int main(int argc, char *argv[])
     {
         //
     }
+    
+    std::string builtin_manifest = Cherry::GetPath("builtin/manifest.json");
+
+    if (std::filesystem::exists(builtin_manifest))
+    {
+        std::ifstream manifest_file(builtin_manifest);
+        nlohmann::json manifest_json;
+
+        try
+        {
+            manifest_file >> manifest_json;
+
+            VortexBuiltinLauncher launcher;
+            launcher.version = manifest_json.at("version").get<std::string>();
+            launcher.arch = manifest_json.at("arch").get<std::string>();
+            launcher.platform = manifest_json.at("platform").get<std::string>();
+            launcher.tarball = manifest_json.at("tarball").get<std::string>();
+            launcher.sum = manifest_json.at("sum").get<std::string>();
+
+            g_InstallerData->m_BuiltinLauncherExist = true;
+            g_InstallerData->m_BuiltinLauncher = launcher;
+
+            std::cout << "Manifest loaded successfully!" << std::endl;
+        }
+        catch (const std::exception &e)
+        {
+            std::cerr << "Error reading manifest: " << e.what() << std::endl;
+        }
+    }
+    else
+    {
+        std::cerr << "Manifest file does not exist!" << std::endl;
+    }
+
+    // Check if the local builtin launcher is equals or higher to the net version
+    if(CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version))
+    {
+        g_InstallerData->g_UseNet = false;
+    }
 
     parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
-
-    VXI_LOG("Action: " << g_InstallerData->g_Action);
-    VXI_LOG("Path: " << g_InstallerData->g_WorkingPath);
 
     std::thread mainThread([&]()
                            { Cherry::Main(argc, argv); });

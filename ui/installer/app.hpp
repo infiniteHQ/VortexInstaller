@@ -32,6 +32,16 @@
 #define VXI_LOG(log)
 #endif
 
+/*
+
+TODO :
+
+Add the app to os knowed applications
+Add the offline install
+
+
+*/
+
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 
 using namespace VortexInstaller;
@@ -84,7 +94,7 @@ std::string GetUncompressCommand(const std::string &tarballFile, const std::stri
   }
   else
   {
-    command = "pkexec sh -c 'tar -xzf " + tarballFile +
+    command = "sh -c 'tar -xzf " + tarballFile +
               " --strip-components=1 -C " + installPath + " dist/'";
   }
 #endif
@@ -269,7 +279,7 @@ bool DownloadFile(const std::string &url, const std::string &outputPath)
   }
   return hr == S_OK;
 #else
-  std::string downloadCommand = "pkexec curl -o " + outputPath + " " + url;
+  std::string downloadCommand = "curl -o " + outputPath + " " + url;
   return system(downloadCommand.c_str()) == 0;
 #endif
 }
@@ -602,7 +612,7 @@ void DeleteVortexVersion()
         VXI_LOG("Folder deleted : " << installPath);
         if (IsSafePath(installPath))
         {
-          std::string cmd = "pkexec rm -rf " + installPath;
+          std::string cmd = "rm -rf " + installPath;
           if (system(cmd.c_str()) != 0)
           {
             installerData.result = "fail";
@@ -711,7 +721,8 @@ bool InstallVortexLauncher()
       }
     }*/
 
-    std::string createCommand = "pkexec mkdir " + installPath;
+    std::string createCommand = "mkdir \"" + installPath + "\"";
+    
     if (system(createCommand.c_str()) != 0)
     {
       installerData.result = "fail";
@@ -867,8 +878,9 @@ bool InstallVortexVersion()
   }
   else
   {
+    if(installerData.m_BuiltinLauncherExist)
     installerData.result = "fail";
-    installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
+    installerData.state = "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation.";
   }
 
   CleanUpTemporaryDirectory(tempDir);

@@ -20,7 +20,7 @@ copy ..\misc\windows\installer\main.py build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\
 cd build\bin
 
-call pyinstaller --onefile --name VortexInstaller --icon=icon.png ^
+call pyinstaller --noconsole --onefile --name VortexInstaller --icon=icon.png ^
     --add-data "vortex_installer.exe;." ^
     --add-data "ressources;ressources" ^
     --add-data "builtin;builtin" ^
