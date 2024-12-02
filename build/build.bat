@@ -15,15 +15,22 @@ call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 cd ..
 mkdir build\dist
 
-copy ..\misc\windows\installer\icon.png build\bin\
-copy ..\misc\windows\installer\main.py build\bin\
+xcopy /E /I /Y ..\ui\installer\assets\ressources .\build\bin\ressources
+xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
+copy ..\misc\windows\installer\icon.png .\build\bin\
+copy ..\misc\windows\installer\main.py .\build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\
 cd build\bin
+
+set BUILTIN_FLAG=
+if exist builtin (
+    set BUILTIN_FLAG=--add-data "builtin;builtin"
+)
 
 call pyinstaller --noconsole --onefile --name VortexInstaller --icon=icon.png ^
     --add-data "vortex_installer.exe;." ^
     --add-data "ressources;ressources" ^
-    --add-data "builtin;builtin" ^
+    %BUILTIN_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
 

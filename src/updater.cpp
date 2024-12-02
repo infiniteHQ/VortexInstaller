@@ -184,11 +184,7 @@ int main(int argc, char *argv[])
         std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
     }
 
-    std::cout << "789" << std::endl;
-
-    std::cout << " finding moduless"<< g_InstallerData->g_WorkingPath << std::endl;
     std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
-    std::cout << "132" << std::endl;
     if (!manifestPath.empty())
     {
         std::cout << "Found manifest.json at: " << manifestPath << std::endl;

@@ -192,6 +192,7 @@ struct VortexInstallerData
     VortexVersion m_SelectedVortexVersion;
     VortexBuiltinLauncher m_BuiltinLauncher;
     bool m_BuiltinLauncherExist = false;
+    bool m_FolderAlreadyExist;
     std::vector<std::string> m_VortexPools;
 };
 

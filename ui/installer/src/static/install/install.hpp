@@ -37,10 +37,14 @@ namespace VortexInstaller
         void SetupRenderCallback();
         void Render();
 
+        void CheckExistingInstallation(const std::shared_ptr<VortexInstallerData> &data);
+
         void RenderInstallVortex();
         void RenderLicenseAgreement();
         void RenderSummary();
         void RenderInstall();
+
+        bool CanInstall = true;
 
         std::unordered_map<std::string, AppChild> m_Childs;
 

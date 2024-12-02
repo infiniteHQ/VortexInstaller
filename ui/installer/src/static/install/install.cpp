@@ -14,11 +14,11 @@ namespace VortexInstaller
         ImGui::PopStyleColor();
 
         Space(20.0f);
-        std::shared_ptr<std::string> val = std::make_shared<std::string>(m_Data->g_DefaultInstallPath);
+        auto val = std::make_shared<std::string>(m_Data->g_DefaultInstallPath);
+        auto input = std::make_shared<Cherry::SimpleStringInput>("Select", val, "Select install path");
 
         Cherry::TitleFiveColored("Please select the installation path", "#787878FF");
         {
-            auto input = std::make_shared<Cherry::SimpleStringInput>("Select", val, "Select install path");
             input->Render("__blank");
         }
 
@@ -42,9 +42,15 @@ namespace VortexInstaller
             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
             if (accept->Render("sec"))
             {
-
+                m_Data->g_DefaultInstallPath = input->GetData("value");
                 m_SelectedChildName = "Accept Licence Agreement";
                 this->SetChildState("Install Vortex", true);
+
+                CheckExistingInstallation(m_Data);
+                if (m_Data->m_FolderAlreadyExist)
+                {
+                    CanInstall = false;
+                }
             }
             ImGui::PopStyleColor();
         }
@@ -184,12 +190,35 @@ namespace VortexInstaller
         }
 
         Cherry::MenuItemTextSeparator("Select packages");
-            ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), "Installer prebuilt packages will be available soon...");
+        ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), "Installer prebuilt packages will be available soon...");
+        std::string label_install = "The installation path is : " + m_Data->g_DefaultInstallPath;
+        ImGui::TextColored(Cherry::HexToRGBA("#555555FF"), label_install.c_str());
+
+        if (m_Data->m_FolderAlreadyExist)
+        {
+            ImGui::Separator();
+            ImGui::TextColored(Cherry::HexToRGBA("#FF3535FF"), "CAUTION : The installation directory already exist. This installation will erase everythinh !");
+            ImGui::Checkbox("Erase the folder and install Vortex", &CanInstall);
+            ImGui::Separator();
+        }
+
+        if (!CanInstall)
+        {
+            ImGui::BeginDisabled();
+        }
+
         ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
         {
             auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
             accept->SetProperty("bg", "#B1FF31FF");
             accept->SetProperty("bg_hovered", "#C3FF53FF");
+
+            if (!CanInstall)
+            {
+                accept->SetProperty("bg", "#353535FF");
+                accept->SetProperty("bg_hovered", "#353535FF");
+            }
+
             ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
             if (accept->Render("__confirm"))
             {
@@ -205,6 +234,11 @@ namespace VortexInstaller
                 mainThread.detach();
             }
             ImGui::PopStyleColor();
+        }
+
+        if (!CanInstall)
+        {
+            ImGui::EndDisabled();
         }
     }
 
@@ -249,6 +283,22 @@ namespace VortexInstaller
                 Cherry::Application().Get().Close();
             }
             ImGui::PopStyleColor();
+        }
+    }
+
+    void InstallAppWindow::CheckExistingInstallation(const std::shared_ptr<VortexInstallerData> &data)
+    {
+        std::string path = data->g_DefaultInstallPath;
+
+        std::filesystem::path installPath(path);
+
+        if (std::filesystem::exists(installPath))
+        {
+            data->m_FolderAlreadyExist = true;
+        }
+        else
+        {
+            data->m_FolderAlreadyExist = false;
         }
     }
 

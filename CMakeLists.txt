@@ -43,4 +43,10 @@ if (WIN32)
     target_link_libraries(vxuninstall PUBLIC urlmon)
 endif()
 
+#if(WIN32)
+#    set_target_properties(vortex_installer PROPERTIES
+#        WIN32_EXECUTABLE TRUE
+#    )
+#endif()
+
 

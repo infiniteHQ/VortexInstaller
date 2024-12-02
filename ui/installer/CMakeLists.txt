@@ -24,6 +24,12 @@ else()
     message(FATAL_ERROR "No source files found for the installer target.")
 endif()
 
+#if(WIN32)
+#    set_target_properties(installer PROPERTIES
+#        WIN32_EXECUTABLE TRUE
+#    )
+#endif()
+
 target_link_libraries(installer PRIVATE cherry)
 
 add_custom_command(TARGET installer POST_BUILD
