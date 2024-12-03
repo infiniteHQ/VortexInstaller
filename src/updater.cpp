@@ -39,11 +39,6 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
     }
 }
 
-// TOut dans un pool de commande et on récupère quand même les logs grace a un mini script qui execute tout et récupère les erreurs.
-
-// Si l'install path est dans un endroit privé : On regroupe la crea du old + tar + suppr dans le pkexec
-// Si non tout est good 
-
 std::vector<int> splitVersion(const std::string &version)
 {
     std::vector<int> versionParts;

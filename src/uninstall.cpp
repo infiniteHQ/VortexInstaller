@@ -8,9 +8,21 @@
 
 static std::string g_OldLauncherVersion;
 
-void parseArguments(int argc, char *argv[], std::string &action, std::string &path) {
+void parseArguments(int argc, char *argv[], std::string &action, std::string &path, std::string &userpath) {
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
+        // Default
+        if (arg.find("--workdir=") == 0)
+        {
+            path = arg.substr(10);
+        }
+
+        // Default
+        // Get the vortex version pools from user configs
+        if (arg.find("--userdir=") == 0)
+        {
+            userpath = arg.substr(10);
+        }
 
         if (arg.find("--path=") == 0) {
             path = arg.substr(7);
@@ -32,7 +44,7 @@ int main(int argc, char *argv[])
     g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
 
             g_InstallerData->g_Action = "uninstall";
-    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
+    parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 
 
     if (g_InstallerData->g_WorkingPath.empty())

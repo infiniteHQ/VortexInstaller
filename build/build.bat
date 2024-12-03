@@ -17,7 +17,6 @@ mkdir build\dist
 
 xcopy /E /I /Y ..\ui\installer\assets\ressources .\build\bin\ressources
 xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
-copy ..\ui\installer\assets\manifest.json .\build\bin\
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\

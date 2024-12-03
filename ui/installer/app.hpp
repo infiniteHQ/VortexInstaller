@@ -31,6 +31,26 @@
 
 #include <shobjidl.h> // Pour IShellLinkW et autres APIs
 
+static void CreateFolder(const std::string &path)
+{
+    if (!std::filesystem::exists(path))
+    {
+        try
+        {
+            std::string cmd = "mkdir " + path;
+            system(cmd.c_str());
+        }
+        catch (const std::exception &ex)
+        {
+            std::cout << "Failed to create the folder : " << ex.what() << std::endl;
+        }
+    }
+    else
+    {
+            std::cout << "Path already exist : " << path << std::endl;
+    }
+}
+
 bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath, int iconIndex = 0)
 {
   HRESULT hres;
@@ -108,12 +128,11 @@ bool IsSafePath(const std::filesystem::path &path)
 
   for (const auto &dangerous_path : dangerous_paths)
   {
-    // Vérifier si les deux chemins existent avant de comparer
     if (std::filesystem::exists(path) && std::filesystem::exists(dangerous_path))
     {
       if (std::filesystem::equivalent(path, dangerous_path))
       {
-        std::cerr << "Tentative de suppression d'un chemin critique : " << path << std::endl;
+        std::cerr << "Cannot delete this path : " << path << std::endl;
         return false;
       }
     }
@@ -541,7 +560,7 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
   {
     std::string installPath = installerData.g_WorkingPath;
     std::string manifestPath;
-    
+
 #ifdef _WIN32
     manifestPath = installPath + "\\manifest.json";
 #else
@@ -557,29 +576,38 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
 
       installerData.state_n++;
       installerData.state = "Deleting Vortex Launcher...";
-  try {
-        if (isValidPath(installPath)) {
+      try
+      {
+        if (isValidPath(installPath))
+        {
 #if defined(_WIN32) || defined(_WIN64)
-            std::string command = "rmdir /S /Q \"" + installPath + "\"";
+          std::string command = "rmdir /S /Q \"" + installPath + "\"";
 #else
-            std::string command = "rm -rf \"" + installPath + "\"";
+          std::string command = "rm -rf \"" + installPath + "\"";
 #endif
-            int result = std::system(command.c_str());
+          int result = std::system(command.c_str());
 
-            if (result == 0) {
-                std::cout << "Folder deleted: " << installPath << std::endl;
-            } else {
-                throw std::runtime_error("Failed to delete folder using command: " + command);
-            }
-        } else {
-            throw std::filesystem::filesystem_error("Bad directory", std::error_code());
+          if (result == 0)
+          {
+            std::cout << "Folder deleted: " << installPath << std::endl;
+          }
+          else
+          {
+            throw std::runtime_error("Failed to delete folder using command: " + command);
+          }
         }
-    } catch (const std::exception& e) {
+        else
+        {
+          throw std::filesystem::filesystem_error("Bad directory", std::error_code());
+        }
+      }
+      catch (const std::exception &e)
+      {
         std::cerr << "ZE: " << e.what() << std::endl;
         installerData.result = "fail";
         failed = true;
         installerData.state = "Error while deleting the Vortex Launcher folder";
-    }
+      }
     }
     else
     {
@@ -680,22 +708,29 @@ void DeleteVortexVersion()
     try
     {
       if (isValidPath(installPath))
-      {   VXI_LOG("Folder deletion attempt: " << installPath);
-    
-    if (IsSafePath(installPath)) {
-        try {
+      {
+        VXI_LOG("Folder deletion attempt: " << installPath);
+
+        if (IsSafePath(installPath))
+        {
+          try
+          {
             // Use std::filesystem for cross-platform folder deletion
             std::filesystem::remove_all(installPath);
             VXI_LOG("Folder deleted successfully: " << installPath);
-        } catch (const std::filesystem::filesystem_error& e) {
+          }
+          catch (const std::filesystem::filesystem_error &e)
+          {
             installerData.result = "fail";
             failed = true;
             installerData.state = "Error while deleting the folder: " + std::string(e.what());
             VXI_LOG("Error: " << e.what());
+          }
         }
-    } else {
-        VXI_LOG("Unsafe path detected, skipping deletion: " << path);
-    }
+        else
+        {
+          VXI_LOG("Unsafe path detected, skipping deletion: " << path);
+        }
       }
       else
       {
@@ -1061,6 +1096,16 @@ bool InstallVortexLauncher()
     // installerData.result = "fail";
     // installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
   }
+
+  // Create default Vortex version folder
+  std::string def_vx_path;
+
+#if defined(_WIN32) || defined(_WIN64)
+  def_vx_path = "C:/Program Files/Vortex";
+#else
+  def_vx_path = "/opt/Vortex/";
+#endif
+  CreateFolder(def_vx_path);
 
   CleanUpTemporaryDirectory(tempDir);
   return true;
