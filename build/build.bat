@@ -17,6 +17,7 @@ mkdir build\dist
 
 xcopy /E /I /Y ..\ui\installer\assets\ressources .\build\bin\ressources
 xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
+copy ..\ui\installer\assets\manifest.json .\build\bin\
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\
@@ -25,6 +26,11 @@ cd build\bin
 set BUILTIN_FLAG=
 if exist builtin (
     set BUILTIN_FLAG=--add-data "builtin;builtin"
+)
+
+set MANIFEST_FLAG=
+if exist manifest.json (
+    set MANIFEST_FLAG=--add-data "manifest.json;."
 )
 
 call pyinstaller --noconsole --onefile --name VortexInstaller --icon=icon.png ^
@@ -46,6 +52,7 @@ cd build\bin
 call pyinstaller --onefile --name VortexUpdater --icon=icon.png ^
     --add-data "vortex_update.exe;." ^
     --add-data "ressources;ressources" ^
+    %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
 
@@ -60,6 +67,22 @@ cd build\bin
 call pyinstaller --onefile --name VersionUninstaller --icon=icon.png ^
     --add-data "vxuninstall.exe;." ^
     --add-data "ressources;ressources" ^
+    %MANIFEST_FLAG% ^
+    --manifest=admin_manifest.xml ^
+    main.py
+
+del icon.png main.py
+cd ..\..
+
+copy ..\misc\windows\uninstaller\icon.png build\bin\
+copy ..\misc\windows\uninstaller\main.py build\bin\
+copy ..\misc\windows\uninstaller\admin_manifest.xml build\bin\
+cd build\bin
+
+call pyinstaller --onefile --name VortexUninstaller --icon=icon.png ^
+    --add-data "vortex_uninstall.exe;." ^
+    --add-data "ressources;ressources" ^
+    %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
 
@@ -74,6 +97,7 @@ cd build\bin
 call pyinstaller --onefile --name VersionInstaller --icon=icon.png ^
     --add-data "vxinstaller.exe;." ^
     --add-data "ressources;ressources" ^
+    %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
 

@@ -116,11 +116,12 @@ static void printManifest(const std::string &manifestPath)
     manifestFile.close();
 }
 
-static std::string findManifestJson(const std::filesystem::path &startPath)
+static std::string findManifestJson(const std::filesystem::path &startPath, int maxDepth = 10)
 {
     std::filesystem::path currentPath = startPath;
+    int depth = 0;
 
-    while (!currentPath.empty())
+    while (!currentPath.empty() && depth < maxDepth)
     {
         std::filesystem::path manifestPath = currentPath / "manifest.json";
 
@@ -130,10 +131,12 @@ static std::string findManifestJson(const std::filesystem::path &startPath)
         }
 
         currentPath = currentPath.parent_path();
+        ++depth;
     }
 
     return "";
 }
+
 
 struct VortexVersion
 {
