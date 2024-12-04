@@ -6,7 +6,6 @@
 
 #include "../ui/installer/app.hpp"
 
-
 std::vector<int> SeparateVersion(const std::string &version)
 {
     std::vector<int> versionParts;

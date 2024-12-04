@@ -33,22 +33,22 @@
 
 static void CreateFolder(const std::string &path)
 {
-    if (!std::filesystem::exists(path))
+  if (!std::filesystem::exists(path))
+  {
+    try
     {
-        try
-        {
-            std::string cmd = "mkdir " + path;
-            system(cmd.c_str());
-        }
-        catch (const std::exception &ex)
-        {
-            std::cout << "Failed to create the folder : " << ex.what() << std::endl;
-        }
+      std::string cmd = "mkdir " + path;
+      system(cmd.c_str());
     }
-    else
+    catch (const std::exception &ex)
     {
-            std::cout << "Path already exist : " << path << std::endl;
+      std::cout << "Failed to create the folder : " << ex.what() << std::endl;
     }
+  }
+  else
+  {
+    std::cout << "Path already exist : " << path << std::endl;
+  }
 }
 
 bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath, int iconIndex = 0)
@@ -820,16 +820,12 @@ bool InstallVortexLauncher()
 
     if (std::filesystem::exists(path))
     {
-      std::cout << "EXIST" << std::endl;
-
-      // Vérifier si le chemin est sécurisé
       if (!IsSafePath(path))
       {
         std::cerr << "Cannot delete this safe path : " << installPath << std::endl;
         return false;
       }
 
-      // Supprimer le dossier existant
       try
       {
         std::filesystem::remove_all(path);
@@ -844,7 +840,6 @@ bool InstallVortexLauncher()
       }
     }
 
-    // Créer un nouveau dossier
     try
     {
       std::filesystem::create_directories(path);
@@ -1134,7 +1129,13 @@ bool InstallVortexVersion()
 
     std::string dlpath = installerData.g_RequestTarballPath;
     std::string sumpath = installerData.g_RequestSumPath;
-    std::string installPath = installerData.g_DefaultInstallPath;
+    std::string installPath;
+
+#ifdef _WIN32
+    installPath = installerData.g_DefaultInstallPath + "\\" + installerData.m_SelectedVortexVersion.name;
+#else
+    installPath = installerData.g_DefaultInstallPath + "/" + installerData.m_SelectedVortexVersion.name;
+#endif
 
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
@@ -1163,6 +1164,22 @@ bool InstallVortexVersion()
       installerData.state = "Error: Integrity check failed.";
       return false;
     }
+    installerData.state_n++;
+    installerData.state = "Ensure clean install path...";
+
+    std::filesystem::path path(installPath);
+    try
+    {
+      std::filesystem::create_directories(path);
+      std::cout << "New folder created : " << installPath << std::endl;
+    }
+    catch (const std::filesystem::filesystem_error &e)
+    {
+      std::cerr << "Error creating folder: " << e.what() << std::endl;
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to prepare installation folder.";
+      return false;
+    }
 
     installerData.state_n++;
     installerData.state = "Extracting files...";
@@ -1170,11 +1187,13 @@ bool InstallVortexVersion()
     std::string finalLink;
     std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand = "cmd /C \"\"tar\" -xzf \"" + tarballFile +
-                        "\" --strip-components=1 -C \"" + installPath + "\" dist\\\"";
+    uncompressCommand = "cmd /C tar -xzf \"" + tarballFile +
+                        "\" --strip-components=2 -C \"" + installPath + "\"";
 #else
     finalLink = GetFinalLink(tarballFile, installPath);
 #endif
+
+    std::cout << "CDdd : " << uncompressCommand << std::endl;
 
     if (system(uncompressCommand.c_str()) != 0)
     {
@@ -1184,11 +1203,11 @@ bool InstallVortexVersion()
     }
 
     installerData.state_n++;
-    installerData.state = "Running vortex_launcher test...";
+    installerData.state = "Running vortex test...";
 
     std::string testLauncher;
 #ifdef _WIN32
-    testLauncher = installPath + "\\bin\\vortex_launcher.exe --test";
+    testLauncher = installPath + "\\bin\\vortex.exe --test";
 #else
     testLauncher = finalLink + "/bin/vortex -test";
 #endif
