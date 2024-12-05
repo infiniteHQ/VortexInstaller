@@ -56,7 +56,6 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
     MultiByteToWideChar(CP_ACP, 0, description.c_str(), -1, wszDescription, MAX_PATH);
     pShellLink->SetDescription(wszDescription);
 
-    // Ajouter une icône
     if (!iconPath.empty())
     {
       wchar_t wszIconPath[MAX_PATH];
@@ -81,6 +80,52 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
 
 #else
 #include <unistd.h>
+
+std::string ReplaceSpacesWithUnderscores(const std::string& str) {
+    std::string result = str;
+    std::replace(result.begin(), result.end(), ' ', '_');
+    return result;
+}
+
+bool CreateShortcut(const std::string& name, const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath)
+{
+    std::string fileName = ReplaceSpacesWithUnderscores(name) + ".desktop";
+    std::string desktopFilePath = shortcutPath + "/" + fileName;
+
+    if (std::filesystem::exists(desktopFilePath)) {
+        if (!std::filesystem::remove(desktopFilePath)) {
+            std::cerr << "Error while deleting the old shorcut." << std::endl;
+            return false;
+        }
+        std::cout << "Old shortcut deleted" << std::endl;
+    }
+
+    std::string content = 
+        "[Desktop Entry]\n"
+        "Name=" + name + "\n"
+        "Exec=" + targetPath + "\n"
+        "Icon=" + iconPath + "\n"
+        "Terminal=false\n"
+        "Type=Application\n"
+        "Categories=Utility;Development;\n";
+
+    std::ofstream desktopFile(desktopFilePath);
+    if (!desktopFile) {
+        std::cerr << "Error while deleting : " << desktopFilePath << std::endl;
+        return false;
+    }
+
+    desktopFile << content;
+    desktopFile.close();
+
+    std::string chmodCommand = "chmod +x " + desktopFilePath;
+    if (std::system(chmodCommand.c_str()) != 0) {
+        return false;
+    }
+
+    return true;
+}
+
 #endif
 
 #if defined(VXI_LOGS)
@@ -939,12 +984,30 @@ bool InstallVortexLauncher()
 
     std::filesystem::current_path(tempDir);
 
+if (!std::filesystem::exists(tarballFile)) {
+    std::cerr << "Error: Tarball file does not exist at " << tarballFile << std::endl;
+    installerData.result = "fail";
+    installerData.state = "Error: Missing tarball file.";
+    return false;
+}
+
+if (!std::filesystem::exists(sumFile)) {
+    std::cerr << "Error: Sum file does not exist at " << sumFile << std::endl;
+    installerData.result = "fail";
+    installerData.state = "Error: Missing sum file.";
+    return false;
+}
+
     std::string checkSumCommand;
 #ifdef _WIN32
     checkSumCommand = "CertUtil -hashfile " + tarballFile + " SHA256";
 #else
     checkSumCommand = "sha256sum -c " + sumFile;
 #endif
+std::cout << system("whoami") << std::endl;
+std::cout << system("pwd") << std::endl;
+std::cout << system("ls -la") << std::endl;
+std::cout << checkSumCommand << std::endl;
     if (system(checkSumCommand.c_str()) != 0)
     {
       installerData.result = "fail";
@@ -952,37 +1015,18 @@ bool InstallVortexLauncher()
       return false;
     }
 
-    /* TODO : Link this suppr with uncompress cmd
-
-    if (!std::filesystem::exists(installPath))
-    {
-      std::filesystem::create_directories(installPath);
-    }
-
-    if (std::filesystem::exists(installPath) && std::filesystem::is_directory(installPath))
-    {
-      for (const auto &entry : std::filesystem::directory_iterator(installPath))
-      {
-        DeleteFileCrossPlatform(entry.path().string());
-      }
-    }*/
-
     installerData.state_n++;
     installerData.state = "Ensure clean install path...";
     std::filesystem::path path(installPath);
 
     if (std::filesystem::exists(path))
     {
-      std::cout << "EXIST" << std::endl;
-
-      // Vérifier si le chemin est sécurisé
       if (!IsSafePath(path))
       {
         std::cerr << "Cannot delete this safe path : " << installPath << std::endl;
         return false;
       }
 
-      // Supprimer le dossier existant
       try
       {
         std::filesystem::remove_all(path);
@@ -997,7 +1041,6 @@ bool InstallVortexLauncher()
       }
     }
 
-    // Créer un nouveau dossier
     try
     {
       std::filesystem::create_directories(path);
@@ -1036,6 +1079,30 @@ bool InstallVortexLauncher()
     installerData.state_n++;
     installerData.state = "Running vortex_launcher test...";
 
+    std::string testLauncher;
+#ifdef _WIN32
+    testLauncher = "cd \"" + installPath + "\\bin\" && vortex_launcher.exe --test";
+#else
+    testLauncher = installPath + "/bin/vortex_launcher --test";
+#endif
+    std::cout << "FQ2" << testLauncher << std::endl;
+    if (system(testLauncher.c_str()) != 0)
+    {
+      installerData.result = "fail";
+      installerData.state = "Error: Launcher test failed.";
+      return false;
+    }
+    std::cout << "FQ3" << std::endl;
+
+    installerData.state_n++;
+    installerData.state = "Installation completed successfully.";
+    installerData.result = "success";
+
+    // installerData.result = "fail";
+    // installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
+  }
+
+    std::string installPath = installerData.g_DefaultInstallPath;
 #ifdef _WIN32
     {
       std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Launcher.lnk";
@@ -1067,30 +1134,35 @@ bool InstallVortexLauncher()
       }
     }
 #else
-#endif
-
-    std::string testLauncher;
-#ifdef _WIN32
-    testLauncher = "cd \"" + installPath + "\\bin\" && vortex_launcher.exe --test";
-#else
-    testLauncher = installPath + "/bin/vortex_launcher --test";
-#endif
-    std::cout << "FQ2" << testLauncher << std::endl;
-    if (system(testLauncher.c_str()) != 0)
     {
-      installerData.result = "fail";
-      installerData.state = "Error: Launcher test failed.";
-      return false;
+      std::string shortcutPath = "/usr/share/applications";
+      if (!CreateShortcut("Vortex Launcher", installPath + "\\bin\\vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/ressources/imgs/icon.png"))
+      {
+        installerData.result = "fail";
+        installerData.state = "Error: Failed to create Start Menu shortcut.";
+        return false;
+      }
     }
-    std::cout << "FQ3" << std::endl;
+    {
+      std::string shortcutPath = "/usr/share/applications";
+      if (!CreateShortcut("Update Vortex", installPath + "\\bin\\VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/ressources/imgs/icon_update.png"))
+      {
+        installerData.result = "fail";
+        installerData.state = "Error: Failed to create Start Menu shortcut.";
+        return false;
+      }
+    }
+    {
+      std::string shortcutPath = "/usr/share/applications";
+      if (!CreateShortcut("Uninstall Vortex", installPath + "\\bin\\VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/ressources/imgs/icon_crash.png"))
+      {
+        installerData.result = "fail";
+        installerData.state = "Error: Failed to create Start Menu shortcut.";
+        return false;
+      }
+    }
 
-    installerData.state_n++;
-    installerData.state = "Installation completed successfully.";
-    installerData.result = "success";
-
-    // installerData.result = "fail";
-    // installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
-  }
+#endif
 
   // Create default Vortex version folder
   std::string def_vx_path;

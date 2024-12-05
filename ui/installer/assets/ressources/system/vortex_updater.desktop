@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Vortex Launcher
+Exec=/opt/VortexLauncher/bin/VortexUpdater
+Icon=/opt/VortexLauncher/bin/resources/imgs/vortex_update.png
+Terminal=false
+Type=Application
+Categories=Utility;Development;
