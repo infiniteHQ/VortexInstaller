@@ -11,6 +11,7 @@ cmake ../..
 make -j$(nproc)
 
 cd ..
+
 mkdir build/dist
 
 cp -r ../ui/installer/assets/ressources ./build/bin/ressources

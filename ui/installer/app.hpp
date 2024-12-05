@@ -966,6 +966,7 @@ bool InstallVortexLauncher()
 
     std::string tarballFile;
     std::string sumFile;
+    std::string sumPath;
 
 #ifdef _WIN32
     tarballFile = Cherry::GetPath("builtin\\" + installerData.m_BuiltinLauncher.tarball);
@@ -976,7 +977,8 @@ bool InstallVortexLauncher()
 #ifdef _WIN32
     sumFile = Cherry::GetPath("builtin\\" + installerData.m_BuiltinLauncher.sum);
 #else
-    sumFile = Cherry::GetPath("builtin/" + installerData.m_BuiltinLauncher.sum);
+    sumPath = Cherry::GetPath("builtin/");
+    sumFile = installerData.m_BuiltinLauncher.sum;
 #endif
 
     installerData.state_n++;
@@ -991,18 +993,18 @@ if (!std::filesystem::exists(tarballFile)) {
     return false;
 }
 
-if (!std::filesystem::exists(sumFile)) {
+/*if (!std::filesystem::exists(sumFile)) {
     std::cerr << "Error: Sum file does not exist at " << sumFile << std::endl;
     installerData.result = "fail";
     installerData.state = "Error: Missing sum file.";
     return false;
-}
+}*/
 
     std::string checkSumCommand;
 #ifdef _WIN32
     checkSumCommand = "CertUtil -hashfile " + tarballFile + " SHA256";
 #else
-    checkSumCommand = "sha256sum -c " + sumFile;
+    checkSumCommand = "cd " + sumPath + " && sha256sum -c " + sumFile;
 #endif
 std::cout << system("whoami") << std::endl;
 std::cout << system("pwd") << std::endl;
