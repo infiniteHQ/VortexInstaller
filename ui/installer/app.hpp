@@ -31,26 +31,6 @@
 
 #include <shobjidl.h> // Pour IShellLinkW et autres APIs
 
-static void CreateFolder(const std::string &path)
-{
-  if (!std::filesystem::exists(path))
-  {
-    try
-    {
-      std::string cmd = "mkdir " + path;
-      system(cmd.c_str());
-    }
-    catch (const std::exception &ex)
-    {
-      std::cout << "Failed to create the folder : " << ex.what() << std::endl;
-    }
-  }
-  else
-  {
-    std::cout << "Path already exist : " << path << std::endl;
-  }
-}
-
 bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath, int iconIndex = 0)
 {
   HRESULT hres;
@@ -108,6 +88,26 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
 #else
 #define VXI_LOG(log)
 #endif
+
+static void CreateFolder(const std::string &path)
+{
+  if (!std::filesystem::exists(path))
+  {
+    try
+    {
+      std::string cmd = "mkdir " + path;
+      system(cmd.c_str());
+    }
+    catch (const std::exception &ex)
+    {
+      std::cout << "Failed to create the folder : " << ex.what() << std::endl;
+    }
+  }
+  else
+  {
+    std::cout << "Path already exist : " << path << std::endl;
+  }
+}
 
 /*
 

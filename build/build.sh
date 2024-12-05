@@ -11,16 +11,29 @@ cmake ../..
 make -j$(nproc)
 
 cd ..
-
 mkdir build/dist
 
-cp ../misc/linux/installer/icon.png build/bin/
-cp ../misc/linux/installer/main.py build/bin/
-
+cp -r ../ui/installer/assets/ressources ./build/bin/ressources
+cp -r ../ui/installer/assets/builtin ./build/bin/builtin
+cp ../misc/linux/installer/icon.png ./build/bin/
+cp ../misc/linux/installer/main.py ./build/bin/
+cp ../misc/linux/installer/admin_manifest.xml build/bin/
 cd build/bin
+
+BUILTIN_FLAG=""
+if [[ -d "builtin" ]]; then
+    BUILTIN_FLAG="--add-data builtin:./builtin"
+fi
+
+MANIFEST_FLAG=""
+if [[ -f "manifest.json" ]]; then
+    MANIFEST_FLAG="--add-data manifest.json:."
+fi
+
 pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-data "vortex_installer:." \
     --add-data "ressources:ressources" \
+    $BUILTIN_FLAG \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
@@ -52,6 +65,22 @@ cd build/bin
 
 pyinstaller --onefile --name VersionUninstaller --icon=icon.png \
     --add-data "vxuninstall:." \
+    --add-data "ressources:ressources" \
+    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
+    --add-binary "../restcpp_build/librestclient-cpp.so:." \
+    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
+    main.py
+
+rm icon.png main.py
+cd ../..
+
+
+cp ../misc/linux/uninstaller/icon.png build/bin/
+cp ../misc/linux/uninstaller/main.py build/bin/
+cd build/bin
+
+pyinstaller --onefile --name VortexUninstaller --icon=icon.png \
+    --add-data "vortex_uninstaller:." \
     --add-data "ressources:ressources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
