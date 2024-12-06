@@ -81,49 +81,57 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
 #else
 #include <unistd.h>
 
-std::string ReplaceSpacesWithUnderscores(const std::string& str) {
-    std::string result = str;
-    std::replace(result.begin(), result.end(), ' ', '_');
-    return result;
+std::string ReplaceSpacesWithUnderscores(const std::string &str)
+{
+  std::string result = str;
+  std::replace(result.begin(), result.end(), ' ', '_');
+  return result;
 }
 
-bool CreateShortcut(const std::string& name, const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath)
+bool CreateShortcut(const std::string &name, const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath)
 {
-    std::string fileName = ReplaceSpacesWithUnderscores(name) + ".desktop";
-    std::string desktopFilePath = shortcutPath + "/" + fileName;
+  std::string fileName = ReplaceSpacesWithUnderscores(name) + ".desktop";
+  std::string desktopFilePath = shortcutPath + "/" + fileName;
 
-    if (std::filesystem::exists(desktopFilePath)) {
-        if (!std::filesystem::remove(desktopFilePath)) {
-            std::cerr << "Error while deleting the old shorcut." << std::endl;
-            return false;
-        }
-        std::cout << "Old shortcut deleted" << std::endl;
+  if (std::filesystem::exists(desktopFilePath))
+  {
+    if (!std::filesystem::remove(desktopFilePath))
+    {
+      std::cerr << "Error while deleting the old shorcut." << std::endl;
+      return false;
     }
+    std::cout << "Old shortcut deleted" << std::endl;
+  }
 
-    std::string content = 
-        "[Desktop Entry]\n"
-        "Name=" + name + "\n"
-        "Exec=" + targetPath + "\n"
-        "Icon=" + iconPath + "\n"
-        "Terminal=false\n"
-        "Type=Application\n"
-        "Categories=Utility;Development;\n";
+  std::string content =
+      "[Desktop Entry]\n"
+      "Name=" +
+      name + "\n"
+             "Exec=" +
+      targetPath + "\n"
+                   "Icon=" +
+      iconPath + "\n"
+                 "Terminal=false\n"
+                 "Type=Application\n"
+                 "Categories=Utility;Development;\n";
 
-    std::ofstream desktopFile(desktopFilePath);
-    if (!desktopFile) {
-        std::cerr << "Error while deleting : " << desktopFilePath << std::endl;
-        return false;
-    }
+  std::ofstream desktopFile(desktopFilePath);
+  if (!desktopFile)
+  {
+    std::cerr << "Error while deleting : " << desktopFilePath << std::endl;
+    return false;
+  }
 
-    desktopFile << content;
-    desktopFile.close();
+  desktopFile << content;
+  desktopFile.close();
 
-    std::string chmodCommand = "chmod +x " + desktopFilePath;
-    if (std::system(chmodCommand.c_str()) != 0) {
-        return false;
-    }
+  std::string chmodCommand = "chmod +x " + desktopFilePath;
+  if (std::system(chmodCommand.c_str()) != 0)
+  {
+    return false;
+  }
 
-    return true;
+  return true;
 }
 
 #endif
@@ -417,7 +425,11 @@ void CleanUpTemporaryDirectory(const std::string &tempDir)
       return;
     }
 
-    std::string command = "rm -rf " + tempDir;
+#if defined(_WIN32) || defined(_WIN64)
+    std::string command = "rmdir /S /Q \"" + tempDir + "\"";
+#else
+    std::string command = "rm -rf \"" + tempDir + "\"";
+#endif
     system(command.c_str());
   }
 }
@@ -571,6 +583,10 @@ void DeleteOldVortexLauncher(const std::string &path)
     {
       installerData.state_n++;
       installerData.state = "Delete old vortex folder...";
+#ifdef _WIN32
+      // On Windows, kill the parent process of Updater to properly delete the containing
+      system("taskkill /F /IM VortexUpdater.exe");
+#endif
       std::filesystem::remove_all(installPath);
       VXI_LOG("Successfully deleted the folder: " << installPath);
     }
@@ -625,6 +641,10 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
       {
         if (isValidPath(installPath))
         {
+#ifdef _WIN32
+          // On Windows, kill the parent process of Updater to properly delete the containing folder
+          system("taskkill /F /IM VortexUninstaller.exe");
+#endif
 #if defined(_WIN32) || defined(_WIN64)
           std::string command = "rmdir /S /Q \"" + installPath + "\"";
 #else
@@ -986,19 +1006,20 @@ bool InstallVortexLauncher()
 
     std::filesystem::current_path(tempDir);
 
-if (!std::filesystem::exists(tarballFile)) {
-    std::cerr << "Error: Tarball file does not exist at " << tarballFile << std::endl;
-    installerData.result = "fail";
-    installerData.state = "Error: Missing tarball file.";
-    return false;
-}
+    if (!std::filesystem::exists(tarballFile))
+    {
+      std::cerr << "Error: Tarball file does not exist at " << tarballFile << std::endl;
+      installerData.result = "fail";
+      installerData.state = "Error: Missing tarball file.";
+      return false;
+    }
 
-/*if (!std::filesystem::exists(sumFile)) {
-    std::cerr << "Error: Sum file does not exist at " << sumFile << std::endl;
-    installerData.result = "fail";
-    installerData.state = "Error: Missing sum file.";
-    return false;
-}*/
+    /*if (!std::filesystem::exists(sumFile)) {
+        std::cerr << "Error: Sum file does not exist at " << sumFile << std::endl;
+        installerData.result = "fail";
+        installerData.state = "Error: Missing sum file.";
+        return false;
+    }*/
 
     std::string checkSumCommand;
 #ifdef _WIN32
@@ -1006,10 +1027,10 @@ if (!std::filesystem::exists(tarballFile)) {
 #else
     checkSumCommand = "cd " + sumPath + " && sha256sum -c " + sumFile;
 #endif
-std::cout << system("whoami") << std::endl;
-std::cout << system("pwd") << std::endl;
-std::cout << system("ls -la") << std::endl;
-std::cout << checkSumCommand << std::endl;
+    std::cout << system("whoami") << std::endl;
+    std::cout << system("pwd") << std::endl;
+    std::cout << system("ls -la") << std::endl;
+    std::cout << checkSumCommand << std::endl;
     if (system(checkSumCommand.c_str()) != 0)
     {
       installerData.result = "fail";
@@ -1104,65 +1125,65 @@ std::cout << checkSumCommand << std::endl;
     // installerData.state = "Error: Network usage is disabled. Cannot proceed with installation.";
   }
 
-    std::string installPath = installerData.g_DefaultInstallPath;
+  std::string installPath = installerData.g_DefaultInstallPath;
 #ifdef _WIN32
+  {
+    std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Launcher.lnk";
+    if (!CreateShortcut(installPath + "\\bin\\vortex_launcher.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon.ico"))
     {
-      std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Launcher.lnk";
-      if (!CreateShortcut(installPath + "\\bin\\vortex_launcher.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon.ico"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
 
+  {
+    std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Updater.lnk";
+    if (!CreateShortcut(installPath + "\\bin\\VortexUpdater.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_updater.ico"))
     {
-      std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Updater.lnk";
-      if (!CreateShortcut(installPath + "\\bin\\VortexUpdater.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_updater.ico"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
 
+  {
+    std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Uninstall Vortex.lnk";
+    if (!CreateShortcut(installPath + "\\bin\\VortexUninstaller.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_uninstaller.ico"))
     {
-      std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Uninstall Vortex.lnk";
-      if (!CreateShortcut(installPath + "\\bin\\VortexUninstaller.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_uninstaller.ico"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
 #else
+  {
+    std::string shortcutPath = "/usr/share/applications";
+    if (!CreateShortcut("Vortex Launcher", installPath + "\\bin\\vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/ressources/imgs/icon.png"))
     {
-      std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Vortex Launcher", installPath + "\\bin\\vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/ressources/imgs/icon.png"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
+  {
+    std::string shortcutPath = "/usr/share/applications";
+    if (!CreateShortcut("Update Vortex", installPath + "\\bin\\VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/ressources/imgs/icon_update.png"))
     {
-      std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Update Vortex", installPath + "\\bin\\VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/ressources/imgs/icon_update.png"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
+  {
+    std::string shortcutPath = "/usr/share/applications";
+    if (!CreateShortcut("Uninstall Vortex", installPath + "\\bin\\VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/ressources/imgs/icon_crash.png"))
     {
-      std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Uninstall Vortex", installPath + "\\bin\\VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/ressources/imgs/icon_crash.png"))
-      {
-        installerData.result = "fail";
-        installerData.state = "Error: Failed to create Start Menu shortcut.";
-        return false;
-      }
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to create Start Menu shortcut.";
+      return false;
     }
+  }
 
 #endif
 

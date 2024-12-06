@@ -36,6 +36,10 @@ bool CompareVersions(const std::string &version, const std::string &comparate_ve
         {
             return true;
         }
+        else if (v2[i] == v1[i])
+        {
+            return true;
+        }
         else if (v2[i] < v1[i])
         {
             return false;

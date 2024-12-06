@@ -100,9 +100,25 @@ int main(int argc, char *argv[])
     DetectArch();
 
     std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-    std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
+    // std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
 
-    RestClient::Response r = RestClient::get(url);
+    std::string url = "https://api.infinite.si";
+    RestClient::Connection *conn = new RestClient::Connection(url);
+
+    conn->SetTimeout(5);
+    conn->SetUserAgent("foo/cool");
+
+    RestClient::HeaderFields headers;
+    headers["Accept"] = "application/json";
+    conn->SetHeaders(headers);
+
+    conn->SetVerifyPeer(false);
+    conn->SetCAInfoFilePath("non-existent file");
+
+    conn->FollowRedirects(true);
+    conn->FollowRedirects(true, 3);
+
+    RestClient::Response r = conn->get("/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch);
 
     if (r.code != 200)
     {
@@ -187,7 +203,7 @@ int main(int argc, char *argv[])
         g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
         if (!g_InstallerData->g_ManifestVersion.empty())
         {
-    std::cout << "132" << std::endl;
+            std::cout << "132" << std::endl;
             g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
             std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
 
