@@ -147,6 +147,16 @@ int main(int argc, char *argv[])
         v.platform = item["platform"].get<std::string>();
         v.date = item["date"].get<std::string>();
         v.created_at = item["created_at"].get<std::string>();
+
+        if (item.contains("values"))
+        {
+            auto values = nlohmann::json::parse(item["values"].get<std::string>());
+            if (values.contains("image"))
+            {
+                v.banner = values["image"].get<std::string>();
+            }
+        }
+
         versions.push_back(v);
     }
 
