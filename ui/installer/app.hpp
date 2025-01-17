@@ -186,7 +186,7 @@ bool IsSafePath(const std::filesystem::path &path)
   return true;
 }
 
-std::string GetUncompressCommand(const std::string &tarballFile, const std::string &installPath)
+std::string GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip = 1)
 {
   std::string command;
 
@@ -212,12 +212,12 @@ std::string GetUncompressCommand(const std::string &tarballFile, const std::stri
   if (destPath.string().find(homeDir.string()) == 0)
   {
     command = "tar -xzf " + tarballFile +
-              " --strip-components=1 -C \"" + installPath + "\" dist";
+              " --strip-components="+std::to_string(strip)+" -C \"" + installPath + "\" dist";
   }
   else
   {
     command = "tar -xzf " + tarballFile +
-              " --strip-components=1 -C \"" + installPath + "\" dist";
+              " --strip-components="+std::to_string(strip)+" -C \"" + installPath + "\" dist";
   }
 #endif
 
@@ -255,7 +255,7 @@ std::string GetTopLevelDir(const std::string &tarballFile)
   return "";
 }
 
-std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath)
+std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip = 1)
 {
   std::string topLevelDir = GetTopLevelDir(tarballFile);
   if (topLevelDir.empty())
@@ -264,9 +264,9 @@ std::string GetFinalLink(const std::string &tarballFile, const std::string &inst
     return "";
   }
 
-  std::string finalPath = installPath + "/" + topLevelDir;
+  std::string finalPath = installPath;
 
-  std::string command = GetUncompressCommand(tarballFile, installPath);
+  std::string command = GetUncompressCommand(tarballFile, installPath, strip);
 
   int result = std::system(command.c_str());
 
@@ -1202,9 +1202,9 @@ bool InstallVortexVersion()
     std::string installPath;
 
 #ifdef _WIN32
-    installPath = installerData.g_DefaultInstallPath + "\\" + installerData.m_SelectedVortexVersion.name;
+    installPath = installerData.g_DefaultInstallPath + "\\" + installerData.m_SelectedVortexVersion.version;
 #else
-    installPath = installerData.g_DefaultInstallPath + "/" + installerData.m_SelectedVortexVersion.name;
+    installPath = installerData.g_DefaultInstallPath + "/" + installerData.m_SelectedVortexVersion.version;
 #endif
 
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
@@ -1260,10 +1260,8 @@ bool InstallVortexVersion()
     uncompressCommand = "cmd /C tar -xzf \"" + tarballFile +
                         "\" --strip-components=2 -C \"" + installPath + "\"";
 #else
-    finalLink = GetFinalLink(tarballFile, installPath);
+    finalLink = GetFinalLink(tarballFile, installPath, 2);
 #endif
-
-    std::cout << "CDdd : " << uncompressCommand << std::endl;
 
     if (system(uncompressCommand.c_str()) != 0)
     {
