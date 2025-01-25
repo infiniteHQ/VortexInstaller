@@ -6,8 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -fPIC")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(VORTEX_VERSION "1.1")
 set(BUNDLE_EXECUTABLE true)
+
+find_package(Vulkan REQUIRED)
+include_directories(${Vulkan_INCLUDE_DIRS})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ui/installer ui_installer_build)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/restcpp restcpp_build)
