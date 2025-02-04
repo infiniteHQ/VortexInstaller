@@ -10,7 +10,8 @@ call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 
 cd ..\build
 call cmake.exe ..\.. -G "MinGW Makefiles"
-call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
+call mingw32-make.exe -j%NUMBER_OF_PROCESSORS% 
+call mingw32-make.exe install
 
 cd ..
 mkdir build\dist

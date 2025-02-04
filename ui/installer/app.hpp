@@ -81,15 +81,6 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
 #else
 #include <unistd.h>
 
-bool IsCurlAvailable()
-{
-#ifdef _WIN32
-  return true;
-#else
-  return system("which curl >/dev/null 2>&1") == 0;
-#endif
-}
-
 std::string ReplaceSpacesWithUnderscores(const std::string &str)
 {
   std::string result = str;
@@ -150,6 +141,15 @@ bool CreateShortcut(const std::string &name, const std::string &targetPath, cons
 #else
 #define VXI_LOG(log)
 #endif
+
+bool IsCurlAvailable()
+{
+#ifdef _WIN32
+  return true;
+#else
+  return system("which curl >/dev/null 2>&1") == 0;
+#endif
+}
 
 static void CreateFolder(const std::string &path)
 {
