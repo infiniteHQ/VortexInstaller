@@ -58,7 +58,7 @@ namespace VortexInstaller
 
     void InstallAppWindow::RenderLicenseAgreement()
     {
-        static std::string file_content = ReadFile(Cherry::GetPath("ressources/license/apache2.txt"));
+        static std::string file_content = ReadFile(Cherry::GetPath("resources/license/apache2.txt"));
 
         const float button_height = 30.0f;
         const float spacing = 10.0f;
@@ -136,7 +136,7 @@ namespace VortexInstaller
             std::string label = "Download and Install from net \n(VortexLauncher " + m_Data->g_RequestVersion + ")";
             ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + button_width);
 
-            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/net.png"));
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("resources/imgs/net.png"));
 
             if (m_Data->g_UseNet)
             {
@@ -170,7 +170,7 @@ namespace VortexInstaller
                 ImGui::BeginDisabled();
             }
 
-            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("ressources/imgs/install.png"));
+            auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label, Cherry::GetPath("resources/imgs/install.png"));
 
             if (!m_Data->g_UseNet && m_Data->m_BuiltinLauncherExist)
             {
@@ -305,7 +305,7 @@ namespace VortexInstaller
     InstallAppWindow::InstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
-        m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
+        m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
         m_AppWindow->SetClosable(false);
 
         m_AppWindow->m_TabMenuCallback = []()

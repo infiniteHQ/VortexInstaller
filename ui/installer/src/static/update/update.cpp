@@ -117,7 +117,7 @@ namespace VortexInstaller
     UpdateAppWindow::UpdateAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data) : m_Data(data)
     {
         m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
-        m_AppWindow->SetIcon(Cherry::GetPath("ressources/imgs/icons/misc/icon_home.png"));
+        m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
         m_AppWindow->SetClosable(false);
 
         m_AppWindow->m_TabMenuCallback = []()

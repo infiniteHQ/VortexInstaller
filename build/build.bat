@@ -15,7 +15,7 @@ call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 cd ..
 mkdir build\dist
 
-xcopy /E /I /Y ..\ui\installer\assets\ressources .\build\bin\ressources
+xcopy /E /I /Y ..\ui\installer\assets\resources .\build\bin\resources
 xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
@@ -34,7 +34,7 @@ if exist manifest.json (
 
 call pyinstaller --noconsole --onefile --name VortexInstaller --icon=icon.png ^
     --add-data "vortex_installer.exe;." ^
-    --add-data "ressources;ressources" ^
+    --add-data "resources;resources" ^
     %BUILTIN_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -50,7 +50,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUpdater --icon=icon.png ^
     --add-data "vortex_update.exe;." ^
-    --add-data "ressources;ressources" ^
+    --add-data "resources;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -65,7 +65,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionUninstaller --icon=icon.png ^
     --add-data "vxuninstall.exe;." ^
-    --add-data "ressources;ressources" ^
+    --add-data "resources;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -80,7 +80,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUninstaller --icon=icon.png ^
     --add-data "vortex_uninstall.exe;." ^
-    --add-data "ressources;ressources" ^
+    --add-data "resources;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -95,7 +95,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionInstaller --icon=icon.png ^
     --add-data "vxinstaller.exe;." ^
-    --add-data "ressources;ressources" ^
+    --add-data "resources;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py

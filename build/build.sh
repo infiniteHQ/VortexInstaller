@@ -14,7 +14,7 @@ cd ..
 
 mkdir build/dist
 
-cp -r ../ui/installer/assets/ressources ./build/bin/ressources
+cp -r ../ui/installer/assets/resources ./build/bin/resources
 cp -r ../ui/installer/assets/builtin ./build/bin/builtin
 cp ../misc/linux/installer/icon.png ./build/bin/
 cp ../misc/linux/installer/main.py ./build/bin/
@@ -33,7 +33,7 @@ fi
 
 pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-data "vortex_installer:." \
-    --add-data "ressources:ressources" \
+    --add-data "resources:resources" \
     $BUILTIN_FLAG \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
@@ -51,7 +51,7 @@ cd build/bin
 
 pyinstaller --onefile --name VortexUpdater --icon=icon.png \
     --add-data "vortex_update:." \
-    --add-data "ressources:ressources" \
+    --add-data "resources:resources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
@@ -66,7 +66,7 @@ cd build/bin
 
 pyinstaller --onefile --name VersionUninstaller --icon=icon.png \
     --add-data "vxuninstall:." \
-    --add-data "ressources:ressources" \
+    --add-data "resources:resources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
@@ -82,7 +82,7 @@ cd build/bin
 
 pyinstaller --onefile --name VortexUninstaller --icon=icon.png \
     --add-data "vortex_uninstaller:." \
-    --add-data "ressources:ressources" \
+    --add-data "resources:resources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
@@ -98,7 +98,7 @@ cd build/bin
 
 pyinstaller --onefile --name VersionInstaller --icon=icon.png \
     --add-data "vxinstaller:." \
-    --add-data "ressources:ressources" \
+    --add-data "resources:resources" \
     --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
     --add-binary "../restcpp_build/librestclient-cpp.so:." \
     --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
