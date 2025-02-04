@@ -1134,7 +1134,7 @@ if (!std::filesystem::exists(tarballFile)) {
 #else
     {
       std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Vortex Launcher", installPath + "\\bin\\vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/ressources/imgs/icon.png"))
+      if (!CreateShortcut("Vortex Launcher", installPath + "/bin/vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/ressources/imgs/icon.png"))
       {
         installerData.result = "fail";
         installerData.state = "Error: Failed to create Start Menu shortcut.";
@@ -1143,7 +1143,7 @@ if (!std::filesystem::exists(tarballFile)) {
     }
     {
       std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Update Vortex", installPath + "\\bin\\VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/ressources/imgs/icon_update.png"))
+      if (!CreateShortcut("Update Vortex", installPath + "/bin/VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/ressources/imgs/icon_update.png"))
       {
         installerData.result = "fail";
         installerData.state = "Error: Failed to create Start Menu shortcut.";
@@ -1152,7 +1152,7 @@ if (!std::filesystem::exists(tarballFile)) {
     }
     {
       std::string shortcutPath = "/usr/share/applications";
-      if (!CreateShortcut("Uninstall Vortex", installPath + "\\bin\\VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/ressources/imgs/icon_crash.png"))
+      if (!CreateShortcut("Uninstall Vortex", installPath + "/bin/VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/ressources/imgs/icon_crash.png"))
       {
         installerData.result = "fail";
         installerData.state = "Error: Failed to create Start Menu shortcut.";
