@@ -43,9 +43,8 @@ int main(int argc, char *argv[])
     g_InstallerData = std::make_shared<VortexInstallerData>();
     g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
 
-            g_InstallerData->g_Action = "uninstall";
+    g_InstallerData->g_Action = "uninstall";
     parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
-
 
     if (g_InstallerData->g_WorkingPath.empty())
     {
