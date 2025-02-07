@@ -35,9 +35,6 @@ pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-data "vortex_installer:." \
     --add-data "resources:resources" \
     $BUILTIN_FLAG \
-    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
-    --add-binary "../restcpp_build/librestclient-cpp.so:." \
-    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
 rm VortexInstaller.spec
@@ -52,9 +49,6 @@ cd build/bin
 pyinstaller --onefile --name VortexUpdater --icon=icon.png \
     --add-data "vortex_update:." \
     --add-data "resources:resources" \
-    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
-    --add-binary "../restcpp_build/librestclient-cpp.so:." \
-    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
 rm icon.png main.py org.vortex.updater.policy
@@ -67,9 +61,6 @@ cd build/bin
 pyinstaller --onefile --name VersionUninstaller --icon=icon.png \
     --add-data "vxuninstall:." \
     --add-data "resources:resources" \
-    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
-    --add-binary "../restcpp_build/librestclient-cpp.so:." \
-    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
 rm icon.png main.py
@@ -83,9 +74,6 @@ cd build/bin
 pyinstaller --onefile --name VortexUninstaller --icon=icon.png \
     --add-data "vortex_uninstaller:." \
     --add-data "resources:resources" \
-    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
-    --add-binary "../restcpp_build/librestclient-cpp.so:." \
-    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
 rm icon.png main.py
@@ -99,9 +87,6 @@ cd build/bin
 pyinstaller --onefile --name VersionInstaller --icon=icon.png \
     --add-data "vxinstaller:." \
     --add-data "resources:resources" \
-    --add-binary "../ui_installer_build/cherry_build/lib/glm/glm/libglm_shared.so:." \
-    --add-binary "../restcpp_build/librestclient-cpp.so:." \
-    --add-binary "../ui_installer_build/cherry_build/lib/spdlog/libspdlog.so:." \
     main.py
 
 rm icon.png main.py
