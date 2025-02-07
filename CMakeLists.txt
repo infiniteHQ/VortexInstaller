@@ -12,7 +12,9 @@ find_package(Vulkan REQUIRED)
 include_directories(${Vulkan_INCLUDE_DIRS})
 
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ui/installer ui_installer_build)
+if (NOT TARGET restclient-cpp)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/lib/restcpp restcpp_build)
+endif()
 
 add_executable(vortex_installer src/installer.cpp)
 target_link_libraries(vortex_installer PUBLIC installer restclient-cpp spdlog cherry)
