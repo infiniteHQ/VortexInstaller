@@ -6,35 +6,38 @@
 namespace VortexInstaller {
 
   void UpdateAppWindow::RenderUpdateVortex() {
+    CherryKit::Space(20.0f);
     if (!m_Data->g_VortexLauncherOutdated) {
-      Cherry::SetNextComponentProperty("color_text", "#AAAAAAFF");
-      CherryKit::TitleThree("Vortex is updated !");
+      Cherry::SetNextComponentProperty("color_text", "#FFFFFF");
+      CherryKit::TitleOne("Vortex is updated !");
       // Cherry::TitleThreeColored("Vortex est a jour !", "#AAAAAAFF");
     } else {
-      Cherry::SetNextComponentProperty("color_text", "#AAAAAAFF");
-      CherryKit::TitleThree("An update is available !");
+      Cherry::SetNextComponentProperty("color_text", "#B1FF31");
+      CherryKit::TitleOne("An update is available !");
       // Cherry::TitleThreeColored("Une mise a jour est disponible", "#AAAAAAFF");
     }
 
     {
-      std::string label =
-          "Latest version for " + m_Data->g_Distribution + " distribution : \"" + m_Data->g_RequestVersion + "\"";
-      ImGui::Text(label.c_str());
+      std::string label = m_Data->g_RequestVersion + " is available !";
+
+      CherryKit::TitleFour(label);
+      Cherry::SetNextComponentProperty("color_text", "#787878");
+      CherryKit::TextSimple(m_Data->g_Distribution);
     }
-    {
+    /*{
       std::string label = "Current version : " + m_Data->g_ManifestVersion;
       ImGui::Text(label.c_str());
-    }
+    }*/
 
-    std::string label = "Update to \n(Vortex Launcher \"" + m_Data->g_RequestVersion + "\")";
+    std::string label = "Update now !";
     ImVec2 to_remove = ImGui::CalcTextSize(label.c_str());
 
     if (m_Data->g_VortexLauncherOutdated) {
       ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
       /*{
         auto accept = std::make_shared<Cherry::CustomButtonSimple>(label.c_str(), label.c_str());
-        accept->SetProperty("bg", "#B1FF31FF");
-        accept->SetProperty("bg_hovered", "#C3FF53FF");
+        accept->SetProperty("color_bg", "#B1FF31FF");
+        accept->SetProperty("color_bg_hovered", "#C3FF53FF");
         ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
         if (accept->Render("__confirm")) {
           m_SelectedChildName = "Update";
@@ -50,8 +53,8 @@ namespace VortexInstaller {
         ImGui::PopStyleColor();
       }*/
 
-      Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-      Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
       if (CherryKit::ButtonText(label)->GetData("isClicked") == "true") {
         m_SelectedChildName = "Update";
@@ -68,8 +71,8 @@ namespace VortexInstaller {
       ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
       /*{
         auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Close");
-        accept->SetProperty("bg", "#B1FF31FF");
-        accept->SetProperty("bg_hovered", "#C3FF53FF");
+        accept->SetProperty("color_bg", "#B1FF31FF");
+        accept->SetProperty("color_bg_hovered", "#C3FF53FF");
         ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
         if (accept->Render("__confirm")) {
           Cherry::Application::Get().Close();
@@ -77,8 +80,8 @@ namespace VortexInstaller {
         ImGui::PopStyleColor();
       }*/
 
-      Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-      Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
       if (CherryKit::ButtonText("Confirm")->GetData("isClicked") == "true") {
         Cherry::Application::Get().Close();
@@ -106,22 +109,22 @@ namespace VortexInstaller {
     ImGui::Text(m_Data->state.c_str());
     ImGui::PopStyleColor();
 
-    if (m_Data->state_n == 5) {
+    if (m_Data->finished) {
       ImVec2 buttonSize = ImGui::CalcTextSize("Finish");
 
       ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
 
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
-      accept->SetProperty("bg", "#B1FF31FF");
-      accept->SetProperty("bg_hovered", "#C3FF53FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
+      accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__finish")) {
         Cherry::Application().Get().Close();
       }
       ImGui::PopStyleColor();*/
 
-      Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-      Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
       if (CherryKit::ButtonText("Finish")->GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
@@ -229,8 +232,12 @@ namespace VortexInstaller {
     ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
 
     Space(25.0f);
-    Cherry::SetNextComponentProperty("color_text", "#B1FF31FF");
+
+    Cherry::SetNextComponentProperty("color_text", "#B1FF31");
+    Cherry::PushFont("ClashBold");
     CherryKit::TitleThree("Vortex Updater");
+    Cherry::PopFont();
+
     // Cherry::TitleThreeColored("Vortex Updater", "#B1FF31FF");
     Space(10.0f);
 

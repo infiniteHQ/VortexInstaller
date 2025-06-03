@@ -1,50 +1,49 @@
 #pragma once
 #define CHERRY_V1
-#include "../../lib/cherry/cherry.hpp"
-
-#include "src/static/install/install.hpp"
-#include "src/static/update/update.hpp"
-#include "src/static/uninstall/uninstall.hpp"
-#include "src/static/install_vx/install_vx.hpp"
-#include "src/static/uninstall_vx/uninstall_vx.hpp"
-
-#include "../../lib/restcpp/include/restclient-cpp/restclient.h"
-#include "../../lib/restcpp/include/restclient-cpp/connection.h"
-#include "../../src/base.hpp"
-
-#include <thread>
-#include <memory>
-
 #include <cstdlib>
 #include <filesystem>
+#include <memory>
+#include <thread>
+
+#include "../../lib/cherry/cherry.hpp"
+#include "../../lib/restcpp/include/restclient-cpp/connection.h"
+#include "../../lib/restcpp/include/restclient-cpp/restclient.h"
+#include "../../src/base.hpp"
+#include "src/static/install/install.hpp"
+#include "src/static/install_vx/install_vx.hpp"
+#include "src/static/uninstall/uninstall.hpp"
+#include "src/static/uninstall_vx/uninstall_vx.hpp"
+#include "src/static/update/update.hpp"
 #ifdef _WIN32
-#include <windows.h>
 #include <fileapi.h>
 #include <urlmon.h>
+#include <windows.h>
 #pragma comment(lib, "urlmon.lib")
 
-#include <shobjidl.h> // Pour IShellLink
-#include <objbase.h>  // Pour CoInitialize et CoUninitialize
-#include <shlguid.h>  // Pour CLSID_ShellLink et IID_IShellLink
-#include <string>
+#include <objbase.h>   // Pour CoInitialize et CoUninitialize
+#include <shlguid.h>   // Pour CLSID_ShellLink et IID_IShellLink
+#include <shobjidl.h>  // Pour IShellLink
+#include <shobjidl.h>  // Pour IShellLinkW et autres APIs
+
 #include <iostream>
+#include <string>
 
-#include <shobjidl.h> // Pour IShellLinkW et autres APIs
-
-bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath, int iconIndex = 0)
-{
+bool CreateShortcut(
+    const std::string &targetPath,
+    const std::string &shortcutPath,
+    const std::string &description,
+    const std::string &iconPath,
+    int iconIndex = 0) {
   HRESULT hres;
   IShellLinkW *pShellLink = nullptr;
 
   hres = CoInitialize(NULL);
-  if (FAILED(hres))
-  {
+  if (FAILED(hres)) {
     return false;
   }
 
   hres = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void **)&pShellLink);
-  if (SUCCEEDED(hres))
-  {
+  if (SUCCEEDED(hres)) {
     IPersistFile *pPersistFile = nullptr;
 
     wchar_t wszTargetPath[MAX_PATH];
@@ -56,16 +55,14 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
     MultiByteToWideChar(CP_ACP, 0, description.c_str(), -1, wszDescription, MAX_PATH);
     pShellLink->SetDescription(wszDescription);
 
-    if (!iconPath.empty())
-    {
+    if (!iconPath.empty()) {
       wchar_t wszIconPath[MAX_PATH];
       MultiByteToWideChar(CP_ACP, 0, iconPath.c_str(), -1, wszIconPath, MAX_PATH);
       pShellLink->SetIconLocation(wszIconPath, iconIndex);
     }
 
     hres = pShellLink->QueryInterface(IID_IPersistFile, (void **)&pPersistFile);
-    if (SUCCEEDED(hres))
-    {
+    if (SUCCEEDED(hres)) {
       wchar_t wsz[MAX_PATH];
       MultiByteToWideChar(CP_ACP, 0, shortcutPath.c_str(), -1, wsz, MAX_PATH);
 
@@ -81,22 +78,23 @@ bool CreateShortcut(const std::string &targetPath, const std::string &shortcutPa
 #else
 #include <unistd.h>
 
-std::string ReplaceSpacesWithUnderscores(const std::string &str)
-{
+std::string ReplaceSpacesWithUnderscores(const std::string &str) {
   std::string result = str;
   std::replace(result.begin(), result.end(), ' ', '_');
   return result;
 }
 
-bool CreateShortcut(const std::string &name, const std::string &targetPath, const std::string &shortcutPath, const std::string &description, const std::string &iconPath)
-{
+bool CreateShortcut(
+    const std::string &name,
+    const std::string &targetPath,
+    const std::string &shortcutPath,
+    const std::string &description,
+    const std::string &iconPath) {
   std::string fileName = ReplaceSpacesWithUnderscores(name) + ".desktop";
   std::string desktopFilePath = shortcutPath + "/" + fileName;
 
-  if (std::filesystem::exists(desktopFilePath))
-  {
-    if (!std::filesystem::remove(desktopFilePath))
-    {
+  if (std::filesystem::exists(desktopFilePath)) {
+    if (!std::filesystem::remove(desktopFilePath)) {
       std::cerr << "Error while deleting the old shorcut." << std::endl;
       return false;
     }
@@ -106,18 +104,20 @@ bool CreateShortcut(const std::string &name, const std::string &targetPath, cons
   std::string content =
       "[Desktop Entry]\n"
       "Name=" +
-      name + "\n"
-             "Exec=" +
-      targetPath + "\n"
-                   "Icon=" +
-      iconPath + "\n"
-                 "Terminal=false\n"
-                 "Type=Application\n"
-                 "Categories=Utility;Development;\n";
+      name +
+      "\n"
+      "Exec=" +
+      targetPath +
+      "\n"
+      "Icon=" +
+      iconPath +
+      "\n"
+      "Terminal=false\n"
+      "Type=Application\n"
+      "Categories=Utility;Development;\n";
 
   std::ofstream desktopFile(desktopFilePath);
-  if (!desktopFile)
-  {
+  if (!desktopFile) {
     std::cerr << "Error while deleting : " << desktopFilePath << std::endl;
     return false;
   }
@@ -126,8 +126,7 @@ bool CreateShortcut(const std::string &name, const std::string &targetPath, cons
   desktopFile.close();
 
   std::string chmodCommand = "chmod +x " + desktopFilePath;
-  if (std::system(chmodCommand.c_str()) != 0)
-  {
+  if (std::system(chmodCommand.c_str()) != 0) {
     return false;
   }
 
@@ -142,8 +141,7 @@ bool CreateShortcut(const std::string &name, const std::string &targetPath, cons
 #define VXI_LOG(log)
 #endif
 
-bool IsCurlAvailable()
-{
+bool IsCurlAvailable() {
 #ifdef _WIN32
   return true;
 #else
@@ -151,22 +149,15 @@ bool IsCurlAvailable()
 #endif
 }
 
-static void CreateFolder(const std::string &path)
-{
-  if (!std::filesystem::exists(path))
-  {
-    try
-    {
+static void CreateFolder(const std::string &path) {
+  if (!std::filesystem::exists(path)) {
+    try {
       std::string cmd = "mkdir " + path;
       system(cmd.c_str());
-    }
-    catch (const std::exception &ex)
-    {
+    } catch (const std::exception &ex) {
       std::cout << "Failed to create the folder : " << ex.what() << std::endl;
     }
-  }
-  else
-  {
+  } else {
     std::cout << "Path already exist : " << path << std::endl;
   }
 }
@@ -182,18 +173,13 @@ static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 
 using namespace VortexInstaller;
 
-bool IsSafePath(const std::filesystem::path &path)
-{
-  const std::vector<std::filesystem::path> dangerous_paths = {
-      "/", "/bin", "/boot", "/dev", "/etc", "/lib", "/lib64", "/opt", "/proc",
-      "/root", "/sbin", "/sys", "/usr", "/var"};
+bool IsSafePath(const std::filesystem::path &path) {
+  const std::vector<std::filesystem::path> dangerous_paths = { "/",    "/bin",  "/boot", "/dev",  "/etc", "/lib", "/lib64",
+                                                               "/opt", "/proc", "/root", "/sbin", "/sys", "/usr", "/var" };
 
-  for (const auto &dangerous_path : dangerous_paths)
-  {
-    if (std::filesystem::exists(path) && std::filesystem::exists(dangerous_path))
-    {
-      if (std::filesystem::equivalent(path, dangerous_path))
-      {
+  for (const auto &dangerous_path : dangerous_paths) {
+    if (std::filesystem::exists(path) && std::filesystem::exists(dangerous_path)) {
+      if (std::filesystem::equivalent(path, dangerous_path)) {
         std::cerr << "Cannot delete this path : " << path << std::endl;
         return false;
       }
@@ -203,53 +189,45 @@ bool IsSafePath(const std::filesystem::path &path)
   return true;
 }
 
-std::string GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip = 1)
-{
+std::string GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip = 1) {
   std::string command;
 
 #ifdef _WIN32
-  command = "cmd /C \"rd /s /q \"" + installPath + "\" && tar -xzf \"" + tarballFile +
-            "\" --strip-components=1 -C \"" + installPath + "\" dist\\\"";
+  command = "cmd /C \"rd /s /q \"" + installPath + "\" && tar -xzf \"" + tarballFile + "\" --strip-components=1 -C \"" +
+            installPath + "\" dist\\\"";
 #else
   std::filesystem::path homeDir = std::getenv("HOME");
   std::filesystem::path destPath = installPath;
 
-  if (!std::filesystem::exists(destPath))
-  {
+  if (!std::filesystem::exists(destPath)) {
     std::cerr << "Path does not exist: " << installPath << std::endl;
     return "";
   }
 
-  if (!IsSafePath(destPath))
-  {
+  if (!IsSafePath(destPath)) {
     std::cerr << "Cannot delete this path: " << installPath << std::endl;
     return "";
   }
 
-  if (destPath.string().find(homeDir.string()) == 0)
-  {
-    command = "tar -xzf " + tarballFile +
-              " --strip-components=" + std::to_string(strip) + " -C \"" + installPath + "\" dist";
-  }
-  else
-  {
-    command = "tar -xzf " + tarballFile +
-              " --strip-components=" + std::to_string(strip) + " -C \"" + installPath + "\" dist";
+  if (destPath.string().find(homeDir.string()) == 0) {
+    command =
+        "tar -xzf " + tarballFile + " --strip-components=" + std::to_string(strip) + " -C \"" + installPath + "\" dist";
+  } else {
+    command =
+        "tar -xzf " + tarballFile + " --strip-components=" + std::to_string(strip) + " -C \"" + installPath + "\" dist";
   }
 #endif
 
   return command;
 }
 
-std::string GetTopLevelDir(const std::string &tarballFile)
-{
+std::string GetTopLevelDir(const std::string &tarballFile) {
   std::string command = "tar -tzf " + tarballFile;
   std::array<char, 128> buffer;
   std::string line;
 
   FILE *pipe = popen(command.c_str(), "r");
-  if (!pipe)
-  {
+  if (!pipe) {
     std::cerr << "Failed to open pipe for command." << std::endl;
     return "";
   }
@@ -257,11 +235,9 @@ std::string GetTopLevelDir(const std::string &tarballFile)
   std::regex distDirPattern(R"(^dist/([^/]+)/)");
   std::smatch match;
 
-  while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
-  {
+  while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
     line = buffer.data();
-    if (std::regex_search(line, match, distDirPattern))
-    {
+    if (std::regex_search(line, match, distDirPattern)) {
       pclose(pipe);
       return match.str(1);
     }
@@ -272,11 +248,9 @@ std::string GetTopLevelDir(const std::string &tarballFile)
   return "";
 }
 
-std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip = 1)
-{
+std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip = 1) {
   std::string topLevelDir = GetTopLevelDir(tarballFile);
-  if (topLevelDir.empty())
-  {
+  if (topLevelDir.empty()) {
     std::cerr << "Failed to find top-level directory in tarball." << std::endl;
     return "";
   }
@@ -287,63 +261,47 @@ std::string GetFinalLink(const std::string &tarballFile, const std::string &inst
 
   int result = std::system(command.c_str());
 
-  if (result != 0)
-  {
+  if (result != 0) {
     std::cerr << "Failed to uncompress tarball." << std::endl;
     return "";
   }
 
-  if (std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath))
-  {
+  if (std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath)) {
     std::cout << "Successfully uncompressed to: " << finalPath << std::endl;
     return finalPath;
-  }
-  else
-  {
+  } else {
     std::cerr << "Uncompression failed or destination path does not exist." << std::endl;
     return "";
   }
 }
 
-class Layer : public Cherry::Layer
-{
-public:
-  Layer() {};
+class Layer : public Cherry::Layer {
+ public:
+  Layer() { };
 };
 
-class Launcher
-{
-public:
-  Launcher(const std::shared_ptr<VortexInstallerData> &data) : installer_data(data)
-  {
-    if (installer_data->g_Action == "install")
-    {
+class Launcher {
+ public:
+  Launcher(const std::shared_ptr<VortexInstallerData> &data) : installer_data(data) {
+    if (installer_data->g_Action == "install") {
       install_window = InstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(install_window->GetAppWindow());
-    }
-    else if (installer_data->g_Action == "vxinstall")
-    {
+    } else if (installer_data->g_Action == "vxinstall") {
       installer_vx = VortexInstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(installer_vx->GetAppWindow());
-    }
-    else if (installer_data->g_Action == "vxuninstall")
-    {
+    } else if (installer_data->g_Action == "vxuninstall") {
       uninstaller_vx = VortexUninstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(uninstaller_vx->GetAppWindow());
-    }
-    else if (installer_data->g_Action == "update")
-    {
+    } else if (installer_data->g_Action == "update") {
       update_window = UpdateAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(update_window->GetAppWindow());
-    }
-    else if (installer_data->g_Action == "uninstall")
-    {
+    } else if (installer_data->g_Action == "uninstall") {
       uninstall_window = UninstallAppWindow::Create("?loc:loc.window_names.welcome", installer_data);
       Cherry::AddAppWindow(uninstall_window->GetAppWindow());
     }
   };
 
-private:
+ private:
   std::shared_ptr<InstallAppWindow> install_window;
   std::shared_ptr<UpdateAppWindow> update_window;
   std::shared_ptr<UninstallAppWindow> uninstall_window;
@@ -354,8 +312,7 @@ private:
 
 static std::shared_ptr<Launcher> c_Launcher;
 
-void DetectPlatform()
-{
+void DetectPlatform() {
 #if defined(_WIN32) || defined(_WIN64)
   g_InstallerData->g_Platform = "windows";
   g_InstallerData->g_DefaultInstallPath = "C:/Program Files/VortexLauncher";
@@ -369,7 +326,7 @@ void DetectPlatform()
 #elif defined(__linux__)
   g_InstallerData->g_Platform = "linux";
   g_InstallerData->g_DefaultInstallPath = "/opt/VortexLauncher";
-  g_InstallerData->g_VortexPath = "/opt/Vortex"; // TODO : Pools
+  g_InstallerData->g_VortexPath = "/opt/Vortex";  // TODO : Pools
   g_InstallerData->g_VortexDataPath = g_InstallerData->g_HomeDirectory + "/.vx";
 #elif defined(__FreeBSD__)
   g_InstallerData->g_Platform = "freebsd";
@@ -384,8 +341,7 @@ void DetectPlatform()
 #endif
 }
 
-void DetectArch()
-{
+void DetectArch() {
 #if defined(__x86_64__) || defined(_M_X64)
   g_InstallerData->g_Arch = "x86_64";
 #elif defined(__i386__) || defined(_M_IX86)
@@ -403,13 +359,11 @@ void DetectArch()
 #endif
 }
 
-bool FileExists(const std::string &path)
-{
+bool FileExists(const std::string &path) {
   return std::filesystem::exists(path);
 }
 
-std::string NormalizePath(const std::string &path)
-{
+std::string NormalizePath(const std::string &path) {
 #ifdef _WIN32
   std::string normalizedPath = path;
   std::replace(normalizedPath.begin(), normalizedPath.end(), '/', '\\');
@@ -421,13 +375,11 @@ std::string NormalizePath(const std::string &path)
 #endif
 }
 
-bool DownloadFile(const std::string &url, const std::string &outputPath)
-{
+bool DownloadFile(const std::string &url, const std::string &outputPath) {
   std::string normalizedOutputPath = NormalizePath(outputPath);
 #ifdef _WIN32
   HRESULT hr = URLDownloadToFileA(NULL, url.c_str(), normalizedOutputPath.c_str(), 0, NULL);
-  if (hr != S_OK)
-  {
+  if (hr != S_OK) {
     std::cerr << "Error downloading: " << url << std::endl;
   }
   return hr == S_OK;
@@ -437,13 +389,9 @@ bool DownloadFile(const std::string &url, const std::string &outputPath)
 #endif
 }
 
-void CleanUpTemporaryDirectory(const std::string &tempDir)
-{
-  if (std::filesystem::exists(tempDir))
-  {
-
-    if (!IsSafePath(tempDir))
-    {
+void CleanUpTemporaryDirectory(const std::string &tempDir) {
+  if (std::filesystem::exists(tempDir)) {
+    if (!IsSafePath(tempDir)) {
       std::cerr << "Cannot delete this path: " << tempDir << std::endl;
       return;
     }
@@ -453,76 +401,56 @@ void CleanUpTemporaryDirectory(const std::string &tempDir)
   }
 }
 
-std::string getManifestVersion(const std::string &manifestPath)
-{
+std::string getManifestVersion(const std::string &manifestPath) {
   std::ifstream manifestFile(manifestPath);
-  if (!manifestFile.is_open())
-  {
+  if (!manifestFile.is_open()) {
     // std::cerr << "Failed to open " << manifestPath);
     return "";
   }
 
   nlohmann::json manifestJson;
-  try
-  {
+  try {
     manifestFile >> manifestJson;
-  }
-  catch (const std::exception &e)
-  {
+  } catch (const std::exception &e) {
     // std::cerr << "Failed to parse JSON: " << e.what());
     return "";
   }
 
   manifestFile.close();
 
-  if (manifestJson.contains("version") && manifestJson["version"].is_string())
-  {
+  if (manifestJson.contains("version") && manifestJson["version"].is_string()) {
     return manifestJson["version"];
-  }
-  else
-  {
+  } else {
     // std::cerr << "\"version\" field not found or not a string");
     return "";
   }
 }
-std::string RevertOldVortexLauncher(const std::string &path)
-{
+std::string RevertOldVortexLauncher(const std::string &path) {
   auto &installerData = *g_InstallerData;
   std::string installPath = path;
   std::string manifestPath = installPath + "/manifest.json";
 
-  auto endsWith = [](const std::string &str, const std::string &suffix) -> bool
-  {
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  auto endsWith = [](const std::string &str, const std::string &suffix) -> bool {
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
   };
 
   std::string newPath = "none";
 
-  if (endsWith(installPath, "VortexLauncherOld") || endsWith(installPath, "VortexLauncherOld/"))
-  {
-    if (std::filesystem::exists(manifestPath))
-    {
+  if (endsWith(installPath, "VortexLauncherOld") || endsWith(installPath, "VortexLauncherOld/")) {
+    if (std::filesystem::exists(manifestPath)) {
       VXI_LOG("manifest.json finded at : " + manifestPath);
 
       newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncher";
 
-      try
-      {
+      try {
         std::filesystem::rename(installPath, newPath);
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         // std::cerr << "Error while renaming : " << e.what());
       }
-    }
-    else
-    {
+    } else {
       // std::cerr << "Error : manifest.json not found in " << installPath);
     }
-  }
-  else
-  {
+  } else {
     // std::cerr << "Error : This directory not end with VortexLauncher or VortexLauncher/.");
   }
 
@@ -530,16 +458,13 @@ std::string RevertOldVortexLauncher(const std::string &path)
 }
 
 // 3 Steps
-std::string MakeVortexLauncherFolderOld(const std::string &path)
-{
+std::string MakeVortexLauncherFolderOld(const std::string &path) {
   auto &installerData = *g_InstallerData;
   std::string installPath = path;
   std::string manifestPath = installPath + "/manifest.json";
 
-  auto endsWith = [](const std::string &str, const std::string &suffix) -> bool
-  {
-    return str.size() >= suffix.size() &&
-           str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  auto endsWith = [](const std::string &str, const std::string &suffix) -> bool {
+    return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
   };
 
   std::string newPath = "none";
@@ -547,12 +472,8 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
   installerData.state_n++;
   installerData.state = "Checking path...";
 
-  if (endsWith(installPath, "VortexLauncher") || endsWith(installPath, "VortexLauncher/"))
-  {
-
-    if (std::filesystem::exists(manifestPath))
-    {
-
+  if (endsWith(installPath, "VortexLauncher") || endsWith(installPath, "VortexLauncher/")) {
+    if (std::filesystem::exists(manifestPath)) {
       installerData.state_n++;
       installerData.state = "Checking if path exist...";
 
@@ -560,25 +481,18 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
 
       newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncherOld";
 
-      try
-      {
+      try {
         installerData.state_n++;
         installerData.state = "Rename path to old...";
         std::filesystem::rename(installPath, newPath);
         VXI_LOG("Folder renamed to : " + newPath);
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         VXI_LOG("Error while renaming folder : " << e.what());
       }
-    }
-    else
-    {
+    } else {
       VXI_LOG("manifest.json not found " << installPath);
     }
-  }
-  else
-  {
+  } else {
     VXI_LOG("Error : This directory not end with VortexLauncher or VortexLauncher/.");
   }
 
@@ -586,45 +500,36 @@ std::string MakeVortexLauncherFolderOld(const std::string &path)
 }
 
 // 2 Check
-void DeleteOldVortexLauncher(const std::string &path)
-{
+void DeleteOldVortexLauncher(const std::string &path) {
   auto &installerData = *g_InstallerData;
   std::string installPath = path;
   std::string manifestPath = installPath + "/manifest.json";
 
   installerData.state_n++;
   installerData.state = "Check old vortex folder...";
-  if (std::filesystem::exists(manifestPath))
-  {
+  if (std::filesystem::exists(manifestPath)) {
     VXI_LOG("Found manifest.json at: " + manifestPath);
     VXI_LOG("Deleting folder: " + installPath);
-    try
-    {
+    try {
       installerData.state_n++;
       installerData.state = "Delete old vortex folder...";
       std::filesystem::remove_all(installPath);
       VXI_LOG("Successfully deleted the folder: " << installPath);
-    }
-    catch (const std::filesystem::filesystem_error &e)
-    {
+    } catch (const std::filesystem::filesystem_error &e) {
       VXI_LOG("Error deleting the folder: " << e.what());
     }
-  }
-  else
-  {
+  } else {
     VXI_LOG("Error: manifest.json not found in " << installPath);
   }
 }
 
-void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vxdatas)
-{
+void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vxdatas) {
   auto &installerData = *g_InstallerData;
   bool failed = false;
 
   DetectPlatform();
 
-  auto isValidPath = [](const std::string &path) -> bool
-  {
+  auto isValidPath = [](const std::string &path) -> bool {
 #ifdef _WIN32
     return !path.empty() && path != "\\" && std::filesystem::exists(path);
 #else
@@ -632,8 +537,7 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
 #endif
   };
 
-  if (vxlauncher)
-  {
+  if (vxlauncher) {
     std::string installPath = installerData.g_WorkingPath;
     std::string manifestPath;
 
@@ -645,17 +549,14 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
 
     installerData.state_n++;
     installerData.state = "Vérification du Vortex Launcher...";
-    if (std::filesystem::exists(manifestPath))
-    {
+    if (std::filesystem::exists(manifestPath)) {
       VXI_LOG("Fichier manifest.json finded at : " << manifestPath);
       VXI_LOG("Deleting folder : " << installPath);
 
       installerData.state_n++;
       installerData.state = "Deleting Vortex Launcher...";
-      try
-      {
-        if (isValidPath(installPath))
-        {
+      try {
+        if (isValidPath(installPath)) {
 #if defined(_WIN32) || defined(_WIN64)
           std::string command = "rmdir /S /Q \"" + installPath + "\"";
 #else
@@ -663,59 +564,43 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
 #endif
           int result = std::system(command.c_str());
 
-          if (result == 0)
-          {
+          if (result == 0) {
             std::cout << "Folder deleted: " << installPath << std::endl;
-          }
-          else
-          {
+          } else {
             throw std::runtime_error("Failed to delete folder using command: " + command);
           }
-        }
-        else
-        {
+        } else {
           throw std::filesystem::filesystem_error("Bad directory", std::error_code());
         }
-      }
-      catch (const std::exception &e)
-      {
+      } catch (const std::exception &e) {
         std::cerr << "ZE: " << e.what() << std::endl;
         installerData.result = "fail";
         failed = true;
         installerData.state = "Error while deleting the Vortex Launcher folder";
       }
-    }
-    else
-    {
+    } else {
       installerData.result = "fail";
       failed = true;
       installerData.state = "Error: Path to Vortex Launcher invalid !";
     }
   }
 
-  if (vx)
-  {
+  if (vx) {
     std::string installPath = installerData.g_VortexPath;
     installerData.state_n++;
     installerData.state = "Deleting Vortex...";
 
-    if (isValidPath(installPath))
-    {
-      try
-      {
+    if (isValidPath(installPath)) {
+      try {
         std::filesystem::remove_all(installPath);
         VXI_LOG("Deleted with success :  " << installPath);
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         // std::cerr << "Error while deleting Vortex Launcher folder : " << e.what());
         installerData.result = "fail";
         failed = true;
         installerData.state = "Failed while deleting the Vortex Launcher folder !";
       }
-    }
-    else
-    {
+    } else {
       // std::cerr << "Vortex Launcher not found at path : " << installPath);
       installerData.result = "fail";
       failed = true;
@@ -723,51 +608,41 @@ void DeleteVortexLauncher(const bool &vxlauncher, const bool &vx, const bool &vx
     }
   }
 
-  if (vxdatas)
-  {
+  if (vxdatas) {
     std::string installPath = installerData.g_VortexDataPath;
     installerData.state_n++;
     installerData.state = "Deleting Vortex datas...";
 
-    if (isValidPath(installPath))
-    {
-      try
-      {
+    if (isValidPath(installPath)) {
+      try {
         std::filesystem::remove_all(installPath);
         VXI_LOG("Deleted with success :  " << installPath);
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         installerData.result = "fail";
         failed = true;
         installerData.state = "Failed while deleting Vortex datas !";
       }
-    }
-    else
-    {
+    } else {
       installerData.result = "fail";
       failed = true;
       installerData.state = "Path to Vortex datas is invalid";
     }
   }
 
-  if (!failed)
-  {
+  if (!failed) {
     installerData.state_n++;
     installerData.state = "Deleted succefully !";
     installerData.result = "success";
   }
 }
 
-void DeleteVortexVersion()
-{
+void DeleteVortexVersion() {
   auto &installerData = *g_InstallerData;
   bool failed = false;
 
   DetectPlatform();
 
-  auto isValidPath = [](const std::string &path) -> bool
-  {
+  auto isValidPath = [](const std::string &path) -> bool {
     return !path.empty() && path != "/" && std::filesystem::exists(path);
   };
 
@@ -777,58 +652,42 @@ void DeleteVortexVersion()
 
   installerData.state_n++;
   installerData.state = "Verify Vortex Launcher...";
-  if (std::filesystem::exists(manifestPath))
-  {
+  if (std::filesystem::exists(manifestPath)) {
     installerData.state_n++;
     installerData.state = "Deleting Vortex Launcher...";
-    try
-    {
-      if (isValidPath(installPath))
-      {
+    try {
+      if (isValidPath(installPath)) {
         VXI_LOG("Folder deletion attempt: " << installPath);
 
-        if (IsSafePath(installPath))
-        {
-          try
-          {
+        if (IsSafePath(installPath)) {
+          try {
             // Use std::filesystem for cross-platform folder deletion
             std::filesystem::remove_all(installPath);
             VXI_LOG("Folder deleted successfully: " << installPath);
-          }
-          catch (const std::filesystem::filesystem_error &e)
-          {
+          } catch (const std::filesystem::filesystem_error &e) {
             installerData.result = "fail";
             failed = true;
             installerData.state = "Error while deleting the folder: " + std::string(e.what());
             VXI_LOG("Error: " << e.what());
           }
-        }
-        else
-        {
+        } else {
           VXI_LOG("Unsafe path detected, skipping deletion: " << path);
         }
-      }
-      else
-      {
+      } else {
         throw std::filesystem::filesystem_error("Invalid path", std::error_code());
       }
-    }
-    catch (const std::filesystem::filesystem_error &e)
-    {
+    } catch (const std::filesystem::filesystem_error &e) {
       installerData.result = "fail";
       failed = true;
       installerData.state = "Error while deleting the Vortex Launcher folder";
     }
-  }
-  else
-  {
+  } else {
     installerData.result = "fail";
     failed = true;
     installerData.state = "Error: Path to Vortex Launcher invalid !";
   }
 
-  if (!failed)
-  {
+  if (!failed) {
     installerData.state_n++;
     installerData.state = "Deleted succefully !";
     installerData.result = "success";
@@ -836,8 +695,7 @@ void DeleteVortexVersion()
 }
 
 // 5 Steps
-bool InstallVortexLauncher()
-{
+bool InstallVortexLauncher() {
   auto &installerData = *g_InstallerData;
 
   // installerData.state_n++;
@@ -853,8 +711,7 @@ bool InstallVortexLauncher()
 
   std::cout << "FQ" << std::endl;
 
-  if (installerData.g_UseNet)
-  {
+  if (installerData.g_UseNet) {
     installerData.state_n++;
     installerData.state = "Downloading files...";
 
@@ -865,14 +722,12 @@ bool InstallVortexLauncher()
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
 
-    if (!IsCurlAvailable())
-    {
+    if (!IsCurlAvailable()) {
       std::cerr << "Error: curl is not installed on this system." << std::endl;
       return false;
     }
 
-    if (!DownloadFile(dlpath, NormalizePath(tarballFile)) || !DownloadFile(sumpath, NormalizePath(sumFile)))
-    {
+    if (!DownloadFile(dlpath, NormalizePath(tarballFile)) || !DownloadFile(sumpath, NormalizePath(sumFile))) {
       std::cerr << "Error: Failed to download files." << std::endl;
       return false;
     }
@@ -888,8 +743,7 @@ bool InstallVortexLauncher()
 #else
     checkSumCommand = "sha256sum -c " + sumFile;
 #endif
-    if (system(checkSumCommand.c_str()) != 0)
-    {
+    if (system(checkSumCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Integrity check failed.";
       return false;
@@ -899,21 +753,16 @@ bool InstallVortexLauncher()
     installerData.state = "Ensure clean install path...";
     std::filesystem::path path(installPath);
 
-    if (std::filesystem::exists(path))
-    {
-      if (!IsSafePath(path))
-      {
+    if (std::filesystem::exists(path)) {
+      if (!IsSafePath(path)) {
         std::cerr << "Cannot delete this safe path : " << installPath << std::endl;
         return false;
       }
 
-      try
-      {
+      try {
         std::filesystem::remove_all(path);
         std::cout << "Folder deleted : " << installPath << std::endl;
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error deleting folder: " << e.what() << std::endl;
         installerData.result = "fail";
         installerData.state = "Error: Failed to prepare installation folder.";
@@ -921,13 +770,10 @@ bool InstallVortexLauncher()
       }
     }
 
-    try
-    {
+    try {
       std::filesystem::create_directories(path);
       std::cout << "New folder created : " << installPath << std::endl;
-    }
-    catch (const std::filesystem::filesystem_error &e)
-    {
+    } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       installerData.result = "fail";
       installerData.state = "Error: Failed to prepare installation folder.";
@@ -956,9 +802,7 @@ bool InstallVortexLauncher()
 
     std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand =
-        "cmd /C \"tar -xzf \"" + tarballFile +
-        "\" --strip-components=1 -C \"" + installPath + "\"\"";
+    uncompressCommand = "cmd /C \"tar -xzf \"" + tarballFile + "\" --strip-components=1 -C \"" + installPath + "\"\"";
 #else
     // uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
     GetFinalLink(tarballFile, installPath);
@@ -966,8 +810,7 @@ bool InstallVortexLauncher()
     std::cout << "FQ55" << std::endl;
 
     std::cout << "INSTALL PATH : " << installPath << std::endl;
-    if (system(uncompressCommand.c_str()) != 0)
-    {
+    if (system(uncompressCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to extract tarball.";
       return false;
@@ -983,8 +826,7 @@ bool InstallVortexLauncher()
     testLauncher = installPath + "/bin/vortex_launcher --test";
 #endif
     std::cout << "FQ2" << std::endl;
-    if (system(testLauncher.c_str()) != 0)
-    {
+    if (system(testLauncher.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Launcher test failed.";
       return false;
@@ -994,9 +836,7 @@ bool InstallVortexLauncher()
     installerData.state_n++;
     installerData.state = "Installation completed successfully.";
     installerData.result = "success";
-  }
-  else
-  {
+  } else {
     std::string dlpath = installerData.g_RequestTarballPath;
     std::string installPath = installerData.g_DefaultInstallPath;
 
@@ -1022,8 +862,7 @@ bool InstallVortexLauncher()
 
     std::filesystem::current_path(tempDir);
 
-    if (!std::filesystem::exists(tarballFile))
-    {
+    if (!std::filesystem::exists(tarballFile)) {
       std::cerr << "Error: Tarball file does not exist at " << tarballFile << std::endl;
       installerData.result = "fail";
       installerData.state = "Error: Missing tarball file.";
@@ -1043,8 +882,7 @@ bool InstallVortexLauncher()
 #else
     checkSumCommand = "cd " + sumPath + " && sha256sum -c " + sumFile;
 #endif
-    if (system(checkSumCommand.c_str()) != 0)
-    {
+    if (system(checkSumCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Integrity check failed.";
       return false;
@@ -1054,21 +892,16 @@ bool InstallVortexLauncher()
     installerData.state = "Ensure clean install path...";
     std::filesystem::path path(installPath);
 
-    if (std::filesystem::exists(path))
-    {
-      if (!IsSafePath(path))
-      {
+    if (std::filesystem::exists(path)) {
+      if (!IsSafePath(path)) {
         std::cerr << "Cannot delete this safe path : " << installPath << std::endl;
         return false;
       }
 
-      try
-      {
+      try {
         std::filesystem::remove_all(path);
         std::cout << "Folder deleted : " << installPath << std::endl;
-      }
-      catch (const std::filesystem::filesystem_error &e)
-      {
+      } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error deleting folder: " << e.what() << std::endl;
         installerData.result = "fail";
         installerData.state = "Error: Failed to prepare installation folder.";
@@ -1076,13 +909,10 @@ bool InstallVortexLauncher()
       }
     }
 
-    try
-    {
+    try {
       std::filesystem::create_directories(path);
       std::cout << "New folder created : " << installPath << std::endl;
-    }
-    catch (const std::filesystem::filesystem_error &e)
-    {
+    } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       installerData.result = "fail";
       installerData.state = "Error: Failed to prepare installation folder.";
@@ -1094,9 +924,7 @@ bool InstallVortexLauncher()
 
     std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand =
-        "cmd /C \"tar -xzf \"" + tarballFile +
-        "\" --strip-components=1 -C \"" + installPath + "\"\"";
+    uncompressCommand = "cmd /C \"tar -xzf \"" + tarballFile + "\" --strip-components=1 -C \"" + installPath + "\"\"";
 #else
     // uncompressCommand = "tar -xzf " + tarballFile + " --strip-components=1 -C " + installPath + " dist/";
     GetFinalLink(tarballFile, installPath);
@@ -1104,8 +932,7 @@ bool InstallVortexLauncher()
     std::cout << "FQ55" << std::endl;
 
     std::cout << "INSTALL PATH : " << installPath << std::endl;
-    if (system(uncompressCommand.c_str()) != 0)
-    {
+    if (system(uncompressCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to extract tarball.";
       return false;
@@ -1121,8 +948,7 @@ bool InstallVortexLauncher()
     testLauncher = installPath + "/bin/vortex_launcher --test";
 #endif
     std::cout << "FQ2" << testLauncher << std::endl;
-    if (system(testLauncher.c_str()) != 0)
-    {
+    if (system(testLauncher.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Launcher test failed.";
       return false;
@@ -1141,8 +967,11 @@ bool InstallVortexLauncher()
 #ifdef _WIN32
   {
     std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Launcher.lnk";
-    if (!CreateShortcut(installPath + "\\bin\\vortex_launcher.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon.ico"))
-    {
+    if (!CreateShortcut(
+            installPath + "\\bin\\vortex_launcher.exe",
+            shortcutPath,
+            "The Vortex creation platform",
+            installPath + "\\bin\\resources\\imgs\\favicon.ico")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1151,8 +980,11 @@ bool InstallVortexLauncher()
 
   {
     std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Vortex Updater.lnk";
-    if (!CreateShortcut(installPath + "\\bin\\VortexUpdater.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_updater.ico"))
-    {
+    if (!CreateShortcut(
+            installPath + "\\bin\\VortexUpdater.exe",
+            shortcutPath,
+            "The Vortex creation platform",
+            installPath + "\\bin\\resources\\imgs\\favicon_updater.ico")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1161,8 +993,11 @@ bool InstallVortexLauncher()
 
   {
     std::string shortcutPath = "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Uninstall Vortex.lnk";
-    if (!CreateShortcut(installPath + "\\bin\\VortexUninstaller.exe", shortcutPath, "The Vortex creation platform", installPath + "\\bin\\resources\\imgs\\favicon_uninstaller.ico"))
-    {
+    if (!CreateShortcut(
+            installPath + "\\bin\\VortexUninstaller.exe",
+            shortcutPath,
+            "The Vortex creation platform",
+            installPath + "\\bin\\resources\\imgs\\favicon_uninstaller.ico")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1171,8 +1006,12 @@ bool InstallVortexLauncher()
 #else
   {
     std::string shortcutPath = "/usr/share/applications";
-    if (!CreateShortcut("Vortex Launcher", installPath + "/bin/vortex_launcher", shortcutPath, "The Vortex creation platform", installPath + "/bin/resources/imgs/icon.png"))
-    {
+    if (!CreateShortcut(
+            "Vortex Launcher",
+            installPath + "/bin/vortex_launcher",
+            shortcutPath,
+            "The Vortex creation platform",
+            installPath + "/bin/resources/imgs/icon.png")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1180,8 +1019,12 @@ bool InstallVortexLauncher()
   }
   {
     std::string shortcutPath = "/usr/share/applications";
-    if (!CreateShortcut("Update Vortex", installPath + "/bin/VortexUpdater", shortcutPath, "Update Vortex to the latest version", installPath + "/bin/resources/imgs/icon_update.png"))
-    {
+    if (!CreateShortcut(
+            "Update Vortex",
+            installPath + "/bin/VortexUpdater",
+            shortcutPath,
+            "Update Vortex to the latest version",
+            installPath + "/bin/resources/imgs/icon_update.png")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1189,8 +1032,12 @@ bool InstallVortexLauncher()
   }
   {
     std::string shortcutPath = "/usr/share/applications";
-    if (!CreateShortcut("Uninstall Vortex", installPath + "/bin/VortexUninstaller", shortcutPath, "Uninstall and delete Vortex", installPath + "/bin/resources/imgs/icon_crash.png"))
-    {
+    if (!CreateShortcut(
+            "Uninstall Vortex",
+            installPath + "/bin/VortexUninstaller",
+            shortcutPath,
+            "Uninstall and delete Vortex",
+            installPath + "/bin/resources/imgs/icon_crash.png")) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to create Start Menu shortcut.";
       return false;
@@ -1214,8 +1061,7 @@ bool InstallVortexLauncher()
 }
 
 // 5 Steps
-bool InstallVortexVersion()
-{
+bool InstallVortexVersion() {
   auto &installerData = *g_InstallerData;
 
   // installerData.state_n++;
@@ -1229,8 +1075,7 @@ bool InstallVortexVersion()
 #endif
   std::filesystem::create_directories(tempDir);
 
-  if (installerData.g_UseNet)
-  {
+  if (installerData.g_UseNet) {
     installerData.state_n++;
     installerData.state = "Downloading files...";
 
@@ -1247,15 +1092,15 @@ bool InstallVortexVersion()
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
 
-    if (!IsCurlAvailable())
-    {
+    if (!IsCurlAvailable()) {
       std::cerr << "Error: curl is not installed on this system." << std::endl;
       return false;
     }
 
-    if (!DownloadFile(dlpath, NormalizePath(tarballFile)) || !DownloadFile(sumpath, NormalizePath(sumFile)))
-    {
+    if (!DownloadFile(dlpath, NormalizePath(tarballFile)) || !DownloadFile(sumpath, NormalizePath(sumFile))) {
       std::cerr << "Error: Failed to download files." << std::endl;
+      installerData.result = "fail";
+      installerData.state = "Error: Failed to download files.";
       return false;
     }
 
@@ -1270,8 +1115,7 @@ bool InstallVortexVersion()
 #else
     checkSumCommand = "sha256sum -c " + sumFile;
 #endif
-    if (system(checkSumCommand.c_str()) != 0)
-    {
+    if (system(checkSumCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Integrity check failed.";
       return false;
@@ -1280,13 +1124,10 @@ bool InstallVortexVersion()
     installerData.state = "Ensure clean install path...";
 
     std::filesystem::path path(installPath);
-    try
-    {
+    try {
       std::filesystem::create_directories(path);
       std::cout << "New folder created : " << installPath << std::endl;
-    }
-    catch (const std::filesystem::filesystem_error &e)
-    {
+    } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       installerData.result = "fail";
       installerData.state = "Error: Failed to prepare installation folder.";
@@ -1299,14 +1140,12 @@ bool InstallVortexVersion()
     std::string finalLink;
     std::string uncompressCommand;
 #ifdef _WIN32
-    uncompressCommand = "cmd /C tar -xzf \"" + tarballFile +
-                        "\" --strip-components=2 -C \"" + installPath + "\"";
+    uncompressCommand = "cmd /C tar -xzf \"" + tarballFile + "\" --strip-components=2 -C \"" + installPath + "\"";
 #else
     finalLink = GetFinalLink(tarballFile, installPath, 2);
 #endif
 
-    if (system(uncompressCommand.c_str()) != 0)
-    {
+    if (system(uncompressCommand.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Failed to extract tarball.";
       return false;
@@ -1321,8 +1160,7 @@ bool InstallVortexVersion()
 #else
     testLauncher = "cd \"" + finalLink + "\" && ./bin/vortex -test";
 #endif
-    if (system(testLauncher.c_str()) != 0)
-    {
+    if (system(testLauncher.c_str()) != 0) {
       installerData.result = "fail";
       installerData.state = "Error: Launcher test failed.";
       return false;
@@ -1331,20 +1169,18 @@ bool InstallVortexVersion()
     installerData.state_n++;
     installerData.state = "Installation completed successfully.";
     installerData.result = "success";
-  }
-  else
-  {
+  } else {
     if (installerData.m_BuiltinLauncherExist)
       installerData.result = "fail";
-    installerData.state = "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation.";
+    installerData.state =
+        "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation.";
   }
 
   CleanUpTemporaryDirectory(tempDir);
   return true;
 }
 
-void UpdateVortexLauncher()
-{
+void UpdateVortexLauncher() {
   auto &installerData = *g_InstallerData;
 
   installerData.state_n = 0;
@@ -1357,18 +1193,16 @@ void UpdateVortexLauncher()
   bool result = InstallVortexLauncher();
 
   // Delete old vortex
-  if (result)
-  {
+  if (result) {
     DeleteOldVortexLauncher(old_vx_path);
-  }
-  else
-  {
+  } else {
     RevertOldVortexLauncher(old_vx_path);
   }
+
+  installerData.finished = true;
 }
 
-Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
-{
+Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   Cherry::ApplicationSpecification spec;
   std::shared_ptr<Layer> layer = std::make_shared<Layer>();
 
@@ -1381,36 +1215,27 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   spec.RenderMode = WindowRenderingMethod::SimpleWindow;
   spec.UniqueAppWindowName = "?loc:loc.window_names.welcome";
 
-  if (g_InstallerData->g_Action == "install")
-  {
+  if (g_InstallerData->g_Action == "install") {
     std::string name = "Installer";
     spec.Name = name;
     spec.IconPath = Cherry::GetPath("resources/imgs/icon_install.png");
     spec.FavIconPath = Cherry::GetPath("resources/imgs/icon_install.png");
-  }
-  else if (g_InstallerData->g_Action == "vxinstall")
-  {
+  } else if (g_InstallerData->g_Action == "vxinstall") {
     std::string name = "Vortex Installer";
     spec.Name = name;
     spec.IconPath = Cherry::GetPath("resources/imgs/icon.png");
     spec.FavIconPath = Cherry::GetPath("resources/imgs/icon.png");
-  }
-  else if (g_InstallerData->g_Action == "vxuninstall")
-  {
+  } else if (g_InstallerData->g_Action == "vxuninstall") {
     std::string name = "Vortex Uninstaller";
     spec.Name = name;
     spec.IconPath = Cherry::GetPath("resources/imgs/icon.png");
     spec.FavIconPath = Cherry::GetPath("resources/imgs/icon.png");
-  }
-  else if (g_InstallerData->g_Action == "update")
-  {
+  } else if (g_InstallerData->g_Action == "update") {
     std::string name = "Vortex Updater";
     spec.Name = name;
     spec.IconPath = Cherry::GetPath("resources/imgs/icon_update.png");
     spec.FavIconPath = Cherry::GetPath("resources/imgs/icon_update.png");
-  }
-  else if (g_InstallerData->g_Action == "uninstall")
-  {
+  } else if (g_InstallerData->g_Action == "uninstall") {
     std::string name = "Uninstaller";
     spec.Name = name;
     spec.IconPath = Cherry::GetPath("resources/imgs/icon_crash.png");
@@ -1428,6 +1253,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv)
   Cherry::Application *app = new Cherry::Application(spec);
   app->SetFavIconPath(Cherry::GetPath("resources/imgs/favicon.png"));
   app->AddFont("Consola", Cherry::GetPath("resources/fonts/consola.ttf"), 17.0f);
+  app->AddFont("ClashBold", Cherry::GetPath("resources/fonts/ClashDisplay-Semibold.ttf"), 20.0f);
 
   app->AddLocale("fr", Cherry::GetPath("resources/locales/fr.json"));
   app->AddLocale("en", Cherry::GetPath("resources/locales/en.json"));

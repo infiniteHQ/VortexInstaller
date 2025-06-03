@@ -36,8 +36,8 @@ namespace VortexInstaller {
 
     ImGui::SameLine();
 
-    Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-    Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+    Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+    Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText("Continue")->GetData("isClicked") == "true") {
       std::thread([this]() { m_Data->m_UninstallVortexCallback(); }).detach();
@@ -47,8 +47,8 @@ namespace VortexInstaller {
 
     /*{
         auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Uninstall");
-        accept->SetProperty("bg", "#B1FF31FF");
-        accept->SetProperty("bg_hovered", "#C3FF53FF");
+        accept->SetProperty("color_bg", "#B1FF31FF");
+        accept->SetProperty("color_bg_hovered", "#C3FF53FF");
         ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
         if (accept->Render("sec"))
         {
@@ -102,8 +102,8 @@ namespace VortexInstaller {
 
     ImGui::SameLine();
 
-    Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-    Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+    Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+    Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText("Accept")->GetData("isClicked") == "true") {
       m_SelectedChildName = "Uninstallation";
@@ -118,8 +118,8 @@ namespace VortexInstaller {
 
     /*{
       auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept", "Accept");
-      accept->SetProperty("bg", "#B1FF31FF");
-      accept->SetProperty("bg_hovered", "#C3FF53FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
+      accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__another")) {
         m_SelectedChildName = "Uninstallation";
@@ -166,16 +166,16 @@ namespace VortexInstaller {
 
       ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
 
-      Cherry::SetNextComponentProperty("bg", "#B1FF31FF");
-      Cherry::SetNextComponentProperty("bg_hovered", "#C3FF53FF");
+      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
       if (CherryKit::ButtonText("Finish")->GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
 
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
-      accept->SetProperty("bg", "#B1FF31FF");
-      accept->SetProperty("bg_hovered", "#C3FF53FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
+      accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__finish")) {
         Cherry::Application().Get().Close();
