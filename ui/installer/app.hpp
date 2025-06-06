@@ -6,8 +6,6 @@
 #include <thread>
 
 #include "../../lib/cherry/cherry.hpp"
-#include "../../lib/restcpp/include/restclient-cpp/connection.h"
-#include "../../lib/restcpp/include/restclient-cpp/restclient.h"
 #include "../../src/base.hpp"
 #include "src/static/install/install.hpp"
 #include "src/static/install_vx/install_vx.hpp"

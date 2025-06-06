@@ -64,38 +64,19 @@ int main(int argc, char *argv[]) {
   DetectPlatform();
   DetectArch();
 
-  RestClient::init();
-
   std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-  std::string url = "https://api.infinite.si";
+  std::string url =
+      "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
 
-  RestClient::Connection *conn = new RestClient::Connection(url);
+  std::string body = g_InstallerData->net.GET(url);
 
-  conn->SetTimeout(5);
-  conn->SetUserAgent("foo/cool");
-
-  RestClient::HeaderFields headers;
-  headers["Accept"] = "application/json";
-  conn->SetHeaders(headers);
-
-  conn->SetVerifyPeer(false);
-  conn->SetCAInfoFilePath("non-existent file");
-
-  conn->FollowRedirects(true);
-  conn->FollowRedirects(true, 3);
-
-  RestClient::Response r = conn->get("/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch);
-
-  if (r.code != 200) {
-    VXI_LOG("Error: " << r.code << " - " << r.body);
-  }
-
-  if (r.code != 200) {
+  if (body.empty()) {
+    VXI_LOG("Error: Empty response or request failed");
     g_InstallerData->g_Request = false;
   } else {
     g_InstallerData->g_Request = true;
     try {
-      g_InstallerData->jsonResponse = nlohmann::json::parse(r.body);
+      g_InstallerData->jsonResponse = nlohmann::json::parse(body);
 
       if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
         std::string values_str = g_InstallerData->jsonResponse[0]["values"];
@@ -178,6 +159,5 @@ int main(int argc, char *argv[]) {
   }
 
   mainThread.join();
-  delete conn;
   return 0;
 }
