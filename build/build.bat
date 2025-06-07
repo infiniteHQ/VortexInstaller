@@ -4,14 +4,13 @@ setlocal
 mkdir build_spdlog
 mkdir build
 
-cd build_spdlog
-call cmake.exe ..\..\lib\spdlog -G "MinGW Makefiles"
-call mingw32-make.exe -j%NUMBER_OF_PROCESSORS%
 
-cd ..\build
-call cmake.exe ..\.. -G "MinGW Makefiles"
-call mingw32-make.exe -j%NUMBER_OF_PROCESSORS% 
-call mingw32-make.exe install
+cd build
+cmake -G "Visual Studio 17" -A x64 ..\..
+
+for /f %%i in ('powershell -command "(Get-WmiObject -Class Win32_Processor).NumberOfLogicalProcessors"') do set THREADS=%%i
+
+cmake --build . --config Release -- /m:%THREADS%
 
 cd ..
 mkdir build\dist
