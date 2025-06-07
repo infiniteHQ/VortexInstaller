@@ -10,17 +10,17 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_text", "#AAAAAAFF");
     CherryKit::TitleThree("Vortex uninstallation wizard");
     // Cherry::TitleThreeColored("Vortex uninstallation wizard", "#AAAAAAFF");
-    ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
-    ImGui::TextWrapped("This software will help you to uninstall vortex (and optionnally Vortex local data).");
+    CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
+    CherryGUI::TextWrapped("This software will help you to uninstall vortex (and optionnally Vortex local data).");
 
-    ImGui::PopStyleColor();
+    CherryGUI::PopStyleColor();
 
     Space(20.0f);
     std::string label = "This action will delete the current Vortex Launcher regitered at \"" + m_Data->g_WorkingPath + "\"";
-    ImGui::Text(label.c_str());
+    CherryGUI::Text(label.c_str());
 
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
 
     /*{
         auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close", "Close");
@@ -34,7 +34,7 @@ namespace VortexInstaller {
       Cherry::Application().Get().Close();
     }
 
-    ImGui::SameLine();
+    CherryGUI::SameLine();
 
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -49,7 +49,7 @@ namespace VortexInstaller {
         auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Uninstall");
         accept->SetProperty("color_bg", "#B1FF31FF");
         accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-        ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+        CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
         if (accept->Render("sec"))
         {
             std::thread([this](){
@@ -58,7 +58,7 @@ namespace VortexInstaller {
             m_SelectedChildName = "Uninstallation";
             this->SetChildState("Uninstallation", true);
         }
-        ImGui::PopStyleColor();
+        CherryGUI::PopStyleColor();
     }*/
   }
 
@@ -66,7 +66,7 @@ namespace VortexInstaller {
     const float button_height = 30.0f;
     const float spacing = 10.0f;
 
-    float available_height = ImGui::GetContentRegionAvail().y - button_height - spacing;
+    float available_height = CherryGUI::GetContentRegionAvail().y - button_height - spacing;
 
     Space(30.0f);
 
@@ -85,9 +85,9 @@ namespace VortexInstaller {
       CherryKit::TitleSix("All datas of Vortex will be deleted.");
     }
 
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
+    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
 
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
 
     /*{
       auto deny = std::make_shared<Cherry::CustomButtonSimple>("Back", "Back");
@@ -100,7 +100,7 @@ namespace VortexInstaller {
       m_SelectedChildName = "Uninstall Vortex";
     }
 
-    ImGui::SameLine();
+    CherryGUI::SameLine();
 
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -120,7 +120,7 @@ namespace VortexInstaller {
       auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept", "Accept");
       accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__another")) {
         m_SelectedChildName = "Uninstallation";
         std::thread mainThread([this]() {
@@ -131,7 +131,7 @@ namespace VortexInstaller {
 
         mainThread.detach();
       }
-      ImGui::PopStyleColor();
+      CherryGUI::PopStyleColor();
     }*/
   }
 
@@ -146,7 +146,7 @@ namespace VortexInstaller {
     ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
                                   ? Cherry::HexToRGBA("#B1FF31FF")
                                   : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
-    ImGui::Text("Installation Progress:");
+    CherryGUI::Text("Installation Progress:");
 
     if (m_Data->result == "processing") {
       CherryKit::TitleTwo("Uninstallation...");
@@ -156,15 +156,15 @@ namespace VortexInstaller {
       CherryKit::TitleTwo("Oups, an error was occured");
     }
 
-    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
-    ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
-    ImGui::Text(m_Data->state.c_str());
-    ImGui::PopStyleColor();
+    CherryGUI::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
+    CherryGUI::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+    CherryGUI::Text(m_Data->state.c_str());
+    CherryGUI::PopStyleColor();
 
     if (m_Data->state_n == 5) {
-      ImVec2 buttonSize = ImGui::CalcTextSize("Finish");
+      ImVec2 buttonSize = CherryGUI::CalcTextSize("Finish");
 
-      ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - buttonSize.x - 50);
 
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -176,11 +176,11 @@ namespace VortexInstaller {
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
       accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__finish")) {
         Cherry::Application().Get().Close();
       }
-      ImGui::PopStyleColor();*/
+      CherryGUI::PopStyleColor();*/
     }
   }
 
@@ -197,22 +197,22 @@ namespace VortexInstaller {
       ImVec4 graySeparatorColor = ImVec4(0.4f, 0.4f, 0.4f, 0.5f);
       ImVec4 darkBackgroundColor = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
       ImVec4 lightBorderColor = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
-      if (ImGui::BeginMenu("Edit")) {
-        ImGui::PushStyleColor(ImGuiCol_Text, grayColor);
-        ImGui::Text("Main stuff");
-        ImGui::PopStyleColor();
+      if (CherryGUI::BeginMenu("Edit")) {
+        CherryGUI::PushStyleColor(ImGuiCol_Text, grayColor);
+        CherryGUI::Text("Main stuff");
+        CherryGUI::PopStyleColor();
 
-        ImGui::PushStyleColor(ImGuiCol_Separator, graySeparatorColor);
-        ImGui::Separator();
-        ImGui::PopStyleColor();
+        CherryGUI::PushStyleColor(ImGuiCol_Separator, graySeparatorColor);
+        CherryGUI::Separator();
+        CherryGUI::PopStyleColor();
 
-        if (ImGui::MenuItem("Logs Utility", "Overview of all logs")) {
+        if (CherryGUI::MenuItem("Logs Utility", "Overview of all logs")) {
         }
 
-        if (ImGui::MenuItem("Logs2 Utility", "Overview of all logs")) {
+        if (CherryGUI::MenuItem("Logs2 Utility", "Overview of all logs")) {
         }
 
-        ImGui::EndMenu();
+        CherryGUI::EndMenu();
       }
     };
 
@@ -281,9 +281,9 @@ namespace VortexInstaller {
     const float splitterWidth = 1.5f;
     static int selected;
 
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToRGBA("#111111FF"));
-    ImGui::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#0000000"));
-    ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
+    CherryGUI::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToRGBA("#111111FF"));
+    CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#0000000"));
+    CherryGUI::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
 
     Space(25.0f);
     Cherry::SetNextComponentProperty("color_text", "#B1FF31FF");
@@ -293,9 +293,9 @@ namespace VortexInstaller {
 
     for (const auto &child : m_Childs) {
       if (child.first == m_SelectedChildName) {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        CherryGUI::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
       } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+        CherryGUI::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
       }
       std::string child_name;
 
@@ -315,13 +315,13 @@ namespace VortexInstaller {
       CustomCheckbox(child_name.c_str(), &activated);
       Space(10.0f);
 
-      ImGui::PopStyleColor();
+      CherryGUI::PopStyleColor();
     }
-    ImGui::EndChild();
-    ImGui::PopStyleColor(2);
+    CherryGUI::EndChild();
+    CherryGUI::PopStyleColor(2);
 
-    ImGui::SameLine();
-    ImGui::BeginGroup();
+    CherryGUI::SameLine();
+    CherryGUI::BeginGroup();
 
     if (!m_SelectedChildName.empty()) {
       std::function<void()> pannel_render = GetChild(m_SelectedChildName);
@@ -330,7 +330,7 @@ namespace VortexInstaller {
       }
     }
 
-    ImGui::EndGroup();
+    CherryGUI::EndGroup();
   }
 
 }  // namespace VortexInstaller

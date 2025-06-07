@@ -70,28 +70,28 @@ endif()
 
 if(WIN32)
     set_target_properties(vortex_installer PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
 endif()
 
 if(WIN32)
     set_target_properties(vortex_update PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
 endif()
 if(WIN32)
     set_target_properties(vortex_uninstall PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
 endif()
 if(WIN32)
     set_target_properties(vxinstaller PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
 endif()
 if(WIN32)
     set_target_properties(vxuninstall PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
 endif()
 

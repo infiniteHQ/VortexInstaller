@@ -7,17 +7,17 @@ namespace VortexInstaller {
   static void MyButton(const std::string &name, int w, int h) {
     ImVec2 squareSize(w, h);
     ImVec2 totalSize(squareSize.x, squareSize.y + 5);
-    ImVec2 cursorPos = ImGui::GetCursorScreenPos();
+    ImVec2 cursorPos = CherryGUI::GetCursorScreenPos();
 
     std::string button_id = name + "squareButtonWithText";
-    if (ImGui::InvisibleButton(button_id.c_str(), totalSize)) {
+    if (CherryGUI::InvisibleButton(button_id.c_str(), totalSize)) {
     }
 
-    if (ImGui::IsItemHovered()) {
-      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (CherryGUI::IsItemHovered()) {
+      CherryGUI::SetMouseCursor(ImGuiMouseCursor_Hand);
     }
 
-    ImDrawList *drawList = ImGui::GetWindowDrawList();
+    ImDrawList *drawList = CherryGUI::GetWindowDrawList();
 
     if (!name.empty()) {
       drawList->AddImage(
@@ -32,9 +32,9 @@ namespace VortexInstaller {
     ImVec2 smallRectSize(40, 20);
     ImVec2 smallRectPos(cursorPos.x + squareSize.x - smallRectSize.x - 5, cursorPos.y + squareSize.y - smallRectSize.y - 5);
 
-    float windowVisibleX2 = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+    float windowVisibleX2 = CherryGUI::GetWindowPos().x + CherryGUI::GetWindowContentRegionMax().x;
     if (cursorPos.x + totalSize.x < windowVisibleX2)
-      ImGui::SameLine();
+      CherryGUI::SameLine();
   }
 
   void VortexInstallAppWindow::RenderInstallVortex() {
@@ -43,8 +43,8 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_text", "#FFFFFF");
     CherryKit::TitleThree("Install Vortex Editor");
 
-    ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
-    ImGui::TextWrapped(
+    CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
+    CherryGUI::TextWrapped(
         "This utility allows you to install a version of Vortex so you can open your projects and run your plugins and "
         "modules. Once installed, you will be able to launch any project for the following version:");
 
@@ -53,66 +53,66 @@ namespace VortexInstaller {
       CherryKit::SeparatorText("Available version :");
       {
         // LOGO Section
-        ImGui::BeginChild("LOGO_", ImVec2(120, 40), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
+        CherryGUI::BeginChild("LOGO_", ImVec2(120, 40), false, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollbar);
         MyButton(Cherry::GetHttpPath(m_Data->m_SelectedVortexVersion.banner), 120, 40);
-        ImGui::EndChild();
-        ImGui::SameLine();
+        CherryGUI::EndChild();
+        CherryGUI::SameLine();
       }
       {
         // Project Info Section
-        ImGuiID _id = ImGui::GetID("INFO_PANEL");
-        ImGui::BeginChild(_id, ImVec2(0, 50), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground);
-        ImGui::SetCursorPosY(ImGui::GetStyle().ItemSpacing.y);
+        ImGuiID _id = CherryGUI::GetID("INFO_PANEL");
+        CherryGUI::BeginChild(_id, ImVec2(0, 50), true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoBackground);
+        CherryGUI::SetCursorPosY(CherryGUI::GetStyle().ItemSpacing.y);
         {
           float fontScale = 0.9f;
-          float oldFontSize = ImGui::GetFont()->Scale;
-          ImGui::GetFont()->Scale = fontScale;
-          ImGui::PushFont(ImGui::GetFont());
+          float oldFontSize = CherryGUI::GetFont()->Scale;
+          CherryGUI::GetFont()->Scale = fontScale;
+          CherryGUI::PushFont(CherryGUI::GetFont());
 
-          ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.9f), m_Data->m_SelectedVortexVersion.name.c_str());
+          CherryGUI::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.9f), m_Data->m_SelectedVortexVersion.name.c_str());
 
-          ImGui::GetFont()->Scale = oldFontSize;
-          ImGui::PopFont();
+          CherryGUI::GetFont()->Scale = oldFontSize;
+          CherryGUI::PopFont();
         }
 
         // Space(2.0f);
         {
           float fontScale = 0.8f;
-          float oldFontSize = ImGui::GetFont()->Scale;
-          ImGui::GetFont()->Scale = fontScale;
-          ImGui::PushFont(ImGui::GetFont());
+          float oldFontSize = CherryGUI::GetFont()->Scale;
+          CherryGUI::GetFont()->Scale = fontScale;
+          CherryGUI::PushFont(CherryGUI::GetFont());
 
-          ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.5f), "Version: ");
-          ImGui::SameLine();
-          ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.8f, 0.8f), m_Data->m_SelectedVortexVersion.version.c_str());
+          CherryGUI::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 0.5f), "Version: ");
+          CherryGUI::SameLine();
+          CherryGUI::TextColored(ImVec4(1.0f, 0.8f, 0.8f, 0.8f), m_Data->m_SelectedVortexVersion.version.c_str());
 
-          ImGui::GetFont()->Scale = oldFontSize;
-          ImGui::PopFont();
+          CherryGUI::GetFont()->Scale = oldFontSize;
+          CherryGUI::PopFont();
         }
 
-        ImGui::EndChild();
+        CherryGUI::EndChild();
       }
 
       CherryKit::Separator();
     }
 
-    ImGui::PopStyleColor();
+    CherryGUI::PopStyleColor();
 
     Space(20.0f);
     std::shared_ptr<std::string> val = std::make_shared<std::string>(m_Data->g_DefaultInstallPath);
 
-    ImGui::TextWrapped(
+    CherryGUI::TextWrapped(
         "Please choose an installation location from the folders that can contain Vortex versions on your system.",
         "#787878FF");
 
     int selected = std::stoi(CherryKit::ComboText("", &m_Data->m_VortexPools, 0)->GetProperty("selected"));
 
     /*static auto cp_ComboOne = std::make_shared<Cherry::ComboSimple>("combo_1", "###SuperCombo", m_Data->m_VortexPools,
-    0); ImGui::SetNextItemWidth(300); cp_ComboOne->Render("combo_1"); m_Data->g_DefaultInstallPath =
+    0); CherryGUI::SetNextItemWidth(300); cp_ComboOne->Render("combo_1"); m_Data->g_DefaultInstallPath =
     cp_ComboOne->GetData("selected_string");*/
 
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
 
     /*{
       auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close", "Close");
@@ -125,7 +125,7 @@ namespace VortexInstaller {
       Cherry::Application().Get().Close();
     }
 
-    ImGui::SameLine();
+    CherryGUI::SameLine();
 
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -143,12 +143,12 @@ namespace VortexInstaller {
       auto accept = std::make_shared<Cherry::CustomButtonSimple>("Continue", "Continue");
       accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("sec")) {
         m_SelectedChildName = "Accept Licence Agreement";
         this->SetChildState("Install Vortex", true);
       }
-      ImGui::PopStyleColor();
+      CherryGUI::PopStyleColor();
     }*/
   }
 
@@ -158,15 +158,15 @@ namespace VortexInstaller {
     const float button_height = 30.0f;
     const float spacing = 10.0f;
 
-    float available_height = ImGui::GetContentRegionAvail().y - button_height - spacing;
+    float available_height = CherryGUI::GetContentRegionAvail().y - button_height - spacing;
 
-    ImGui::BeginChild("TextZone", ImVec2(0, available_height), true, ImGuiWindowFlags_HorizontalScrollbar);
-    ImGui::TextUnformatted(file_content.c_str());
-    ImGui::EndChild();
+    CherryGUI::BeginChild("TextZone", ImVec2(0, available_height), true, ImGuiWindowFlags_HorizontalScrollbar);
+    CherryGUI::TextUnformatted(file_content.c_str());
+    CherryGUI::EndChild();
 
-    ImVec2 to_remove = ImGui::CalcTextSize("DenyAccept");
+    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
 
-    ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - to_remove.x - 50);
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
 
     /*{
       auto deny = std::make_shared<Cherry::CustomButtonSimple>("Deny", "Deny");
@@ -179,7 +179,7 @@ namespace VortexInstaller {
       Cherry::Application().Get().Close();
     }
 
-    ImGui::SameLine();
+    CherryGUI::SameLine();
 
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -197,7 +197,7 @@ namespace VortexInstaller {
       auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept", "Accept");
       accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__another")) {
         std::thread([this]() {
           if (m_Data->m_InstallVortexCallback) {
@@ -206,7 +206,7 @@ namespace VortexInstaller {
         }).detach();
         m_SelectedChildName = "Installation";
       }
-      ImGui::PopStyleColor();
+      CherryGUI::PopStyleColor();
     }*/
   }
 
@@ -224,15 +224,15 @@ namespace VortexInstaller {
       CherryKit::TitleTwo("Oups, an error was occured");
     }
 
-    ImGui::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
-    ImGui::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
-    ImGui::Text(m_Data->state.c_str());
-    ImGui::PopStyleColor();
+    CherryGUI::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
+    CherryGUI::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
+    CherryGUI::Text(m_Data->state.c_str());
+    CherryGUI::PopStyleColor();
 
     if (m_Data->state_n == 5) {
-      ImVec2 buttonSize = ImGui::CalcTextSize("Finish");
+      ImVec2 buttonSize = CherryGUI::CalcTextSize("Finish");
 
-      ImGui::SetCursorPosX(ImGui::GetContentRegionMax().x - buttonSize.x - 50);
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - buttonSize.x - 50);
 
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -244,11 +244,11 @@ namespace VortexInstaller {
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
       accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      ImGui::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
+      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__finish")) {
         Cherry::Application().Get().Close();
       }
-      ImGui::PopStyleColor();*/
+      CherryGUI::PopStyleColor();*/
     }
   }
 
@@ -263,22 +263,22 @@ namespace VortexInstaller {
       ImVec4 graySeparatorColor = ImVec4(0.4f, 0.4f, 0.4f, 0.5f);
       ImVec4 darkBackgroundColor = ImVec4(0.15f, 0.15f, 0.15f, 1.0f);
       ImVec4 lightBorderColor = ImVec4(0.2f, 0.2f, 0.2f, 1.0f);
-      if (ImGui::BeginMenu("Edit")) {
-        ImGui::PushStyleColor(ImGuiCol_Text, grayColor);
-        ImGui::Text("Main stuff");
-        ImGui::PopStyleColor();
+      if (CherryGUI::BeginMenu("Edit")) {
+        CherryGUI::PushStyleColor(ImGuiCol_Text, grayColor);
+        CherryGUI::Text("Main stuff");
+        CherryGUI::PopStyleColor();
 
-        ImGui::PushStyleColor(ImGuiCol_Separator, graySeparatorColor);
-        ImGui::Separator();
-        ImGui::PopStyleColor();
+        CherryGUI::PushStyleColor(ImGuiCol_Separator, graySeparatorColor);
+        CherryGUI::Separator();
+        CherryGUI::PopStyleColor();
 
-        if (ImGui::MenuItem("Logs Utility", "Overview of all logs")) {
+        if (CherryGUI::MenuItem("Logs Utility", "Overview of all logs")) {
         }
 
-        if (ImGui::MenuItem("Logs2 Utility", "Overview of all logs")) {
+        if (CherryGUI::MenuItem("Logs2 Utility", "Overview of all logs")) {
         }
 
-        ImGui::EndMenu();
+        CherryGUI::EndMenu();
       }
     };
 
@@ -349,9 +349,9 @@ namespace VortexInstaller {
     const float splitterWidth = 1.5f;
     static int selected;
 
-    ImGui::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToRGBA("#111111FF"));
-    ImGui::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#0000000"));
-    ImGui::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
+    CherryGUI::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToRGBA("#111111FF"));
+    CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#0000000"));
+    CherryGUI::BeginChild("left_pane", ImVec2(leftPaneWidth, 0), true);
 
     Space(25.0f);
 
@@ -365,9 +365,9 @@ namespace VortexInstaller {
 
     for (const auto &child : m_Childs) {
       if (child.first == m_SelectedChildName) {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        CherryGUI::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
       } else {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
+        CherryGUI::PushStyleColor(ImGuiCol_Text, ImVec4(0.5f, 0.5f, 0.5f, 1.0f));
       }
       std::string child_name;
 
@@ -387,13 +387,13 @@ namespace VortexInstaller {
       CustomCheckbox(child_name.c_str(), &activated);
       Space(10.0f);
 
-      ImGui::PopStyleColor();
+      CherryGUI::PopStyleColor();
     }
-    ImGui::EndChild();
-    ImGui::PopStyleColor(2);
+    CherryGUI::EndChild();
+    CherryGUI::PopStyleColor(2);
 
-    ImGui::SameLine();
-    ImGui::BeginGroup();
+    CherryGUI::SameLine();
+    CherryGUI::BeginGroup();
 
     if (!m_SelectedChildName.empty()) {
       std::function<void()> pannel_render = GetChild(m_SelectedChildName);
@@ -402,7 +402,7 @@ namespace VortexInstaller {
       }
     }
 
-    ImGui::EndGroup();
+    CherryGUI::EndGroup();
   }
 
 }  // namespace VortexInstaller

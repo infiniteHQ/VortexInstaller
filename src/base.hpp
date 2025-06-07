@@ -5,14 +5,20 @@
 
 #include "../lib/httpcl/httpcl.h"
 #include "../lib/json/single_include/nlohmann/json.hpp"
+#include <iostream>
+
+#ifdef _WIN32
+#define popen _popen
+#define pclose _pclose
+#endif
 
 static void Space(const float &space) {
-  ImGui::BeginDisabled();
-  ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
-  ImGui::Button("", ImVec2(0, space));
-  ImGui::PopStyleColor(2);
-  ImGui::EndDisabled();
+  CherryGUI::BeginDisabled();
+  CherryGUI::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+  CherryGUI::PushStyleColor(ImGuiCol_Button, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
+  CherryGUI::Button("", ImVec2(0, space));
+  CherryGUI::PopStyleColor(2);
+  CherryGUI::EndDisabled();
 }
 
 static std::string ReadFile(const std::string &file_path) {
@@ -26,10 +32,10 @@ static std::string ReadFile(const std::string &file_path) {
 }
 
 static void CustomCheckbox(const std::string &label, bool activated, float radius = 7.0f) {
-  ImVec2 pos = ImGui::GetCursorScreenPos();
-  ImDrawList *draw_list = ImGui::GetWindowDrawList();
+  ImVec2 pos = CherryGUI::GetCursorScreenPos();
+  ImDrawList *draw_list = CherryGUI::GetWindowDrawList();
 
-  ImVec2 text_size = ImGui::CalcTextSize(label.c_str());
+  ImVec2 text_size = CherryGUI::CalcTextSize(label.c_str());
 
   float offset_y = (text_size.y - radius * 2.0f) * 0.5f;
 
@@ -43,10 +49,10 @@ static void CustomCheckbox(const std::string &label, bool activated, float radiu
     draw_list->AddCircleFilled(ImVec2(pos.x + radius, pos.y + radius + offset_y), radius * 0.6f, color_check, 16);
   }
 
-  ImGui::Dummy(ImVec2(radius * 2.0f, radius * 2.0f));
+  CherryGUI::Dummy(ImVec2(radius * 2.0f, radius * 2.0f));
 
-  ImGui::SameLine();
-  ImGui::TextUnformatted(label.c_str());
+  CherryGUI::SameLine();
+  CherryGUI::TextUnformatted(label.c_str());
 }
 
 static std::string CookPath(const std::string input_path) {
@@ -161,45 +167,74 @@ class VortexInstallerNet {
 
  private:
   std::string Request(
-      const std::string &url,
-      const std::string &method,
-      const std::string &body = "",
-      const std::string &contentType = "") {
-    naettReq *req = nullptr;
+    const std::string &url,
+    const std::string &method,
+    const std::string &body ="",
+    const std::string &contentType ="") {
+
+    naettReq* req = nullptr;
 
     if (method == "GET") {
-      req = naettRequest(url.c_str(), naettMethod("GET"), naettHeader("accept", "*/*"));
+        std::cout << "GET request\n";
+
+    const char* URL = url.c_str();
+req = naettRequest_va(
+    URL,
+    2,
+    naettMethod("GET"),
+    naettHeader("accept", "*/*")
+);
+
+
     } else if (method == "POST") {
-      req = naettRequest(
-          url.c_str(),
-          naettMethod("POST"),
-          naettHeader("Content-Type", contentType.c_str()),
-          naettBody(body.data(), body.size()));
+        std::cout << "POST request\n";
+
+
     } else {
-      std::cerr << "Unsupported HTTP method: " << method << std::endl;
-      return "";
+        std::cerr << "Unsupported HTTP method: " << method << std::endl;
+        return "";
     }
 
-    naettRes *res = naettMake(req);
+    if (!req) {
+        std::cerr << "Failed to create request\n";
+        return "";
+    }
+
+    naettRes* res = naettMake(req);
+    if (!res) {
+        std::cerr << "Failed to make request\n";
+        naettFree(req);
+        return "";
+    }
+
     while (!naettComplete(res)) {
-      usleep(100 * 1000);  // 100 ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     int status = naettGetStatus(res);
-    std::string response;
-
-    if (status == 200) {
-      int len = 0;
-      const void *bodyData = naettGetBody(res, &len);
-      if (bodyData && len > 0) {
-        response.assign(static_cast<const char *>(bodyData), len);
-      }
+    if (status < 0) {
+        std::cerr << "Request failed with status: " << status << std::endl;
+        naettClose(res);
+        naettFree(req);
+        return "";
     }
+
+    int length = 0;
+    const char* responseBody = static_cast<const char*>(naettGetBody(res, &length));
+    if (!responseBody || length == 0) {
+        std::cerr << "Empty response body\n";
+        naettClose(res);
+        naettFree(req);
+        return "";
+    }
+
+    std::string result(responseBody, length);
 
     naettClose(res);
     naettFree(req);
-    return response;
-  }
+
+    return result;
+}
 };
 
 struct VortexInstallerData {
