@@ -18,10 +18,10 @@
 #include <windows.h>
 #pragma comment(lib, "urlmon.lib")
 
-#include <objbase.h>   // Pour CoInitialize et CoUninitialize
-#include <shlguid.h>   // Pour CLSID_ShellLink et IID_IShellLink
-#include <shobjidl.h>  // Pour IShellLink
-#include <shobjidl.h>  // Pour IShellLinkW et autres APIs
+#include <objbase.h>
+#include <shlguid.h>
+#include <shobjidl.h>
+#include <shobjidl.h>
 
 #include <iostream>
 #include <string>
@@ -159,13 +159,6 @@ static void CreateFolder(const std::string &path) {
     std::cout << "Path already exist : " << path << std::endl;
   }
 }
-
-/*
-
-Fix the deletion path
-Todo : other utilities in vortex launcher.
-
-*/
 
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 
