@@ -15,7 +15,6 @@ def main():
             sys.exit(1)
         sys.exit()
 
-    # Determine the path to the `vxinstaller` executable
     if getattr(sys, 'frozen', False):
         app_path = sys._MEIPASS
     else:
@@ -23,11 +22,9 @@ def main():
 
     exe_path = os.path.join(app_path, "vxuninstall")
 
-    # Prepare to forward the arguments
-    vxinstaller_args = [exe_path] + sys.argv[1:]  # Append all arguments passed to the Python script
+    vxinstaller_args = [exe_path] + sys.argv[1:]
 
     try:
-        # Run `vxinstaller` with all arguments passed to this Python script
         subprocess.run(vxinstaller_args, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error while executing Vortex Installer: {exe_path}: {e}")

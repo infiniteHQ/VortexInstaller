@@ -72,7 +72,7 @@ cp ../misc/linux/uninstaller/main.py build/bin/
 cd build/bin
 
 pyinstaller --onefile --name VortexUninstaller --icon=icon.png \
-    --add-data "vortex_uninstaller:." \
+    --add-data "vortex_uninstall:." \
     --add-data "resources:resources" \
     main.py
 
