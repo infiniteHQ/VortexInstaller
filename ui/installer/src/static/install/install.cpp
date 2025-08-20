@@ -26,7 +26,10 @@ namespace VortexInstaller {
         input->Render("__blank");
     }*/
 
-    CherryKit::InputString("Please select the installation path", &m_Data->g_DefaultInstallPath);
+    CherryNextComponent.SetProperty("color_text", "#777777FF");
+    CherryKit::TextWrapped("Please select the installation path");
+    CherryNextComponent.SetProperty("size_x", "400.0f");
+    CherryKit::InputString("", &m_Data->g_DefaultInstallPath);
 
     ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
@@ -39,7 +42,7 @@ namespace VortexInstaller {
         }
     }*/
 
-    if (CherryKit::ButtonText("Close")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
       Cherry::Application().Get().Close();
     }
 
@@ -48,7 +51,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Continue")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Continue").GetData("isClicked") == "true") {
       m_SelectedChildName = "Accept Licence Agreement";
       this->SetChildState("Install Vortex", true);
 
@@ -60,12 +63,12 @@ namespace VortexInstaller {
 
     {
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Contdinue", "Continue");
-      accept->SetProperty("bg", "#B1FF31FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("sec"))
       {
-          m_Data->g_DefaultInstallPath = input->GetData("value");
+          m_Data->g_DefaultInstallPath = input.GetData("value");
           m_SelectedChildName = "Accept Licence Agreement";
           this->SetChildState("Install Vortex", true);
 
@@ -102,7 +105,7 @@ namespace VortexInstaller {
       }
     }*/
 
-    if (CherryKit::ButtonText("Close")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
       Cherry::Application().Get().Close();
     }
 
@@ -111,13 +114,13 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Continue")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Continue").GetData("isClicked") == "true") {
       m_SelectedChildName = "Summary";
     }
 
     /*{
       auto accept = std::make_shared<Cherry::CustomButtonSimple>("Accept", "Accept");
-      accept->SetProperty("bg", "#B1FF31FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__another")) {
@@ -182,7 +185,7 @@ namespace VortexInstaller {
         m_Data->g_UseNet = true;
       }*/
 
-      if (CherryKit::ButtonImageText(label, Cherry::GetPath("resources/imgs/net.png"))->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonImageText(label, Cherry::GetPath("resources/imgs/net.png")).GetData("isClicked") == "true") {
         m_Data->g_UseNet = true;
       }
 
@@ -215,7 +218,7 @@ namespace VortexInstaller {
         Cherry::SetNextComponentProperty("color_border", "#B1FF31FF");
       }
 
-      if (CherryKit::ButtonImageText(label, Cherry::GetPath("resources/imgs/install.png"))->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonImageText(label, Cherry::GetPath("resources/imgs/install.png")).GetData("isClicked") == "true") {
         m_Data->g_UseNet = false;
       }
 
@@ -253,17 +256,17 @@ namespace VortexInstaller {
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
     {
       // auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
-      // accept->SetProperty("bg", "#B1FF31FF");
+      // accept->SetProperty("color_bg", "#B1FF31FF");
       // accept->SetProperty("color_bg_hovered", "#C3FF53FF");
 
-      if (CherryKit::ButtonText("Close")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
 
       CherryGUI::SameLine();
 
       if (!CanInstall) {
-        // accept->SetProperty("bg", "#353535FF");
+        // accept->SetProperty("color_bg", "#353535FF");
         // accept->SetProperty("color_bg_hovered", "#353535FF");
         Cherry::SetNextComponentProperty("color_bg", "#353535FF");
         Cherry::SetNextComponentProperty("color_bg_hovered", "#353535FF");
@@ -273,7 +276,7 @@ namespace VortexInstaller {
       }
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
 
-      if (CherryKit::ButtonText("Confirm and install !")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Confirm and install !").GetData("isClicked") == "true") {
         m_SelectedChildName = "Installation";
 
         std::thread mainThread([this]() {
@@ -332,12 +335,12 @@ namespace VortexInstaller {
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText("Finish")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Finish").GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
 
       /*auto accept = std::make_shared<Cherry::CustomButtonSimple>("Finish", "Finish");
-      accept->SetProperty("bg", "#B1FF31FF");
+      accept->SetProperty("color_bg", "#B1FF31FF");
       accept->SetProperty("color_bg_hovered", "#C3FF53FF");
       CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
       if (accept->Render("__finish")) {

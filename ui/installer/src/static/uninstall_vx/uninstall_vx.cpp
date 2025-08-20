@@ -30,7 +30,7 @@ namespace VortexInstaller {
         }
     }*/
 
-    if (CherryKit::ButtonText("Close")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
       Cherry::Application().Get().Close();
     }
 
@@ -39,7 +39,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Continue")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Continue").GetData("isClicked") == "true") {
       std::thread([this]() { m_Data->m_UninstallVortexCallback(); }).detach();
       m_SelectedChildName = "Uninstallation";
       this->SetChildState("Uninstallation", true);
@@ -96,7 +96,7 @@ namespace VortexInstaller {
       }
     }*/
 
-    if (CherryKit::ButtonText("Back")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Back").GetData("isClicked") == "true") {
       m_SelectedChildName = "Uninstall Vortex";
     }
 
@@ -105,7 +105,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Accept")->GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText("Accept").GetData("isClicked") == "true") {
       m_SelectedChildName = "Uninstallation";
       std::thread mainThread([this]() {
         if (m_Data->m_DeleteCallback) {
@@ -169,7 +169,7 @@ namespace VortexInstaller {
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText("Finish")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Finish").GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
 

@@ -24,7 +24,7 @@ def main():
         app_path = os.path.dirname(os.path.abspath(__file__))
         executable_path = os.path.abspath(sys.argv[0])
 
-    exe_path = os.path.join(app_path, "vortex_install")
+    exe_path = os.path.join(app_path, "vortex_installer")
 
     try:
         subprocess.run([exe_path, f"--workdir={executable_path}"], check=True)

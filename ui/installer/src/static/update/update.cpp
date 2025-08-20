@@ -56,7 +56,7 @@ namespace VortexInstaller {
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText(label)->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText(label).GetData("isClicked") == "true") {
         m_SelectedChildName = "Update";
 
         std::thread mainThread([this]() {
@@ -83,7 +83,7 @@ namespace VortexInstaller {
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText("Confirm")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Confirm").GetData("isClicked") == "true") {
         Cherry::Application::Get().Close();
       }
     }
@@ -126,7 +126,7 @@ namespace VortexInstaller {
       Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
       Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText("Finish")->GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText("Finish").GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
     }

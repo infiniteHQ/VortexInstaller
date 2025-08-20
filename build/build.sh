@@ -95,12 +95,6 @@ cd ../..
 cp build/bin/dist/* build/bin
 rm -rf build/bin/build
 rm -rf build/bin/dist
-rm build/bin/vortex_installer
-rm build/bin/vortex_update
-rm build/bin/org.vortex.vxinstaller.policy
-rm build/bin/VortexUpdater.spec
-rm build/bin/VersionInstaller.spec
-rm build/bin/VersionUninstaller.spec
 
 mkdir -p shipping/linux
 
