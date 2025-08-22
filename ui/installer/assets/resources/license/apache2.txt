@@ -1,7 +1,7 @@
-                                 Apache License
-                           Version 2.0, January 2004
-                        http://www.apache.org/licenses/
-                    Copyright 2024 Diego E. Moreno, Infinite
+   Apache License
+   Version 2.0, January 2004
+   http://www.apache.org/licenses/
+   Copyright 2024 Diego E. Moreno, Infinite
 
    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
 

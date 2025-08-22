@@ -5,20 +5,19 @@
 
 namespace VortexInstaller {
   void InstallAppWindow::RenderInstallVortex() {
-    Space(30.0f);
     {
       float x = ImGui::GetContentRegionAvail().x;
       float y = x / 4.726f;
       CherryKit::ImageLocalCentered(Cherry::GetPath("resources/imgs/vortex_banner.png"), x, y);
-      CherryStyle::AddMarginX(20.0f);
-      CherryStyle::RemoveMarginY(70.0f);
+      CherryStyle::AddMarginX(10.0f);
+      CherryStyle::RemoveMarginY(40.0f);
       Cherry::PushFont("ClashMedium");
       CherryNextProp("color_text", "#FFFFFF");
       CherryKit::TitleOne(Cherry::GetLocale("loc.welcome"));
       Cherry::PopFont();
     }
 
-    Space(30.0f);
+    Space(15.0f);
     CherryNextProp("color_text", "#777777FF");
     CherryKit::TextWrapped(Cherry::GetLocale("loc.description"));
 
@@ -43,14 +42,6 @@ namespace VortexInstaller {
     CherryNextProp("color", "#222222");
     CherryKit::Separator();
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 40);
-
-    /*{
-        auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close", "Close");
-        if (deny->Render())
-        {
-            Cherry::Application().Get().Close();
-        }
-    }*/
 
     CherryNextProp("color_text", "#B1FF31");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
@@ -101,14 +92,13 @@ namespace VortexInstaller {
 
     float available_height = CherryGUI::GetContentRegionAvail().y - button_height - spacing;
 
-    CherryGUI::BeginChild("TextZone", ImVec2(0, available_height), true, ImGuiWindowFlags_HorizontalScrollbar);
+    CherryGUI::PushStyleColor(ImGuiCol_ChildBg, Cherry::HexToImU32("#121212"));
+    CherryGUI::PushStyleVar(ImGuiStyleVar_ChildRounding, 0.0f);
+    CherryGUI::BeginChild("TextZone", ImVec2(0, available_height), false, ImGuiWindowFlags_HorizontalScrollbar);
     CherryGUI::TextUnformatted(file_content.c_str());
     CherryGUI::EndChild();
-
-    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
-
-    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
-
+    CherryGUI::PopStyleColor();
+    CherryGUI::PopStyleVar();
     /*{
       auto deny = std::make_shared<Cherry::CustomButtonSimple>("Deny", "Deny");
       if (deny->Render()) {
@@ -116,7 +106,15 @@ namespace VortexInstaller {
       }
     }*/
 
-    if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
+    std::string text = CherryApp.GetLocale("loc.accept") + CherryApp.GetLocale("loc.close");
+    ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+    CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+    CherryNextProp("color", "#222222");
+    CherryKit::Separator();
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 40);
+
+    if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
       Cherry::Application().Get().Close();
     }
 
@@ -125,7 +123,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Continue").GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText(CherryApp.GetLocale("loc.accept")).GetData("isClicked") == "true") {
       m_SelectedChildName = "Summary";
     }
 
@@ -144,7 +142,6 @@ namespace VortexInstaller {
   void InstallAppWindow::RenderSummary() {
     Cherry::SetNextComponentProperty("color_text", "#AAAAAAFF");
     CherryKit::TitleThree("Select your packages to install");
-    ImVec2 to_remove = CherryGUI::CalcTextSize("Confirm and install !");
 
     /*Cherry::TitleThreeColored("Select your packages to install", "#AAAAAAFF");
      */
@@ -259,22 +256,28 @@ namespace VortexInstaller {
       CherryGUI::Checkbox("Erase the folder and install Vortex", &CanInstall);
       CherryGUI::Separator();
     }
-
-    if (!CanInstall) {
-      CherryGUI::BeginDisabled();
-    }
-
+    std::string text = CherryApp.GetLocale("loc.confirg_install") + CherryApp.GetLocale("loc.close");
+    ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+    CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+    CherryNextProp("color", "#222222");
+    CherryKit::Separator();
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 40);
+
     {
       // auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm", "Confirm and install !");
       // accept->SetProperty("color_bg", "#B1FF31FF");
       // accept->SetProperty("color_bg_hovered", "#C3FF53FF");
 
-      if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
         Cherry::Application().Get().Close();
       }
 
       CherryGUI::SameLine();
+
+      if (!CanInstall) {
+        CherryGUI::BeginDisabled();
+      }
 
       if (!CanInstall) {
         // accept->SetProperty("color_bg", "#353535FF");
@@ -287,7 +290,7 @@ namespace VortexInstaller {
       }
       Cherry::SetNextComponentProperty("color_text", "#121212FF");
 
-      if (CherryKit::ButtonText("Confirm and install !").GetData("isClicked") == "true") {
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.confirg_install")).GetData("isClicked") == "true") {
         m_SelectedChildName = "Installation";
 
         std::thread mainThread([this]() {
@@ -312,10 +315,9 @@ namespace VortexInstaller {
         mainThread.detach();
       }
       CherryGUI::PopStyleColor();*/
-    }
-
-    if (!CanInstall) {
-      CherryGUI::EndDisabled();
+      if (!CanInstall) {
+        CherryGUI::EndDisabled();
+      }
     }
   }
 
@@ -358,6 +360,66 @@ namespace VortexInstaller {
         Cherry::Application().Get().Close();
       }
       CherryGUI::PopStyleColor();*/
+    }
+
+    if (m_Data->result == "processing") {
+      CherryGUI::BeginDisabled();
+      std::string text = CherryApp.GetLocale("loc.close");
+      ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+      CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+      CherryNextProp("color", "#222222");
+      CherryKit::Separator();
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 30);
+
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
+        m_SelectedChildName = "Accept Licence Agreement";
+        this->SetChildState("Install Vortex", true);
+
+        CheckExistingInstallation(m_Data);
+        if (m_Data->m_FolderAlreadyExist) {
+          CanInstall = false;
+        }
+      }
+      CherryGUI::EndDisabled();
+
+    } else if (m_Data->result == "success") {
+      std::string text = CherryApp.GetLocale("loc.launch_launcher") + CherryApp.GetLocale("loc.close");
+      ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+      CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+      CherryNextProp("color", "#222222");
+      CherryKit::Separator();
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 40);
+
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
+        Cherry::Application().Get().Close();
+      }
+
+      CherryGUI::SameLine();
+
+      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
+      Cherry::SetNextComponentProperty("color_text", "#121212FF");
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.launch_launcher")).GetData("isClicked") == "true") {
+        // Start launcher
+      }
+
+    } else if (m_Data->result == "fail") {
+      std::string text = CherryApp.GetLocale("loc.close");
+      ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+      CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+      CherryNextProp("color", "#222222");
+      CherryKit::Separator();
+      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 30);
+
+      Cherry::SetNextComponentProperty("color_bg", "#ed5247");
+      Cherry::SetNextComponentProperty("color_bg_hovered", "#eda49f");
+      Cherry::SetNextComponentProperty("color_text", "#121212FF");
+      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
+        Cherry::Application().Get().Close();
+      }
     }
   }
 

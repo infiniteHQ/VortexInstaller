@@ -1213,7 +1213,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
 
     CherryStyle::AddMarginX(20.0f);
     CherryGUI::BeginGroup();
-
+    // MEttre l'input en full size et cahnger please select to Installation path
     auto &langSelector = CherryKit::ComboImageText(
         CherryID("language_selector"),
         "",
