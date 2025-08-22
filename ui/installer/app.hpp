@@ -21,7 +21,6 @@
 #include <objbase.h>
 #include <shlguid.h>
 #include <shobjidl.h>
-#include <shobjidl.h>
 
 #include <iostream>
 #include <string>
@@ -1206,6 +1205,43 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   spec.RenderMode = WindowRenderingMethod::SimpleWindow;
   spec.UniqueAppWindowName = "?loc:loc.window_names.welcome";
 
+  spec.SetFramebarCallback([]() {
+    CherryStyle::AddMarginY(10.0f);
+    CherryNextComponent.SetProperty("size_x", 50.0f);
+    CherryNextComponent.SetProperty("padding_x", 3.0f);
+    CherryNextComponent.SetProperty("padding_y", 3.0f);
+
+    CherryStyle::AddMarginX(20.0f);
+    CherryGUI::BeginGroup();
+
+    auto &langSelector = CherryKit::ComboImageText(
+        CherryID("language_selector"),
+        "",
+        {
+            { "English", Cherry::GetPath("resources/imgs/icons/flags/us.png") },
+            { "Français", Cherry::GetPath("resources/imgs/icons/flags/fr.png") },
+            { "Español", Cherry::GetPath("resources/imgs/icons/flags/es.png") },
+        });
+
+    int selectedIndex = langSelector.GetPropertyAs<int>("selected");
+
+    if (g_InstallerData) {
+      switch (selectedIndex) {
+        case 0: g_InstallerData->g_SelectedLanguage = "en"; break;
+        case 1: g_InstallerData->g_SelectedLanguage = "fr"; break;
+        case 2: g_InstallerData->g_SelectedLanguage = "es"; break;
+        default: g_InstallerData->g_SelectedLanguage = "en"; break;
+      }
+
+      if (g_InstallerData->g_SelectedLanguage != g_InstallerData->g_PreviousSelectedLanguage) {
+        CherryApp.SetLocale(g_InstallerData->g_SelectedLanguage);
+        g_InstallerData->g_PreviousSelectedLanguage = g_InstallerData->g_SelectedLanguage;
+      }
+    }
+
+    CherryGUI::EndGroup();
+  });
+
   if (g_InstallerData->g_Action == "install") {
     std::string name = "Installer";
     spec.Name = name;
@@ -1249,7 +1285,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   app->AddLocale("fr", Cherry::GetPath("resources/locales/fr.json"));
   app->AddLocale("en", Cherry::GetPath("resources/locales/en.json"));
   app->SetDefaultLocale("en");
-  app->SetLocale("fr");
+  app->SetLocale("en");
 
   app->PushLayer(layer);
   app->SetMenubarCallback([app, layer]() {

@@ -1,20 +1,25 @@
 {
     "locales": [
-        {"loc.menubar.show_logs_utility":"Show Logs utility"},
-        {"loc.menubar.show_logs_utility_brief":"Show the log utility of Vortex"},
+        {"loc.welcome":"Welcome to Vortex !"},
+        {"loc.description":"We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. After installation, you will be able to create your projects and explore all the amazing features and capabilities that Vortex provides. Enjoy your experience!"},  
+        {"loc.select_install_path":"Please select the installation path"},        
+        {"loc.download_net":"Please select the installation path"},
+        {"loc.no_local_launcher":"No local launcher to install"},
+        {"loc.no_internet":"No internet connexion"},
+        {"loc.close":"Close"},
+        {"loc.continue":"Continue"},
+        {"loc.install":"Confirm and install"},
+        {"loc.install.title":"Select your packages to install"},
+        {"loc.install.description":"Install Vortex Launcher from repository, or from this local installer"},
+        {"loc.install.no_internet":"No internet connexion, you need to have a built-in launcher."},
+        {"loc.install.no_builtin":"No builtin launcher, you need to have a internet connexion."},
+        {"loc.install.builder_is_older":"The built-in launcher is older or innexistant. We recommend using insternet to download the latest version."},
+        {"loc.install.builder_is_newer":"The built-in launcher is newer. We recommend using it to get better performances."},
+        {"loc.install.select_package":"Select pre-installed packages"},
+        {"loc.install.net_download":"Download and install from net"},
+        {"loc.install.no_net_download":"No internet connexion"},
+        {"loc.install.builtin_download":"Download and install from net"},
+        {"loc.install.no_builtin_download":"No internet connexion"}
 
-        {"loc.window_names.project_manager":"Project manager"},
-        {"loc.window_names.settings":"Main settings"},
-        {"loc.window_names.logs_utility":"Logs utility"},
-
-        {"loc.window_names.welcome":"Welcome !"},
-        {"loc.window_names.welcome.title":"Welcome to Vortex !"},
-        {"loc.window_names.welcome.fast_actions":"Fast actions"},
-        {"loc.window_names.welcome.trends":"Trends"},
-        {"loc.window_names.welcome.overview":"Overview"},
-        {"loc.window_names.welcome.contribute":"Contribute to Vortex"},
-        {"loc.window_names.welcome.sponsor":"Sponsorize Vortex"},
-        {"loc.window_names.welcome.whats_news":"What's News"},
-        {"loc.window_names.welcome.actuality":"Actuality"}
     ]
 }

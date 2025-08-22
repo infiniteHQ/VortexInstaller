@@ -6,16 +6,21 @@
 namespace VortexInstaller {
   void InstallAppWindow::RenderInstallVortex() {
     Space(30.0f);
-    Cherry::SetNextComponentProperty("color_text", "#B1FF31");
-    CherryKit::TitleThree("Welcome to Vortex !");
-    CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#777777FF"));
-    CherryGUI::TextWrapped(
-        "We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. "
-        "The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. "
-        "After installation, you will be able to create your projects and explore all the amazing features and capabilities "
-        "that Vortex provides. Enjoy your experience!");
+    {
+      float x = ImGui::GetContentRegionAvail().x;
+      float y = x / 4.726f;
+      CherryKit::ImageLocalCentered(Cherry::GetPath("resources/imgs/vortex_banner.png"), x, y);
+      CherryStyle::AddMarginX(20.0f);
+      CherryStyle::RemoveMarginY(70.0f);
+      Cherry::PushFont("ClashMedium");
+      CherryNextProp("color_text", "#FFFFFF");
+      CherryKit::TitleOne(Cherry::GetLocale("loc.welcome"));
+      Cherry::PopFont();
+    }
 
-    CherryGUI::PopStyleColor();
+    Space(30.0f);
+    CherryNextProp("color_text", "#777777FF");
+    CherryKit::TextWrapped(Cherry::GetLocale("loc.description"));
 
     Space(20.0f);
     /*auto val = std::make_shared<std::string>(m_Data->g_DefaultInstallPath);
@@ -31,8 +36,13 @@ namespace VortexInstaller {
     CherryNextComponent.SetProperty("size_x", "400.0f");
     CherryKit::InputString("", &m_Data->g_DefaultInstallPath);
 
-    ImVec2 to_remove = CherryGUI::CalcTextSize("DenyAccept");
+    std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");
+    ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
+    CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
+    CherryNextProp("color", "#222222");
+    CherryKit::Separator();
+    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 40);
 
     /*{
         auto deny = std::make_shared<Cherry::CustomButtonSimple>("Close", "Close");
@@ -42,7 +52,8 @@ namespace VortexInstaller {
         }
     }*/
 
-    if (CherryKit::ButtonText("Close").GetData("isClicked") == "true") {
+    CherryNextProp("color_text", "#B1FF31");
+    if (CherryKit::ButtonText(CherryApp.GetLocale("loc.close")).GetData("isClicked") == "true") {
       Cherry::Application().Get().Close();
     }
 
@@ -51,7 +62,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText("Continue").GetData("isClicked") == "true") {
+    if (CherryKit::ButtonText(CherryApp.GetLocale("loc.continue")).GetData("isClicked") == "true") {
       m_SelectedChildName = "Accept Licence Agreement";
       this->SetChildState("Install Vortex", true);
 
@@ -469,11 +480,11 @@ namespace VortexInstaller {
 
     Cherry::SetNextComponentProperty("color_text", "#B1FF31");
     Cherry::PushFont("ClashBold");
-    CherryKit::TitleThree("Vortex Installer");
+    // CherryKit::TitleThree("Vortex Installer");
     Cherry::PopFont();
 
     // Cherry::TitleThreeColored("Vortex Installer", "#B1FF31FF");
-    Space(10.0f);
+    Space(20.0f);
 
     for (const auto &child : m_Childs) {
       if (child.first == m_SelectedChildName) {

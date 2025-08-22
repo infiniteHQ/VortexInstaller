@@ -3,12 +3,13 @@
 #ifndef BASE_VORTEXINSTALLER_H
 #define BASE_VORTEXINSTALLER_H
 
-#include "../lib/httpcl/httpcl.h"
-#include "../lib/json/single_include/nlohmann/json.hpp"
 #include <iostream>
 
+#include "../lib/httpcl/httpcl.h"
+#include "../lib/json/single_include/nlohmann/json.hpp"
+
 #ifdef _WIN32
-#define popen _popen
+#define popen  _popen
 #define pclose _pclose
 #endif
 
@@ -31,7 +32,7 @@ static std::string ReadFile(const std::string &file_path) {
   return buffer.str();
 }
 
-static void CustomCheckbox(const std::string &label, bool activated, float radius = 7.0f) {
+static void CustomCheckbox(const std::string &label, bool *activated, float radius = 7.0f) {
   ImVec2 pos = CherryGUI::GetCursorScreenPos();
   ImDrawList *draw_list = CherryGUI::GetWindowDrawList();
 
@@ -167,65 +168,57 @@ class VortexInstallerNet {
 
  private:
   std::string Request(
-    const std::string &url,
-    const std::string &method,
-    const std::string &body ="",
-    const std::string &contentType ="") {
-
-    naettReq* req = nullptr;
+      const std::string &url,
+      const std::string &method,
+      const std::string &body = "",
+      const std::string &contentType = "") {
+    naettReq *req = nullptr;
 
     if (method == "GET") {
-        std::cout << "GET request\n";
+      std::cout << "GET request\n";
 
-    const char* URL = url.c_str();
-req = naettRequest_va(
-    URL,
-    2,
-    naettMethod("GET"),
-    naettHeader("accept", "*/*")
-);
-
+      const char *URL = url.c_str();
+      req = naettRequest_va(URL, 2, naettMethod("GET"), naettHeader("accept", "*/*"));
 
     } else if (method == "POST") {
-        std::cout << "POST request\n";
-
+      std::cout << "POST request\n";
 
     } else {
-        std::cerr << "Unsupported HTTP method: " << method << std::endl;
-        return "";
+      std::cerr << "Unsupported HTTP method: " << method << std::endl;
+      return "";
     }
 
     if (!req) {
-        std::cerr << "Failed to create request\n";
-        return "";
+      std::cerr << "Failed to create request\n";
+      return "";
     }
 
-    naettRes* res = naettMake(req);
+    naettRes *res = naettMake(req);
     if (!res) {
-        std::cerr << "Failed to make request\n";
-        naettFree(req);
-        return "";
+      std::cerr << "Failed to make request\n";
+      naettFree(req);
+      return "";
     }
 
     while (!naettComplete(res)) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     int status = naettGetStatus(res);
     if (status < 0) {
-        std::cerr << "Request failed with status: " << status << std::endl;
-        naettClose(res);
-        naettFree(req);
-        return "";
+      std::cerr << "Request failed with status: " << status << std::endl;
+      naettClose(res);
+      naettFree(req);
+      return "";
     }
 
     int length = 0;
-    const char* responseBody = static_cast<const char*>(naettGetBody(res, &length));
+    const char *responseBody = static_cast<const char *>(naettGetBody(res, &length));
     if (!responseBody || length == 0) {
-        std::cerr << "Empty response body\n";
-        naettClose(res);
-        naettFree(req);
-        return "";
+      std::cerr << "Empty response body\n";
+      naettClose(res);
+      naettFree(req);
+      return "";
     }
 
     std::string result(responseBody, length);
@@ -234,7 +227,7 @@ req = naettRequest_va(
     naettFree(req);
 
     return result;
-}
+  }
 };
 
 struct VortexInstallerData {
@@ -251,6 +244,8 @@ struct VortexInstallerData {
   std::string g_RequestVersion = "";
   std::string g_RequestTarballPath = "";
   std::string g_RequestSumPath = "";
+  std::string g_PreviousSelectedLanguage = "en";
+  std::string g_SelectedLanguage = "en";
   std::string state = "Unknown";
   std::string result = "processing";
   nlohmann::json jsonResponse;
