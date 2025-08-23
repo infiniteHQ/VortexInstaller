@@ -12,6 +12,7 @@
 #include "src/static/uninstall/uninstall.hpp"
 #include "src/static/uninstall_vx/uninstall_vx.hpp"
 #include "src/static/update/update.hpp"
+
 #ifdef _WIN32
 #include <fileapi.h>
 #include <urlmon.h>
@@ -1207,13 +1208,21 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
 
   spec.SetFramebarCallback([]() {
     CherryStyle::AddMarginY(10.0f);
+    CherryStyle::AddMarginY(3.0f);
+    if (!g_InstallerData->g_Request) {
+      CherryKit::ImageLocal(Cherry::GetPath("resources/imgs/icons/misc/icon_disconnected.png"), 15.0f, 15.0f);
+    } else {
+      CherryKit::ImageLocal(Cherry::GetPath("resources/imgs/icons/misc/icon_connected.png"), 15.0f, 15.0f);
+    }
+    CherryStyle::RemoveMarginY(3.0f);
+
     CherryNextComponent.SetProperty("size_x", 50.0f);
     CherryNextComponent.SetProperty("padding_x", 3.0f);
     CherryNextComponent.SetProperty("padding_y", 3.0f);
 
     CherryStyle::AddMarginX(20.0f);
     CherryGUI::BeginGroup();
-    // MEttre l'input en full size et cahnger please select to Installation path
+
     auto &langSelector = CherryKit::ComboImageText(
         CherryID("language_selector"),
         "",

@@ -1,5 +1,9 @@
 {
     "locales": [
+        {"loc.child.installation":"Installation"},
+        {"loc.child.summary":"Summary"},
+        {"loc.child.license":"Accept Licence Agreement"},
+        {"loc.child.main":"Install Vortex"},
         {"loc.welcome":"Welcome to Vortex !"},
         {"loc.description":"We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. After installation, you will be able to create your projects and explore all the amazing features and capabilities that Vortex provides. Enjoy your experience!"},  
         {"loc.select_install_path":"Please select the installation path"},        
@@ -22,6 +26,9 @@
         {"loc.install.net_download":"Download and install from net"},
         {"loc.install.no_net_download":"No internet connexion"},
         {"loc.install.builtin_download":"Download and install from net"},
+        {"loc.install.result_failed":"Oups, an error was occured"},
+        {"loc.install.result_success":"Vortex Launcher is now installed !"},
+        {"loc.install.result_processing":"Installation of Vortex Launcher"},
         {"loc.install.no_builtin_download":"No internet connexion"}
 
     ]

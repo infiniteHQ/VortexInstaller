@@ -64,59 +64,62 @@ int main(int argc, char *argv[]) {
   DetectPlatform();
   DetectArch();
 
-  std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-  std::string url =
-      "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
-
-  std::string body = g_InstallerData->net.GET(url);
-
-  if (body.empty()) {
-    VXI_LOG("Error: Empty response or request failed");
-    g_InstallerData->g_Request = false;
-  } else {
-    g_InstallerData->g_Request = true;
-    try {
-      g_InstallerData->jsonResponse = nlohmann::json::parse(body);
-
-      if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
-        std::string values_str = g_InstallerData->jsonResponse[0]["values"];
-
-        g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
-
-        if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string()) {
-          g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
-          VXI_LOG("Tarball Path: " << g_InstallerData->g_RequestTarballPath);
-        } else {
-          VXI_LOG("Error: 'path' key missing or not a string");
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string()) {
-          g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
-          VXI_LOG("Sum Path: " << g_InstallerData->g_RequestSumPath);
-        } else {
-          VXI_LOG("Error: 'sum' key missing or not a string");
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("version") &&
-            g_InstallerData->g_RequestValues["version"].is_string()) {
-          g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
-          VXI_LOG("Version: " << g_InstallerData->g_RequestVersion);
-        } else {
-          VXI_LOG("Error: 'version' key missing or not a string");
-        }
-      } else {
-        VXI_LOG("Unexpected JSON format or empty response.");
-      }
-    } catch (nlohmann::json::parse_error &e) {
-      VXI_LOG("JSON Parse Error: " << e.what());
+  std::thread([=]() {
+    if (g_InstallerData->net.CheckNet()) {
+      g_InstallerData->g_Request = true;
     }
-  }
+  }).detach();
 
-  if (g_InstallerData->g_Request) {
-    VXI_LOG(r.body);
-  } else {
-    //
-  }
+  std::thread([=]() {
+    while (!g_InstallerData->g_NetFetched) {
+      if (g_InstallerData->g_Request) {
+        std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
+        std::string url =
+            "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
+
+        std::string body = g_InstallerData->net.GET(url);
+
+        try {
+          g_InstallerData->jsonResponse = nlohmann::json::parse(body);
+
+          if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
+            std::string values_str = g_InstallerData->jsonResponse[0]["values"];
+
+            g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
+
+            if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string()) {
+              g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
+              VXI_LOG("Tarball Path: " << g_InstallerData->g_RequestTarballPath);
+            } else {
+              VXI_LOG("Error: 'path' key missing or not a string");
+            }
+
+            if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string()) {
+              g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
+              VXI_LOG("Sum Path: " << g_InstallerData->g_RequestSumPath);
+            } else {
+              VXI_LOG("Error: 'sum' key missing or not a string");
+            }
+
+            if (g_InstallerData->g_RequestValues.contains("version") &&
+                g_InstallerData->g_RequestValues["version"].is_string()) {
+              g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
+              VXI_LOG("Version: " << g_InstallerData->g_RequestVersion);
+            } else {
+              VXI_LOG("Error: 'version' key missing or not a string");
+            }
+          } else {
+            VXI_LOG("Unexpected JSON format or empty response.");
+          }
+        } catch (nlohmann::json::parse_error &e) {
+          VXI_LOG("JSON Parse Error: " << e.what());
+        }
+
+        g_InstallerData->g_NetFetched = true;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+  }).detach();
 
   std::string builtin_manifest = Cherry::GetPath("builtin/manifest.json");
 
@@ -146,10 +149,11 @@ int main(int argc, char *argv[]) {
   }
 
   // Check if the local builtin launcher is equals or higher to the net
-  if (CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version)) {
-    g_InstallerData->g_UseNet = false;
-    g_InstallerData->m_BuiltinLauncherNewer = true;
-  }
+  if (g_InstallerData->m_BuiltinLauncherExist)
+    if (CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version)) {
+      g_InstallerData->g_UseNet = false;
+      g_InstallerData->m_BuiltinLauncherNewer = true;
+    }
 
   parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 
@@ -165,9 +169,9 @@ int main(int argc, char *argv[]) {
 #ifdef _WIN32
 #include <windows.h>
 
-extern int main(int argc, char* argv[]);
+extern int main(int argc, char *argv[]);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    return main(__argc, __argv);
+  return main(__argc, __argv);
 }
 #endif

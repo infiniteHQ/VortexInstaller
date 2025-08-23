@@ -13,6 +13,16 @@
 #define pclose _pclose
 #endif
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#pragma comment(lib, "Ws2_32.lib")
+#else
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <unistd.h>
+#endif
+
 static void Space(const float &space) {
   CherryGUI::BeginDisabled();
   CherryGUI::PushStyleColor(ImGuiCol_Border, ImVec4(1.0f, 1.0f, 1.0f, 0.0f));
@@ -156,8 +166,27 @@ class VortexInstallerNet {
   }
 
   bool CheckNet() {
-    std::string res = GET("http://api.infinite.si:8000/");
-    return !res.empty();
+#ifdef _WIN32
+    WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+      return false;
+    }
+#endif
+
+    addrinfo hints{}, *res = nullptr;
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+
+    int status = getaddrinfo("infinite.si", "80", &hints, &res);
+
+    if (res)
+      freeaddrinfo(res);
+
+#ifdef _WIN32
+    WSACleanup();
+#endif
+
+    return (status == 0);
   }
   std::string GET(const std::string &url) {
     return Request(url, "GET");
@@ -251,6 +280,8 @@ struct VortexInstallerData {
   nlohmann::json jsonResponse;
   nlohmann::json g_RequestValues;
   bool g_Request = false;
+  bool g_NetFetched = false;
+  bool g_NetAvailable = true;
   bool g_UseNet = true;
   bool g_VortexLauncherOutdated = false;
   bool finished = false;
