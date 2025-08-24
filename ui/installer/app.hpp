@@ -1,8 +1,10 @@
 #pragma once
 #define CHERRY_V1
+#include <algorithm>
 #include <cstdlib>
 #include <filesystem>
 #include <memory>
+#include <string>
 #include <thread>
 
 #include "../../lib/cherry/cherry.hpp"
@@ -12,6 +14,62 @@
 #include "src/static/uninstall/uninstall.hpp"
 #include "src/static/uninstall_vx/uninstall_vx.hpp"
 #include "src/static/update/update.hpp"
+
+#if defined(_WIN32)
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <CoreFoundation/CFLocale.h>
+#include <CoreFoundation/CFString.h>
+#endif
+
+static std::string DetectSystemLanguage() {
+#if defined(_WIN32)
+  wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
+  if (GetUserDefaultLocaleName(localeName, LOCALE_NAME_MAX_LENGTH)) {
+    char buffer[LOCALE_NAME_MAX_LENGTH];
+    wcstombs(buffer, localeName, LOCALE_NAME_MAX_LENGTH);
+    std::string lang(buffer);
+
+    auto pos = lang.find('-');
+    if (pos != std::string::npos)
+      lang = lang.substr(0, pos);
+
+    std::transform(lang.begin(), lang.end(), lang.begin(), ::tolower);
+    return lang;
+  }
+#else
+  const char *envVars[] = { "LC_ALL", "LANG", "LC_MESSAGES" };
+  for (auto var : envVars) {
+    const char *val = std::getenv(var);
+    if (val && *val) {
+      std::string s(val);
+
+      auto pos = s.find('_');
+      if (pos != std::string::npos)
+        s = s.substr(0, pos);
+      pos = s.find('.');
+      if (pos != std::string::npos)
+        s = s.substr(0, pos);
+
+      std::transform(s.begin(), s.end(), s.begin(), ::tolower);
+      return s;
+    }
+  }
+#endif
+  return "en";
+}
+
+static int GetDefaultSelectedLanguage() {
+  std::string sysLang = DetectSystemLanguage();
+  std::transform(sysLang.begin(), sysLang.end(), sysLang.begin(), ::tolower);
+
+  if (sysLang.find("fr") != std::string::npos) {
+    return 1;
+  } else if (sysLang.find("es") != std::string::npos) {
+    return 2;
+  }
+  return 0;
+}
 
 #ifdef _WIN32
 #include <fileapi.h>
@@ -1223,6 +1281,8 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
     CherryStyle::AddMarginX(20.0f);
     CherryGUI::BeginGroup();
 
+    static int default_selected = GetDefaultSelectedLanguage();
+
     auto &langSelector = CherryKit::ComboImageText(
         CherryID("language_selector"),
         "",
@@ -1230,7 +1290,8 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
             { "English", Cherry::GetPath("resources/imgs/icons/flags/us.png") },
             { "Français", Cherry::GetPath("resources/imgs/icons/flags/fr.png") },
             { "Español", Cherry::GetPath("resources/imgs/icons/flags/es.png") },
-        });
+        },
+        default_selected);
 
     int selectedIndex = langSelector.GetPropertyAs<int>("selected");
 
