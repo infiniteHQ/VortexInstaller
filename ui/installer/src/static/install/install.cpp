@@ -305,7 +305,7 @@ namespace VortexInstaller {
                   CherryStyle::PushFontSize(0.70f);
                   if (package_base) {
                     CherryNextComponent.SetProperty("color_text", "#B1FF31");
-                    CherryKit::TextSimple("Selected");
+                    CherryKit::TextSimple("Required");
                   }
                   CherryStyle::PopFontSize();
                 },
