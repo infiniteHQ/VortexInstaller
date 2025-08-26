@@ -1,5 +1,4 @@
 #pragma once
-#define CHERRY_V1
 #include <algorithm>
 #include <cstdlib>
 #include <filesystem>

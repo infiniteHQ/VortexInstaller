@@ -4,23 +4,13 @@
 #define BASE_VORTEXINSTALLER_H
 
 #include <iostream>
-
+#include "../lib/cherry/cherry.hpp"
 #include "../lib/httpcl/httpcl.h"
 #include "../lib/json/single_include/nlohmann/json.hpp"
 
 #ifdef _WIN32
 #define popen  _popen
 #define pclose _pclose
-#endif
-
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#pragma comment(lib, "Ws2_32.lib")
-#else
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
 #endif
 
 static void Space(const float &space) {
@@ -165,29 +155,7 @@ class VortexInstallerNet {
   ~VortexInstallerNet() {
   }
 
-  bool CheckNet() {
-#ifdef _WIN32
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-      return false;
-    }
-#endif
-
-    addrinfo hints{}, *res = nullptr;
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-
-    int status = getaddrinfo("infinite.si", "80", &hints, &res);
-
-    if (res)
-      freeaddrinfo(res);
-
-#ifdef _WIN32
-    WSACleanup();
-#endif
-
-    return (status == 0);
-  }
+  bool CheckNet();
   std::string GET(const std::string &url) {
     return Request(url, "GET");
   }
