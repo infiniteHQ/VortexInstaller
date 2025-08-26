@@ -16,7 +16,7 @@ bool VortexInstallerNet::CheckNet() {
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
 
-    int status = getaddrinfo("google.com", "80", &hints, &res);
+    int status = getaddrinfo("infinite.si", "80", &hints, &res);
 
     if (res)
         freeaddrinfo(res);
