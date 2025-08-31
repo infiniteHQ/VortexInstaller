@@ -11,6 +11,7 @@
         {"loc.child.uninstall_vortex":"Uninstall Vortex"},
         {"loc.child.installation_vortex_editor":"Install Vortex Editor"},
         {"loc.welcome":"Welcome to Vortex !"},
+        {"loc.vortex_editor_uninstall":"Vortex Editor uninstallation wizard"},
         {"loc.vortex_editor_install":"Install a new version of the Editor"},
         {"loc.uninstallation":"Vortex uninstallation wizard"},
         {"loc.description":"We re glad to see you here. This software is an installation wizard that can help you install the Vortex Launcher. The Vortex Launcher is a powerful tool designed to assist you in managing projects, modules, plugins, and content. After installation, you will be able to create your projects and explore all the amazing features and capabilities that Vortex provides. Enjoy your experience!"},  
@@ -63,6 +64,12 @@
         {"loc.vxinstall.success":"Vortex Editor is now installed !"},
         {"loc.vxinstall.fail":"Oups, an error was occured"},
 
+        {"loc.vxuninstall.summary":"This software will help you to uninstall vortex editor versions"},
+        {"loc.vxuninstall.delete_action":"This action will delete the current Vortex Editor regitered at"},
+        {"loc.vxuninstall.processing":"Uninstallation..."},
+        {"loc.vxuninstall.success":"Uninstallation well done !"},
+        {"loc.vxuninstall.fail":"Oups, an error was occured"},
+    
         {"loc.update.no":"No internet connexion"},
         {"loc.update.is_updated":"Vortex Launcher is updated !"},
         {"loc.update.can_update":"A new update is available !"},

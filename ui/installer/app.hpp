@@ -1313,10 +1313,9 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   spec.UniqueAppWindowName = "?loc:loc.window_names.welcome";
 
   spec.SetFramebarCallback([]() {
-    CherryStyle::AddMarginY(10.0f);
     CherryStyle::AddMarginY(3.0f);
-
-    if (g_InstallerData->g_Action != "uninstall") {
+    if (g_InstallerData->g_Action != "uninstall" &&
+        g_InstallerData->g_Action != "vxuninstall") {
       if (!g_InstallerData->g_Request) {
         CherryKit::ImageLocal(
             Cherry::GetPath("resources/imgs/icons/misc/icon_disconnected.png"),
@@ -1327,17 +1326,18 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
             15.0f, 15.0f);
       }
     }
-    CherryStyle::RemoveMarginY(3.0f);
 
     CherryNextComponent.SetProperty("size_x", 50.0f);
     CherryNextComponent.SetProperty("padding_x", 3.0f);
     CherryNextComponent.SetProperty("padding_y", 3.0f);
 
-    CherryStyle::AddMarginX(20.0f);
+    CherryStyle::AddMarginX(7.0f);
+    CherryStyle::RemoveMarginY(4.0f);
     CherryGUI::BeginGroup();
 
     static int default_selected = GetDefaultSelectedLanguage();
 
+    CherryNextComponent.SetProperty("disable_text", "true");
     auto &langSelector = CherryKit::ComboImageText(
         CherryID("language_selector"), "",
         {

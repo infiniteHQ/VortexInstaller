@@ -614,6 +614,13 @@ void InstallAppWindow::RenderInstall() {
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.launch_launcher"))
             .GetData("isClicked") == "true") {
       // Start launcher
+      std::thread([=]() {
+        std::string installPath = m_Data->g_DefaultInstallPath;
+        std::string cmd = installPath + "/bin/vortex_launcher";
+        std::system(cmd.c_str());
+      }).detach();
+
+      Cherry::Application().Get().Close();
     }
 
   } else if (m_Data->result == "fail") {
