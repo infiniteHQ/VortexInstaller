@@ -50,7 +50,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 
-add_executable(vxinstaller src/vxinstaller.cpp)
+add_executable(vxinstaller src/vxinstaller.cpp src/base.cpp)
 target_link_libraries(vxinstaller PRIVATE installer httpcl spdlog cherry)
 if (WIN32)
     target_link_libraries(vxinstaller PRIVATE urlmon)
