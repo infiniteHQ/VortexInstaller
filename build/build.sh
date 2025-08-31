@@ -1,4 +1,19 @@
 #!/bin/sh
+
+NO_INSTALLER=false
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    -ni|--no_installer)
+      NO_INSTALLER=true
+      shift
+      ;;
+    *)
+      echo "Unknown option : $1"
+      exit 1
+      ;;
+  esac
+done
+
 mkdir build_spdlog
 mkdir build
 
@@ -30,6 +45,9 @@ MANIFEST_FLAG=""
 if [[ -f "manifest.json" ]]; then
     MANIFEST_FLAG="--add-data manifest.json:."
 fi
+
+
+if [ "$NO_INSTALLER" = false ]; then
 
 pyinstaller --onefile --name VortexInstaller --icon=icon.png \
     --add-data "vortex_installer:." \
@@ -91,6 +109,8 @@ pyinstaller --onefile --name VersionInstaller --icon=icon.png \
 
 rm icon.png main.py
 cd ../..
+fi
+
 
 cp build/bin/dist/* build/bin
 rm -rf build/bin/build
