@@ -30,6 +30,7 @@ void UpdateAppWindow::RenderUpdateVortex() {
 
   CherryKit::Space(20.0f);
 
+  Cherry::SetNextComponentProperty("color_text", "#767676");
   if (!m_Data->g_Request) {
     CherryKit::TextWrapped(
         CherryApp.GetLocale("loc.update.explain_no_internet"));
@@ -59,7 +60,6 @@ void UpdateAppWindow::RenderUpdateVortex() {
 
   ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
   CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 52.0f);
-  Cherry::SetNextComponentProperty("color_text", "#767676");
   CherryKit::TextSimple("Distribution : " + m_Data->g_Distribution);
 
   CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x -
