@@ -91,46 +91,62 @@ int main(int argc, char *argv[]) {
 
   RefreshEnvironmentVortexVersionsPools();
   g_InstallerData->m_VortexPools = version_pools;
+  std::thread([=]() {
+    if (g_InstallerData->net.CheckNet()) {
+      g_InstallerData->g_Request = true;
+    }
+  }).detach();
 
-  std::string url = "http://api.infinite.si:9000/api/vortexupdates/get_filtered_v_versions?platform=" + platform +
-                    "&dist=" + dist + "&arch=" + arch + "&version=" + version;
+  std::thread([=]() {
+    while (!g_InstallerData->g_NetFetched) {
+      if (g_InstallerData->g_Request) {
+        std::string url = "http://api.infinite.si:9000/api/vortexupdates/"
+                          "get_filtered_v_versions?platform=" +
+                          platform + "&dist=" + dist + "&arch=" + arch +
+                          "&version=" + version;
 
-  std::string body = g_InstallerData->net.GET(url);
+        std::string body = g_InstallerData->net.GET(url);
+        auto json_response = nlohmann::json::parse(body);
+        std::vector<VortexVersion> versions;
 
-  auto json_response = nlohmann::json::parse(body);
-  std::vector<VortexVersion> versions;
+        for (const auto &item : json_response) {
+          VortexVersion v;
+          v.id = item["id"].get<int>();
+          v.version = item["version"].get<std::string>();
+          v.name = item["name"].get<std::string>();
+          v.arch = item["arch"].get<std::string>();
+          v.dist = item["dist"].get<std::string>();
+          v.path = item["path"].get<std::string>();
+          v.sum = item["sum"].get<std::string>();
+          g_InstallerData->g_RequestTarballPath = v.path;
+          g_InstallerData->g_RequestSumPath = v.sum; // TODO
+          v.platform = item["platform"].get<std::string>();
+          v.date = item["date"].get<std::string>();
+          v.created_at = item["created_at"].get<std::string>();
 
-  for (const auto &item : json_response) {
-    VortexVersion v;
-    v.id = item["id"].get<int>();
-    v.version = item["version"].get<std::string>();
-    v.name = item["name"].get<std::string>();
-    v.arch = item["arch"].get<std::string>();
-    v.dist = item["dist"].get<std::string>();
-    v.path = item["path"].get<std::string>();
-    v.sum = item["sum"].get<std::string>();
-    g_InstallerData->g_RequestTarballPath = v.path;
-    g_InstallerData->g_RequestSumPath = v.sum;  // TODO
-    v.platform = item["platform"].get<std::string>();
-    v.date = item["date"].get<std::string>();
-    v.created_at = item["created_at"].get<std::string>();
+          if (item.contains("values")) {
+            auto values =
+                nlohmann::json::parse(item["values"].get<std::string>());
+            if (values.contains("image")) {
+              v.banner = values["image"].get<std::string>();
+            }
+          }
 
-    if (item.contains("values")) {
-      auto values = nlohmann::json::parse(item["values"].get<std::string>());
-      if (values.contains("image")) {
-        v.banner = values["image"].get<std::string>();
+          versions.push_back(v);
+        }
+
+        for (auto &v : versions) {
+          if (v.version == version && v.arch == arch) {
+            g_InstallerData->m_SelectedVortexVersion = v;
+            break;
+          }
+        }
+        g_InstallerData->g_NetFetched = true;
       }
-    }
 
-    versions.push_back(v);
-  }
-
-  for (auto &v : versions) {
-    if (v.version == version && v.arch == arch) {
-      g_InstallerData->m_SelectedVortexVersion = v;
-      break;
+      std::this_thread::sleep_for(std::chrono::seconds(2));
     }
-  }
+  }).detach();
 
   std::thread mainThread([&]() { Cherry::Main(argc, argv); });
 
@@ -144,9 +160,9 @@ int main(int argc, char *argv[]) {
 #ifdef _WIN32
 #include <windows.h>
 
-extern int main(int argc, char* argv[]);
+extern int main(int argc, char *argv[]);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    return main(__argc, __argv);
+  return main(__argc, __argv);
 }
 #endif
