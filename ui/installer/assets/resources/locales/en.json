@@ -10,12 +10,21 @@
         {"loc.download_net":"Please select the installation path"},
         {"loc.no_local_launcher":"No local launcher to install"},
         {"loc.no_internet":"No internet connexion"},
+        {"loc.comming_soon":"Comming soon..."},
         {"loc.close":"Close"},
+        {"loc.update":"Update"},
         {"loc.accept":"Accept"},
+        {"loc.finish":"Finish"},
+        {"loc.available_soon":"Available soon"},
+        {"loc.required":"Required"},
+        {"loc.selected":"Selected"},
         {"loc.launch_launcher":"Finish and launch"},
         {"loc.continue":"Continue"},
         {"loc.confirg_install":"Confirm and install"},
+        {"loc.error.no_internet_and_builtin": "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation."},
+        
         {"loc.install":"Confirm and install"},
+        {"loc.install.select_packages":"Select packages"},
         {"loc.install.title":"Select your packages to install"},
         {"loc.install.description":"Install Vortex Launcher from repository, or from this local installer"},
         {"loc.install.no_internet":"No internet connexion, you need to have a built-in launcher."},
@@ -24,12 +33,23 @@
         {"loc.install.builder_is_newer":"The built-in launcher is newer. We recommend using it to get better performances."},
         {"loc.install.select_package":"Select pre-installed packages"},
         {"loc.install.net_download":"Download and install from net"},
+        {"loc.install.no_local_launcher":"No local Launcher to install..."},
         {"loc.install.no_net_download":"No internet connexion"},
-        {"loc.install.builtin_download":"Download and install from net"},
+        {"loc.install.builtin_install":"Install from this installer"},
         {"loc.install.result_failed":"Oups, an error was occured"},
         {"loc.install.result_success":"Vortex Launcher is now installed !"},
         {"loc.install.result_processing":"Installation of Vortex Launcher"},
-        {"loc.install.no_builtin_download":"No internet connexion"}
+        {"loc.install.install_path":"Path where Vortex will be installed"},
+        {"loc.install.install_path_is": "The installation path is"},
+        {"loc.install.install_summary":"Install Vortex Launcher from repository, or from this local installer"},
+        {"loc.install.offline_mode":"Offline mode, the web installation is not available."},
+        {"loc.install.wait_fetch":"Waiting to fetch online Vortex Launcher versions, please wait."},
+        {"loc.install.install_path_already_exist": "CAUTION : The installation directory already exist. This installation will erase everything !"},
+        {"loc.install.erase_and_install": "Erase the folder and install Vortex"},
+
+        {"loc.update.no":"No internet connexion"},
+        {"loc.update.is_updated":"Vortex Launcher is updated !"},
+        {"loc.update.can_update":"A new update is available !"}
 
     ]
 }
