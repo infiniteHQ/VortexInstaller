@@ -618,7 +618,14 @@ void InstallAppWindow::RenderInstall() {
       // Start launcher
       std::thread([=]() {
         std::string installPath = m_Data->g_DefaultInstallPath;
+
+        
+#if defined(_WIN32)
+        std::string cmd = "\""+installPath + "\\bin\\vortex_launcher.exe\"";
+#else
         std::string cmd = installPath + "/bin/vortex_launcher";
+#endif
+        
         std::system(cmd.c_str());
       }).detach();
 
