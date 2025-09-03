@@ -93,6 +93,5 @@
         {"loc.uninstall.processing":"Uninstallation..."},
         {"loc.uninstall.success":"Uninstallation well done !"},
         {"loc.uninstall.fail":"Oups, an error was occured"}
-
     ]
 }
