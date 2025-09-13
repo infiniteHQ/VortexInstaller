@@ -139,6 +139,10 @@ namespace VortexInstaller {
       CherryGUI::TextColored(Cherry::HexToRGBA("#FF3535FF"), Cherry::GetLocale("loc.install.no_builtin").c_str());
     }
 
+    if (m_Data->m_NetLauncherNewer) {
+      m_Data->g_UseNet = true;
+    }
+
     if (!m_Data->m_BuiltinLauncherExist && !m_Data->g_Request) {
       m_Data->result = "fail";
       m_Data->state = Cherry::GetLocale("loc.error.no_internet_and_builtin");

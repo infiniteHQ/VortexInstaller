@@ -118,15 +118,14 @@ int main(int argc, char *argv[]) {
 
         // Check if the local builtin launcher is equals or higher to the net
         if (g_InstallerData->m_BuiltinLauncherExist)
-          if (CompareVersions(g_InstallerData->m_BuiltinLauncher.version, g_InstallerData->g_RequestVersion)) {
+          if (CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version)) {
             g_InstallerData->g_UseNet = false;
             g_InstallerData->m_BuiltinLauncherNewer = true;
+          } else {
+            g_InstallerData->m_NetLauncherNewer = true;
           }
 
-        std::cout << "Same version" << g_InstallerData->m_BuiltinLauncher.version << "adg"
-                  << g_InstallerData->g_RequestVersion << std::endl;
         if (g_InstallerData->m_BuiltinLauncher.version == g_InstallerData->g_RequestVersion) {
-          std::cout << "Same version" << std::endl;
           g_InstallerData->g_UseNet = false;
           g_InstallerData->m_BuiltinLauncherNewer = true;
         }

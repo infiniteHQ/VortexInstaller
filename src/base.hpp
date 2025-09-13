@@ -10,7 +10,7 @@
 #include "../lib/json/single_include/nlohmann/json.hpp"
 
 #ifdef _WIN32
-#define popen _popen
+#define popen  _popen
 #define pclose _pclose
 #endif
 
@@ -33,9 +33,8 @@ static std::string ReadFile(const std::string &file_path) {
   return buffer.str();
 }
 
-static void CustomCheckbox(const std::string &label, bool *activated,
-                           float radius = 7.0f,
-                           const std::string hex = "#B1FF31FF") {
+static void
+CustomCheckbox(const std::string &label, bool *activated, float radius = 7.0f, const std::string hex = "#B1FF31FF") {
   ImVec2 pos = CherryGUI::GetCursorScreenPos();
   ImDrawList *draw_list = CherryGUI::GetWindowDrawList();
 
@@ -43,18 +42,14 @@ static void CustomCheckbox(const std::string &label, bool *activated,
 
   float offset_y = (text_size.y - radius * 2.0f) * 0.5f;
 
-  ImU32 color_bg =
-      activated ? IM_COL32(70, 70, 70, 255) : IM_COL32(50, 50, 50, 255);
+  ImU32 color_bg = activated ? IM_COL32(70, 70, 70, 255) : IM_COL32(50, 50, 50, 255);
 
   ImU32 color_check = Cherry::HexToImU32(hex);
 
-  draw_list->AddCircleFilled(ImVec2(pos.x + radius, pos.y + radius + offset_y),
-                             radius, color_bg, 16);
+  draw_list->AddCircleFilled(ImVec2(pos.x + radius, pos.y + radius + offset_y), radius, color_bg, 16);
 
   if (activated) {
-    draw_list->AddCircleFilled(
-        ImVec2(pos.x + radius, pos.y + radius + offset_y), radius * 0.6f,
-        color_check, 16);
+    draw_list->AddCircleFilled(ImVec2(pos.x + radius, pos.y + radius + offset_y), radius * 0.6f, color_check, 16);
   }
 
   CherryGUI::Dummy(ImVec2(radius * 2.0f, radius * 2.0f));
@@ -114,8 +109,7 @@ static void printManifest(const std::string &manifestPath) {
   manifestFile.close();
 }
 
-static std::string findManifestJson(const std::filesystem::path &startPath,
-                                    int maxDepth = 10) {
+static std::string findManifestJson(const std::filesystem::path &startPath, int maxDepth = 10) {
   std::filesystem::path currentPath = startPath;
   int depth = 0;
 
@@ -156,29 +150,34 @@ struct VortexBuiltinLauncher {
 };
 
 class VortexInstallerNet {
-public:
-  VortexInstallerNet() { naettInit(nullptr); }
-  ~VortexInstallerNet() {}
+ public:
+  VortexInstallerNet() {
+    naettInit(nullptr);
+  }
+  ~VortexInstallerNet() {
+  }
 
   bool CheckNet();
-  std::string GET(const std::string &url) { return Request(url, "GET"); }
-  std::string POST(const std::string &url, const std::string &body,
-                   const std::string &contentType = "application/json") {
+  std::string GET(const std::string &url) {
+    return Request(url, "GET");
+  }
+  std::string POST(const std::string &url, const std::string &body, const std::string &contentType = "application/json") {
     return Request(url, "POST", body, contentType);
   }
 
-private:
-  std::string Request(const std::string &url, const std::string &method,
-                      const std::string &body = "",
-                      const std::string &contentType = "") {
+ private:
+  std::string Request(
+      const std::string &url,
+      const std::string &method,
+      const std::string &body = "",
+      const std::string &contentType = "") {
     naettReq *req = nullptr;
 
     if (method == "GET") {
       std::cout << "GET request\n";
 
       const char *URL = url.c_str();
-      req = naettRequest_va(URL, 2, naettMethod("GET"),
-                            naettHeader("accept", "*/*"));
+      req = naettRequest_va(URL, 2, naettMethod("GET"), naettHeader("accept", "*/*"));
 
     } else if (method == "POST") {
       std::cout << "POST request\n";
@@ -213,8 +212,7 @@ private:
     }
 
     int length = 0;
-    const char *responseBody =
-        static_cast<const char *>(naettGetBody(res, &length));
+    const char *responseBody = static_cast<const char *>(naettGetBody(res, &length));
     if (!responseBody || length == 0) {
       std::cerr << "Empty response body\n";
       naettClose(res);
@@ -263,9 +261,7 @@ struct VortexInstallerData {
   std::function<void()> m_DowngradeCallback;
   std::function<void()> m_InstallVortexCallback;
   std::function<void()> m_UninstallVortexCallback;
-  std::function<void(const bool &vxlauncher, const bool &vx,
-                     const bool &vxdata)>
-      m_DeleteCallback;
+  std::function<void(const bool &vxlauncher, const bool &vx, const bool &vxdata)> m_DeleteCallback;
 
   VortexInstallerNet net;
 
@@ -273,8 +269,9 @@ struct VortexInstallerData {
   VortexBuiltinLauncher m_BuiltinLauncher;
   bool m_BuiltinLauncherExist = false;
   bool m_BuiltinLauncherNewer = false;
+  bool m_NetLauncherNewer = false;
   bool m_FolderAlreadyExist;
   std::vector<std::string> m_VortexPools;
 };
 
-#endif // BASE_VORTEXINSTALLER_H
+#endif  // BASE_VORTEXINSTALLER_H
