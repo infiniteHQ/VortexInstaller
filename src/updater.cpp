@@ -33,7 +33,7 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
   }
 }
 
-std::vector<int> splitVersion(const std::string &version) {
+std::vector<int> SeparateVersion(const std::string &version) {
   std::vector<int> versionParts;
   std::stringstream ss(version);
   std::string part;
@@ -49,9 +49,9 @@ std::vector<int> splitVersion(const std::string &version) {
   return versionParts;
 }
 
-bool isVersionGreater(const std::string &manifestVersion, const std::string &requestVersion) {
-  std::vector<int> v1 = splitVersion(manifestVersion);
-  std::vector<int> v2 = splitVersion(requestVersion);
+bool CompareVersions(const std::string &version, const std::string &comparate_version, bool strict = false) {
+  std::vector<int> v1 = SeparateVersion(version);
+  std::vector<int> v2 = SeparateVersion(comparate_version);
 
   for (size_t i = 0; i < 3; ++i) {
     if (v2[i] > v1[i]) {
@@ -61,11 +61,10 @@ bool isVersionGreater(const std::string &manifestVersion, const std::string &req
     }
   }
 
-  return false;
+  return !strict;
 }
-
 std::string normalizeVersion(const std::string &version) {
-  std::vector<int> versionParts = splitVersion(version);
+  std::vector<int> versionParts = SeparateVersion(version);
 
   std::stringstream ss;
   ss << versionParts[0] << "." << versionParts[1] << "." << versionParts[2];
@@ -93,10 +92,8 @@ int main(int argc, char *argv[]) {
     while (!g_InstallerData->g_NetFetched) {
       if (g_InstallerData->g_Request) {
         std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-        // std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" +
-        // g_InstallerData->g_Arch;
-
-        std::string url = "https://api.infinite.si";
+        std::string url =
+            "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
 
         std::string body = g_InstallerData->net.GET(url);
 
@@ -150,6 +147,40 @@ int main(int argc, char *argv[]) {
         }
         std::cout << "456" << std::endl;
 
+        std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
+        if (!manifestPath.empty()) {
+          std::cout << "Found manifest.json at: " << manifestPath << std::endl;
+
+          g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
+          if (!g_InstallerData->g_ManifestVersion.empty()) {
+            std::cout << "132" << std::endl;
+            g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
+            std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
+
+            std::cout << "Manifest version: " << g_InstallerData->g_ManifestVersion << std::endl;
+            std::cout << "Requested version: " << requestVersion << std::endl;
+
+            if (requestVersion == g_InstallerData->g_ManifestVersion) {
+              g_InstallerData->g_VortexLauncherOutdated = false;
+            } else {
+              bool isGreater = CompareVersions(g_InstallerData->g_ManifestVersion, requestVersion);
+              if (isGreater) {
+                g_InstallerData->g_VortexLauncherOutdated = true;
+                std::cout << "Requested version is greater than manifest version. VortexLauncher is outdated." << std::endl;
+              } else {
+                g_InstallerData->g_VortexLauncherOutdated = false;
+                std::cout << "Requested version is not greater than manifest version. VortexLauncher is up to date."
+                          << std::endl;
+              }
+            }
+
+          } else {
+            std::cerr << "Failed to extract version from manifest.json!" << std::endl;
+          }
+        } else {
+          std::cerr << "manifest.json not found!" << std::endl;
+        }
+
         g_InstallerData->g_NetFetched = true;
       }
       std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -159,34 +190,6 @@ int main(int argc, char *argv[]) {
   if (g_InstallerData->g_WorkingPath.empty()) {
     g_InstallerData->g_WorkingPath = CookPath("");
     std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
-  }
-
-  std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
-  if (!manifestPath.empty()) {
-    std::cout << "Found manifest.json at: " << manifestPath << std::endl;
-
-    g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
-    if (!g_InstallerData->g_ManifestVersion.empty()) {
-      std::cout << "132" << std::endl;
-      g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
-      std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
-
-      std::cout << "Manifest version: " << g_InstallerData->g_ManifestVersion << std::endl;
-      std::cout << "Requested version: " << requestVersion << std::endl;
-
-      bool isGreater = isVersionGreater(requestVersion, g_InstallerData->g_ManifestVersion);
-      if (isGreater) {
-        g_InstallerData->g_VortexLauncherOutdated = true;
-        std::cout << "Requested version is greater than manifest version. VortexLauncher is outdated." << std::endl;
-      } else {
-        g_InstallerData->g_VortexLauncherOutdated = false;
-        std::cout << "Requested version is not greater than manifest version. VortexLauncher is up to date." << std::endl;
-      }
-    } else {
-      std::cerr << "Failed to extract version from manifest.json!" << std::endl;
-    }
-  } else {
-    std::cerr << "manifest.json not found!" << std::endl;
   }
 
   std::cout << "132" << std::endl;
