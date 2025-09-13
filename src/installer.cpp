@@ -36,6 +36,7 @@ bool CompareVersions(const std::string &version, const std::string &comparate_ve
 
   return !strict;
 }
+
 void parseArguments(int argc, char *argv[], std::string &action, std::string &path, std::string &home) {
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -115,6 +116,20 @@ int main(int argc, char *argv[]) {
           VXI_LOG("JSON Parse Error: " << e.what());
         }
 
+        // Check if the local builtin launcher is equals or higher to the net
+        if (g_InstallerData->m_BuiltinLauncherExist)
+          if (CompareVersions(g_InstallerData->m_BuiltinLauncher.version, g_InstallerData->g_RequestVersion)) {
+            g_InstallerData->g_UseNet = false;
+            g_InstallerData->m_BuiltinLauncherNewer = true;
+          }
+
+        std::cout << "Same version" << g_InstallerData->m_BuiltinLauncher.version << "adg"
+                  << g_InstallerData->g_RequestVersion << std::endl;
+        if (g_InstallerData->m_BuiltinLauncher.version == g_InstallerData->g_RequestVersion) {
+          std::cout << "Same version" << std::endl;
+          g_InstallerData->g_UseNet = false;
+          g_InstallerData->m_BuiltinLauncherNewer = true;
+        }
         g_InstallerData->g_NetFetched = true;
       }
       std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -147,13 +162,6 @@ int main(int argc, char *argv[]) {
   } else {
     std::cerr << "Manifest file does not exist!" << std::endl;
   }
-
-  // Check if the local builtin launcher is equals or higher to the net
-  if (g_InstallerData->m_BuiltinLauncherExist)
-    if (CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version)) {
-      g_InstallerData->g_UseNet = false;
-      g_InstallerData->m_BuiltinLauncherNewer = true;
-    }
 
   parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 

@@ -83,62 +83,78 @@ int main(int argc, char *argv[]) {
   DetectPlatform();
   DetectArch();
 
-  std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-  // std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" +
-  // g_InstallerData->g_Arch;
-
-  std::string url = "https://api.infinite.si";
-
-  std::string body = g_InstallerData->net.GET(url);
-
-  if (body.empty()) {
-    g_InstallerData->g_Request = false;
-  } else {
-    g_InstallerData->g_Request = true;
-    try {
-      g_InstallerData->jsonResponse = nlohmann::json::parse(body);
-
-      if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
-        std::string values_str = g_InstallerData->jsonResponse[0]["values"];
-
-        g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
-
-        if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string()) {
-          g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
-          std::cout << "Tarball Path: " << g_InstallerData->g_RequestTarballPath << std::endl;
-        } else {
-          std::cout << "Error: 'path' key missing or not a string" << std::endl;
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string()) {
-          g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
-          std::cout << "Sum Path: " << g_InstallerData->g_RequestSumPath << std::endl;
-        } else {
-          std::cout << "Error: 'sum' key missing or not a string" << std::endl;
-        }
-
-        if (g_InstallerData->g_RequestValues.contains("version") &&
-            g_InstallerData->g_RequestValues["version"].is_string()) {
-          g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
-          std::cout << "Version: " << g_InstallerData->g_RequestVersion << std::endl;
-        } else {
-          std::cout << "Error: 'version' key missing or not a string" << std::endl;
-        }
-      } else {
-        std::cout << "Unexpected JSON format or empty response." << std::endl;
-      }
-    } catch (nlohmann::json::parse_error &e) {
-      std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+  std::thread([=]() {
+    if (g_InstallerData->net.CheckNet()) {
+      g_InstallerData->g_Request = true;
     }
-  }
+  }).detach();
 
-  std::cout << "123" << std::endl;
-  if (g_InstallerData->g_Request) {
-    std::cout << body << std::endl;
-  } else {
-    //
-  }
-  std::cout << "456" << std::endl;
+  std::thread([=]() {
+    while (!g_InstallerData->g_NetFetched) {
+      if (g_InstallerData->g_Request) {
+        std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
+        // std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" +
+        // g_InstallerData->g_Arch;
+
+        std::string url = "https://api.infinite.si";
+
+        std::string body = g_InstallerData->net.GET(url);
+
+        if (body.empty()) {
+          g_InstallerData->g_Request = false;
+        } else {
+          g_InstallerData->g_Request = true;
+          try {
+            g_InstallerData->jsonResponse = nlohmann::json::parse(body);
+
+            if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
+              std::string values_str = g_InstallerData->jsonResponse[0]["values"];
+
+              g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
+
+              if (g_InstallerData->g_RequestValues.contains("path") &&
+                  g_InstallerData->g_RequestValues["path"].is_string()) {
+                g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
+                std::cout << "Tarball Path: " << g_InstallerData->g_RequestTarballPath << std::endl;
+              } else {
+                std::cout << "Error: 'path' key missing or not a string" << std::endl;
+              }
+
+              if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string()) {
+                g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
+                std::cout << "Sum Path: " << g_InstallerData->g_RequestSumPath << std::endl;
+              } else {
+                std::cout << "Error: 'sum' key missing or not a string" << std::endl;
+              }
+
+              if (g_InstallerData->g_RequestValues.contains("version") &&
+                  g_InstallerData->g_RequestValues["version"].is_string()) {
+                g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
+                std::cout << "Version: " << g_InstallerData->g_RequestVersion << std::endl;
+              } else {
+                std::cout << "Error: 'version' key missing or not a string" << std::endl;
+              }
+            } else {
+              std::cout << "Unexpected JSON format or empty response." << std::endl;
+            }
+          } catch (nlohmann::json::parse_error &e) {
+            std::cerr << "JSON Parse Error: " << e.what() << std::endl;
+          }
+        }
+
+        std::cout << "123" << std::endl;
+        if (g_InstallerData->g_Request) {
+          std::cout << body << std::endl;
+        } else {
+          //
+        }
+        std::cout << "456" << std::endl;
+
+        g_InstallerData->g_NetFetched = true;
+      }
+      std::this_thread::sleep_for(std::chrono::seconds(2));
+    }
+  }).detach();
 
   if (g_InstallerData->g_WorkingPath.empty()) {
     g_InstallerData->g_WorkingPath = CookPath("");
@@ -158,7 +174,7 @@ int main(int argc, char *argv[]) {
       std::cout << "Manifest version: " << g_InstallerData->g_ManifestVersion << std::endl;
       std::cout << "Requested version: " << requestVersion << std::endl;
 
-      bool isGreater = isVersionGreater(g_InstallerData->g_ManifestVersion, requestVersion);
+      bool isGreater = isVersionGreater(requestVersion, g_InstallerData->g_ManifestVersion);
       if (isGreater) {
         g_InstallerData->g_VortexLauncherOutdated = true;
         std::cout << "Requested version is greater than manifest version. VortexLauncher is outdated." << std::endl;
@@ -189,9 +205,9 @@ int main(int argc, char *argv[]) {
 #ifdef _WIN32
 #include <windows.h>
 
-extern int main(int argc, char* argv[]);
+extern int main(int argc, char *argv[]);
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-    return main(__argc, __argv);
+  return main(__argc, __argv);
 }
 #endif

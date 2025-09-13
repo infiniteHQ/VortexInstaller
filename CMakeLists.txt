@@ -29,7 +29,7 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(vortex_installer PRIVATE CURL::libcurl)
 endif()
 
-add_executable(vortex_update src/updater.cpp)
+add_executable(vortex_update src/updater.cpp src/base.cpp)
 target_link_libraries(vortex_update PRIVATE installer httpcl spdlog cherry)
 if (WIN32)
     target_link_libraries(vortex_update PRIVATE urlmon)
