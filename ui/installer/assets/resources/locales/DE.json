@@ -42,7 +42,7 @@
         {"loc.install.builder_is_older":"Der eingebaute Launcher ist älter oder nicht vorhanden. Wir empfehlen, die neueste Version über das Internet herunterzuladen."},
         {"loc.install.builder_is_newer":"Der eingebaute Launcher ist neuer. Wir empfehlen, diesen für bessere Leistung zu verwenden."},
         {"loc.install.select_package":"Vorinstallierte Pakete auswählen"},
-        {"loc.install.net_download":"Aus dem Internet herunterladen und installieren"},
+        {"loc.install.net_download": "Herunterladen und installieren"},
         {"loc.install.no_local_launcher":"Kein lokaler Launcher zum Installieren..."},
         {"loc.install.no_net_download":"Keine Internetverbindung"},
         {"loc.install.builtin_install":"Von diesem Installer installieren"},

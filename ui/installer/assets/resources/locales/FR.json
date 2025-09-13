@@ -42,7 +42,7 @@
         {"loc.install.builder_is_older":"Le lanceur intégré est obsolète ou inexistant. Nous vous recommandons d'utiliser Internet pour télécharger la dernière version."},
         {"loc.install.builder_is_newer":"Le lanceur intégré est plus récent. Nous vous recommandons de l'utiliser pour de meilleures performances."},
         {"loc.install.select_package":"Sélectionner les paquets préinstallés"},
-        {"loc.install.net_download":"Télécharger et installer depuis Internet"},
+        {"loc.install.net_download":"Télécharger et installer"},
         {"loc.install.no_local_launcher":"Aucun lanceur local à installer..."},
         {"loc.install.no_net_download":"Pas de connexion Internet"},
         {"loc.install.builtin_install":"Installer depuis cet installateur"},
