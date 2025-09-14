@@ -72,7 +72,7 @@ void parseArguments(int argc, char *argv[]) {
     }
 
     if (arg.find("--version_name=") == 0) {
-      version_name = arg.substr(10);
+      version_name = arg.substr(15);
     }
 
     if (arg.find("--home=") == 0) {
