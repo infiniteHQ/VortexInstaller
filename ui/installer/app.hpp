@@ -1151,9 +1151,9 @@ bool InstallVortexVersion() {
     std::string installPath;
 
 #ifdef _WIN32
-    installPath = installerData.g_DefaultInstallPath + "\\" + installerData.m_SelectedVortexVersion.version;
+    installPath = installerData.g_DefaultInstallPath + "\\" + installerData.m_SelectedVortexVersion.name;
 #else
-    installPath = installerData.g_DefaultInstallPath + "/" + installerData.m_SelectedVortexVersion.version;
+    installPath = installerData.g_DefaultInstallPath + "/" + installerData.m_SelectedVortexVersion.name;
 #endif
 
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);

@@ -138,6 +138,7 @@ struct VortexVersion {
   std::string platform;
   std::string date;
   std::string banner;
+  std::string proper_name;
   std::string created_at;
 };
 

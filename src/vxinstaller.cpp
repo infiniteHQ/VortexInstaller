@@ -6,7 +6,7 @@
 
 #include "../ui/installer/app.hpp"
 
-static std::string version;
+static std::string version_name;
 static std::string dist;
 static std::string arch;
 static std::string platform;
@@ -71,8 +71,8 @@ void parseArguments(int argc, char *argv[]) {
       dist = arg.substr(7);
     }
 
-    if (arg.find("--version=") == 0) {
-      version = arg.substr(10);
+    if (arg.find("--version_name=") == 0) {
+      version_name = arg.substr(10);
     }
 
     if (arg.find("--home=") == 0) {
@@ -100,10 +100,10 @@ int main(int argc, char *argv[]) {
   std::thread([=]() {
     while (!g_InstallerData->g_NetFetched) {
       if (g_InstallerData->g_Request) {
-        std::string url = "http://api.infinite.si:9000/api/vortexupdates/"
-                          "get_filtered_v_versions?platform=" +
-                          platform + "&dist=" + dist + "&arch=" + arch +
-                          "&version=" + version;
+        std::string url =
+            "http://api.infinite.si:9000/api/vortexupdates/"
+            "get_filtered_v_versions?platform=" +
+            platform + "&dist=" + dist + "&arch=" + arch + "&name=" + version_name;
 
         std::string body = g_InstallerData->net.GET(url);
         auto json_response = nlohmann::json::parse(body);
@@ -119,16 +119,18 @@ int main(int argc, char *argv[]) {
           v.path = item["path"].get<std::string>();
           v.sum = item["sum"].get<std::string>();
           g_InstallerData->g_RequestTarballPath = v.path;
-          g_InstallerData->g_RequestSumPath = v.sum; // TODO
+          g_InstallerData->g_RequestSumPath = v.sum;  // TODO
           v.platform = item["platform"].get<std::string>();
           v.date = item["date"].get<std::string>();
           v.created_at = item["created_at"].get<std::string>();
 
           if (item.contains("values")) {
-            auto values =
-                nlohmann::json::parse(item["values"].get<std::string>());
+            auto values = nlohmann::json::parse(item["values"].get<std::string>());
             if (values.contains("image")) {
               v.banner = values["image"].get<std::string>();
+            }
+            if (values.contains("proper_name")) {
+              v.proper_name = values["proper_name"].get<std::string>();
             }
           }
 
@@ -136,7 +138,7 @@ int main(int argc, char *argv[]) {
         }
 
         for (auto &v : versions) {
-          if (v.version == version && v.arch == arch) {
+          if (v.name == version_name && v.arch == arch) {
             g_InstallerData->m_SelectedVortexVersion = v;
             break;
           }
