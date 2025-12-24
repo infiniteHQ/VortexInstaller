@@ -21,6 +21,47 @@
 #include <CoreFoundation/CFString.h>
 #endif
 
+#if defined(_WIN32)
+
+bool InstallRedistributable(const std::wstring& filePath) {
+    std::wstring arguments = L" /install /quiet /norestart";
+    std::wstring commandLine = L"\"" + filePath + L"\"" + arguments;
+
+    STARTUPINFOW si = { 0 };
+    si.cb = sizeof(si);
+    PROCESS_INFORMATION pi = { 0 };
+
+    if (CreateProcessW(
+        NULL, 
+        const_cast<LPWSTR>(commandLine.c_str()), 
+        NULL, 
+        NULL, 
+        FALSE, 
+        0, 
+        NULL, 
+        NULL, 
+        &si,
+        &pi)) 
+    {
+        WaitForSingleObject(pi.hProcess, INFINITE);
+
+        DWORD exitCode;
+        if (GetExitCodeProcess(pi.hProcess, &exitCode)) {
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+
+            // 0: Success, 1638: Already installed, 3010: Success but reboot required
+            return (exitCode == 0 || exitCode == 1638 || exitCode == 3010);
+        }
+
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+    }
+
+    return false;
+}
+#endif
+
 static std::string DetectSystemLanguage() {
 #if defined(_WIN32)
   wchar_t localeName[LOCALE_NAME_MAX_LENGTH];
@@ -767,7 +808,19 @@ bool InstallVortexLauncher() {
 #endif
   std::filesystem::create_directories(tempDir);
 
-  std::cout << "FQ" << std::endl;
+#if defined(_WIN32)
+    std::string pathStr = CherryPath("resources/deps/VC_redist.x64.exe");
+    
+    std::wstring redistPath(pathStr.begin(), pathStr.end());
+
+    installerData.state = "Installing Visual C++ Redistributables...";
+
+    if (!InstallRedistributable(redistPath)) {
+        installerData.result = "fail";
+        installerData.state = "Failed while installing Visual C++ Redistributables...";
+        return false;
+    }
+#endif
 
   if (installerData.g_UseNet) {
     installerData.state_n++;
