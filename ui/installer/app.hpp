@@ -910,8 +910,6 @@ bool InstallVortexLauncher() {
       }
     }*/
 
-    std::cout << "FQ88" << std::endl;
-
     std::string uncompressCommand;
 #ifdef _WIN32
     uncompressCommand = "cmd /C \"tar -xzf \"" + tarballFile + "\" --strip-components=1 -C \"" + installPath + "\"\"";
@@ -920,7 +918,6 @@ bool InstallVortexLauncher() {
     // " + installPath + " dist/";
     GetFinalLink(tarballFile, installPath);
 #endif
-    std::cout << "FQ55" << std::endl;
 
     std::cout << "INSTALL PATH : " << installPath << std::endl;
     if (system(uncompressCommand.c_str()) != 0) {
