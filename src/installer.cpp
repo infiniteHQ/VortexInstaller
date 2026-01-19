@@ -164,12 +164,7 @@ int main(int argc, char *argv[]) {
 
   parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 
-  std::thread mainThread([&]() { Cherry::Main(argc, argv); });
-
-  while (g_ApplicationRunning) {
-  }
-
-  mainThread.join();
+  CherryRun(argc, argv);
   return 0;
 }
 

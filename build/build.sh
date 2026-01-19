@@ -14,15 +14,10 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
-mkdir build_spdlog
 mkdir build
 
-cd build_spdlog
-cmake ../../lib/spdlog
-make -j$(nproc)
-
-cd ../build
-cmake ../.. 
+cd ./build
+cmake -DCMAKE_BUILD_TYPE=Release ../..
 make -j$(nproc)
 
 cd ..

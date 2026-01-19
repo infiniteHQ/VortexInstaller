@@ -150,12 +150,7 @@ int main(int argc, char *argv[]) {
     }
   }).detach();
 
-  std::thread mainThread([&]() { Cherry::Main(argc, argv); });
-
-  while (g_ApplicationRunning) {
-  }
-
-  mainThread.join();
+  CherryRun(argc, argv);
   return 0;
 }
 

@@ -139,13 +139,9 @@ int main(int argc, char *argv[]) {
           }
         }
 
-        std::cout << "123" << std::endl;
         if (g_InstallerData->g_Request) {
           std::cout << body << std::endl;
-        } else {
-          //
         }
-        std::cout << "456" << std::endl;
 
         std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
         if (!manifestPath.empty()) {
@@ -153,7 +149,6 @@ int main(int argc, char *argv[]) {
 
           g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
           if (!g_InstallerData->g_ManifestVersion.empty()) {
-            std::cout << "132" << std::endl;
             g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
             std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
 
@@ -192,15 +187,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
   }
 
-  std::cout << "132" << std::endl;
-  std::thread mainThread([&]() { Cherry::Main(argc, argv); });
-
-  std::cout << "321" << std::endl;
-  while (g_ApplicationRunning) {
-    //
-  }
-
-  mainThread.join();
+  CherryRun(argc, argv);
 
   return 0;
 }
