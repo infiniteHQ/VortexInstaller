@@ -520,37 +520,42 @@ std::string getManifestVersion(const std::string &manifestPath) {
     return "";
   }
 }
+
 std::string RevertOldVortexLauncher(const std::string &path) {
   auto &installerData = *g_InstallerData;
   std::string installPath = path;
-  std::string manifestPath = installPath + "/manifest.json";
-
+  
   auto endsWith = [](const std::string &str, const std::string &suffix) -> bool {
     return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
   };
 
-  std::string newPath = "none";
+  std::string originalPath = "none";
 
   if (endsWith(installPath, "VortexLauncherOld") || endsWith(installPath, "VortexLauncherOld/")) {
-    if (std::filesystem::exists(manifestPath)) {
-      VXI_LOG("manifest.json finded at : " + manifestPath);
+    
+    originalPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncher";
 
-      newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncher";
-
-      try {
-        std::filesystem::rename(installPath, newPath);
-      } catch (const std::filesystem::filesystem_error &e) {
-        // std::cerr << "Error while renaming : " << e.what());
+    try {
+      if (std::filesystem::exists(originalPath)) {
+        VXI_LOG("Removing failed installation attempt at: " + originalPath);
+        std::filesystem::remove_all(originalPath);
       }
-    } else {
-      // std::cerr << "Error : manifest.json not found in " << installPath);
+
+      if (std::filesystem::exists(installPath)) {
+        VXI_LOG("Reverting: Renaming " + installPath + " back to " + originalPath);
+        std::filesystem::rename(installPath, originalPath);
+        VXI_LOG("Revert successful.");
+      } else {
+        VXI_LOG("Revert failed: Backup folder not found.");
+      }
+    } catch (const std::filesystem::filesystem_error &e) {
+      VXI_LOG("Critical error during revert: " << e.what());
     }
   } else {
-    // std::cerr << "Error : This directory not end with VortexLauncher or
-    // VortexLauncher/.");
+    VXI_LOG("Revert aborted: Path is not a backup folder.");
   }
 
-  return newPath;
+  return originalPath;
 }
 
 // 3 Steps
