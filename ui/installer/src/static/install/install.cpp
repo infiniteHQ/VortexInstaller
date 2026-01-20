@@ -531,19 +531,6 @@ namespace VortexInstaller {
     CherryGUI::Text(m_Data->state.c_str());
     CherryGUI::PopStyleColor();
 
-    if (m_Data->state_n == 5) {
-      ImVec2 buttonSize = CherryGUI::CalcTextSize(CherryApp.GetLocale("loc.finish").c_str());
-
-      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - buttonSize.x - 50);
-
-      Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
-      Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
-      Cherry::SetNextComponentProperty("color_text", "#121212FF");
-      if (CherryKit::ButtonText(CherryApp.GetLocale("loc.finish")).GetData("isClicked") == "true") {
-        Cherry::Application().Get().Close();
-      }
-    }
-
     if (m_Data->result == "processing") {
       CherryGUI::BeginDisabled();
       std::string text = CherryApp.GetLocale("loc.close");

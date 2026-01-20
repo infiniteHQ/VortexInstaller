@@ -570,28 +570,32 @@ std::string MakeVortexLauncherFolderOld(const std::string &path) {
 
   if (endsWith(installPath, "VortexLauncher") || endsWith(installPath, "VortexLauncher/")) {
     if (std::filesystem::exists(manifestPath)) {
-      installerData.state_n++;
-      installerData.state = "Checking if path exist...";
-
-      VXI_LOG("manifest.json finded at : " + manifestPath);
+      VXI_LOG("manifest.json found at : " + manifestPath);
 
       newPath = installPath.substr(0, installPath.find_last_of("/")) + "/VortexLauncherOld";
 
       try {
+        if (std::filesystem::exists(newPath)) {
+          installerData.state_n++;
+          installerData.state = "Removing existing old folder...";
+          VXI_LOG("Removing existing folder: " + newPath);
+          std::filesystem::remove_all(newPath); 
+        }
+
         installerData.state_n++;
         installerData.state = "Rename path to old...";
         std::filesystem::rename(installPath, newPath);
         VXI_LOG("Folder renamed to : " + newPath);
+
       } catch (const std::filesystem::filesystem_error &e) {
-        VXI_LOG("Error while renaming folder : " << e.what());
+        VXI_LOG("Filesystem error : " << e.what());
+        newPath = "none";
       }
     } else {
-      VXI_LOG("manifest.json not found " << installPath);
+      VXI_LOG("manifest.json not found in " << installPath);
     }
   } else {
-    VXI_LOG(
-        "Error : This directory not end with VortexLauncher or "
-        "VortexLauncher/.");
+    VXI_LOG("Error : This directory does not end with VortexLauncher.");
   }
 
   return newPath;
@@ -600,24 +604,43 @@ std::string MakeVortexLauncherFolderOld(const std::string &path) {
 // 2 Check
 void DeleteOldVortexLauncher(const std::string &path) {
   auto &installerData = *g_InstallerData;
-  std::string installPath = path;
-  std::string manifestPath = installPath + "/manifest.json";
+
+  if (path.empty() || path == "none") {
+    VXI_LOG("DeleteOldVortexLauncher aborted: invalid path");
+    return;
+  }
+
+  std::filesystem::path folderPath(path);
+  std::string folderName = folderPath.filename().string();
 
   installerData.state_n++;
   installerData.state = "Check old vortex folder...";
-  if (std::filesystem::exists(manifestPath)) {
-    VXI_LOG("Found manifest.json at: " + manifestPath);
-    VXI_LOG("Deleting folder: " + installPath);
-    try {
-      installerData.state_n++;
-      installerData.state = "Delete old vortex folder...";
-      std::filesystem::remove_all(installPath);
-      VXI_LOG("Successfully deleted the folder: " << installPath);
-    } catch (const std::filesystem::filesystem_error &e) {
-      VXI_LOG("Error deleting the folder: " << e.what());
+
+  if (folderName != "VortexLauncherOld") {
+    VXI_LOG("DeleteOldVortexLauncher aborted: not a VortexLauncherOld folder -> " << path);
+    return;
+  }
+
+  if (!std::filesystem::exists(folderPath)) {
+    VXI_LOG("DeleteOldVortexLauncher aborted: folder does not exist -> " << path);
+    return;
+  }
+
+  VXI_LOG("Deleting old vortex folder: " << folderPath.string());
+
+  try {
+    installerData.state_n++;
+    installerData.state = "Delete old vortex folder...";
+
+    std::error_code ec;
+    if (std::filesystem::remove_all(folderPath, ec) == static_cast<std::uintmax_t>(-1)) {
+        VXI_LOG("Error during deletion: " << ec.message());
+    } else {
+        VXI_LOG("Successfully deleted old vortex folder");
     }
-  } else {
-    VXI_LOG("Error: manifest.json not found in " << installPath);
+
+  } catch (const std::exception &e) {
+    VXI_LOG("Exception while deleting folder: " << e.what());
   }
 }
 
