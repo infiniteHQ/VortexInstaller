@@ -4,7 +4,6 @@ setlocal
 mkdir build_spdlog
 mkdir build
 
-
 cd build
 cmake -G "Visual Studio 17" -A x64 ..\..
 
@@ -20,6 +19,9 @@ cd ..
 mkdir build\dist
 
 xcopy /E /I /Y ..\ui\installer\assets\resources .\build\bin\resources
+xcopy /E /I /Y ..\ui\installer\assets\resources .\build\bin\resources_nodeps
+rmdir /S /Q .\build\bin\resources_nodeps\deps
+
 xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
@@ -54,7 +56,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUpdater --icon=icon.png ^
     --add-data "vortex_update.exe;." ^
-    --add-data "resources;resources" ^
+    --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -69,7 +71,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionUninstaller --icon=icon.png ^
     --add-data "vxuninstall.exe;." ^
-    --add-data "resources;resources" ^
+    --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -84,7 +86,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUninstaller --icon=icon.png ^
     --add-data "vortex_uninstall.exe;." ^
-    --add-data "resources;resources" ^
+    --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -99,7 +101,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionInstaller --icon=icon.png ^
     --add-data "vxinstaller.exe;." ^
-    --add-data "resources;resources" ^
+    --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
@@ -110,6 +112,8 @@ cd ..\..
 copy build\bin\dist\* build\bin
 rd /s /q build\bin\build
 rd /s /q build\bin\dist
+rd /s /q build\bin\resources
+rd /s /q build\bin\resources_nodeps
 del build\bin\vortex_installer
 del build\bin\vortex_update
 del build\bin\org.vortex.vxinstaller.policy
