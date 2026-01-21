@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 NO_INSTALLER=false
 while [[ "$#" -gt 0 ]]; do
@@ -14,21 +14,26 @@ while [[ "$#" -gt 0 ]]; do
   esac
 done
 
-mkdir build
+python3 -m venv venv_build
+source venv_build/bin/activate
+pip install --upgrade pip
+pip install pyinstaller
 
+mkdir -p build
 cd ./build
 cmake -DCMAKE_BUILD_TYPE=Release ../..
 make -j$(nproc)
-
 cd ..
 
-mkdir build/dist
+mkdir -p build/dist
 
 cp -r ../ui/installer/assets/resources ./build/bin/resources
+rm -rf ./build/bin/resources/deps
 cp -r ../ui/installer/assets/builtin ./build/bin/builtin
 cp ../misc/linux/installer/icon.png ./build/bin/
 cp ../misc/linux/installer/main.py ./build/bin/
 cp ../misc/linux/installer/admin_manifest.xml build/bin/
+
 cd build/bin
 
 BUILTIN_FLAG=""
@@ -36,81 +41,74 @@ if [[ -d "builtin" ]]; then
     BUILTIN_FLAG="--add-data builtin:./builtin"
 fi
 
-MANIFEST_FLAG=""
-if [[ -f "manifest.json" ]]; then
-    MANIFEST_FLAG="--add-data manifest.json:."
-fi
-
+PY_OPTS="--onefile --clean --upx-dir /usr/bin"
 
 if [ "$NO_INSTALLER" = false ]; then
 
-pyinstaller --onefile --name VortexInstaller --icon=icon.png \
-    --add-data "vortex_installer:." \
-    --add-data "resources:resources" \
-    $BUILTIN_FLAG \
-    main.py
+    # VortexInstaller
+    pyinstaller $PY_OPTS --name VortexInstaller --icon=icon.png \
+        --add-data "vortex_installer:." \
+        --add-data "resources:resources" \
+        $BUILTIN_FLAG \
+        main.py
+    rm VortexInstaller.spec icon.png main.py
 
-rm VortexInstaller.spec
-rm icon.png main.py
-cd ../..
+    # VortexUpdater
+    cd ../..
+    cp ../misc/linux/updater/icon.png build/bin/
+    cp ../misc/linux/updater/main.py build/bin/
+    cp ../misc/linux/updater/org.vortex.updater.policy build/bin/
+    cd build/bin
+    pyinstaller $PY_OPTS --name VortexUpdater --icon=icon.png \
+        --add-data "vortex_update:." \
+        --add-data "resources:resources" \
+        main.py
+    rm VortexUpdater.spec icon.png main.py org.vortex.updater.policy
 
-cp ../misc/linux/updater/icon.png build/bin/
-cp ../misc/linux/updater/main.py build/bin/
-cp ../misc/linux/updater/org.vortex.updater.policy build/bin/
-cd build/bin
+    # VersionUninstaller
+    cd ../..
+    cp ../misc/linux/vxuninstaller/icon.png build/bin/
+    cp ../misc/linux/vxuninstaller/main.py build/bin/
+    cd build/bin
+    pyinstaller $PY_OPTS --name VersionUninstaller --icon=icon.png \
+        --add-data "vxuninstall:." \
+        --add-data "resources:resources" \
+        main.py
+    rm VersionUninstaller.spec icon.png main.py
 
-pyinstaller --onefile --name VortexUpdater --icon=icon.png \
-    --add-data "vortex_update:." \
-    --add-data "resources:resources" \
-    main.py
+    # VortexUninstaller
+    cd ../..
+    cp ../misc/linux/uninstaller/icon.png build/bin/
+    cp ../misc/linux/uninstaller/main.py build/bin/
+    cd build/bin
+    pyinstaller $PY_OPTS --name VortexUninstaller --icon=icon.png \
+        --add-data "vortex_uninstall:." \
+        --add-data "resources:resources" \
+        main.py
+    rm VortexUninstaller.spec icon.png main.py
 
-rm icon.png main.py org.vortex.updater.policy
-cd ../..
-
-cp ../misc/linux/vxuninstaller/icon.png build/bin/
-cp ../misc/linux/vxuninstaller/main.py build/bin/
-cd build/bin
-
-pyinstaller --onefile --name VersionUninstaller --icon=icon.png \
-    --add-data "vxuninstall:." \
-    --add-data "resources:resources" \
-    main.py
-
-rm icon.png main.py
-cd ../..
-
-
-cp ../misc/linux/uninstaller/icon.png build/bin/
-cp ../misc/linux/uninstaller/main.py build/bin/
-cd build/bin
-
-pyinstaller --onefile --name VortexUninstaller --icon=icon.png \
-    --add-data "vortex_uninstall:." \
-    --add-data "resources:resources" \
-    main.py
-
-rm icon.png main.py
-cd ../..
-
-
-cp ../misc/linux/vxinstaller/icon.png build/bin/
-cp ../misc/linux/vxinstaller/main.py build/bin/
-cd build/bin
-
-pyinstaller --onefile --name VersionInstaller --icon=icon.png \
-    --add-data "vxinstaller:." \
-    --add-data "resources:resources" \
-    main.py
-
-rm icon.png main.py
-cd ../..
+    # VersionInstaller
+    cd ../..
+    cp ../misc/linux/vxinstaller/icon.png build/bin/
+    cp ../misc/linux/vxinstaller/main.py build/bin/
+    cd build/bin
+    pyinstaller $PY_OPTS --name VersionInstaller --icon=icon.png \
+        --add-data "vxinstaller:." \
+        --add-data "resources:resources" \
+        main.py
+    rm VersionInstaller.spec icon.png main.py
+    
+    cd ../..
 fi
-
 
 cp build/bin/dist/* build/bin
 rm -rf build/bin/build
 rm -rf build/bin/dist
+rm -rf build/bin/resources
+rm -rf build/bin/builtin
 
 mkdir -p shipping/linux
+cp build/bin/VortexInstaller shipping/linux/
 
-cp build/bin/dist/VortexInstaller shipping/linux/
+deactivate
+rm -rf venv_build
