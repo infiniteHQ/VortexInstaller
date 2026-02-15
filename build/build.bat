@@ -18,11 +18,11 @@ rmdir /S /Q .\bin\Release
 cd ..
 mkdir build\dist
 
-xcopy /E /I /Y ..\ui\installer\assets\resources .\build\bin\resources
-xcopy /E /I /Y ..\ui\installer\assets\resources .\build\bin\resources_nodeps
+xcopy /E /I /Y ..\src\ui\assets\resources .\build\bin\resources
+xcopy /E /I /Y ..\src\ui\assets\resources .\build\bin\resources_nodeps
 rmdir /S /Q .\build\bin\resources_nodeps\deps
 
-xcopy /E /I /Y ..\ui\installer\assets\builtin .\build\bin\builtin
+xcopy /E /I /Y ..\src\ui\\assets\builtin .\build\bin\builtin
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\

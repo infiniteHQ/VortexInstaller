@@ -3,6 +3,9 @@
 #include <future>
 #include <thread>
 
+#include "../../../../common/common.hpp"
+#include "../../../helpers.hpp"
+
 namespace VortexInstaller {
 
   void UpdateAppWindow::RenderUpdateVortex() {
@@ -82,9 +85,11 @@ namespace VortexInstaller {
           m_SelectedChildName = "?loc:loc.child.update";
 
           std::thread mainThread([this]() {
-            if (m_Data->m_UpdateCallback) {
-              m_Data->m_UpdateCallback();
-            }
+            VortexInstaller::UpdateVortexLauncher();
+
+            // if (m_Data->m_UpdateCallback) {
+            //   m_Data->m_UpdateCallback();
+            // }
           });
 
           mainThread.detach();

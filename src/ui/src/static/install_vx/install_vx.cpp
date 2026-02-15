@@ -3,6 +3,9 @@
 #include <future>
 #include <thread>
 
+#include "../../../../common/common.hpp"
+#include "../../../helpers.hpp"
+
 namespace VortexInstaller {
   static void MyButton(const std::string &name, int w, int h) {
     ImVec2 squareSize(w, h);
@@ -166,9 +169,10 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.accept")).GetData("isClicked") == "true") {
       std::thread([this]() {
-        if (m_Data->m_InstallVortexCallback) {
-          m_Data->m_InstallVortexCallback();
-        }
+        VortexInstaller::InstallVortexVersion();
+        // if (m_Data->m_InstallVortexCallback) {
+        //   m_Data->m_InstallVortexCallback();
+        // }
       }).detach();
       m_SelectedChildName = "?loc:loc.child.installation";
     }

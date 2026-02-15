@@ -27,9 +27,9 @@ cd ..
 
 mkdir -p build/dist
 
-cp -r ../ui/installer/assets/resources ./build/bin/resources
+cp -r ../src/ui/assets/resources ./build/bin/resources
 rm -rf ./build/bin/resources/deps
-cp -r ../ui/installer/assets/builtin ./build/bin/builtin
+cp -r ../src/ui/assets/builtin ./build/bin/builtin
 cp ../misc/linux/installer/icon.png ./build/bin/
 cp ../misc/linux/installer/main.py ./build/bin/
 cp ../misc/linux/installer/admin_manifest.xml build/bin/

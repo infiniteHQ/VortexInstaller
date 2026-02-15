@@ -3,6 +3,9 @@
 #include <future>
 #include <thread>
 
+#include "../../../../common/common.hpp"
+#include "../../../helpers.hpp"
+
 namespace VortexInstaller {
 
   static bool ShowPackagesSelection = false;
@@ -497,9 +500,10 @@ namespace VortexInstaller {
         m_SelectedChildName = "?loc:loc.child.installation";
 
         std::thread mainThread([this]() {
-          if (m_Data->m_InstallCallback) {
-            m_Data->m_InstallCallback();
-          }
+          VortexInstaller::InstallVortexLauncher();
+          // if (m_Data->m_InstallCallback) {
+          //   m_Data->m_InstallCallback();
+          // }
         });
 
         mainThread.detach();
