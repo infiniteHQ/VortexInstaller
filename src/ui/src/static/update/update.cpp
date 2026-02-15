@@ -83,16 +83,7 @@ namespace VortexInstaller {
         Cherry::SetNextComponentProperty("color_text", "#121212FF");
         if (CherryKit::ButtonText("Update").GetData("isClicked") == "true") {
           m_SelectedChildName = "?loc:loc.child.update";
-
-          std::thread mainThread([this]() {
-            VortexInstaller::UpdateVortexLauncher();
-
-            // if (m_Data->m_UpdateCallback) {
-            //   m_Data->m_UpdateCallback();
-            // }
-          });
-
-          mainThread.detach();
+          m_Backend.SendCommand("UpdateVortexLauncher");
         }
       }
     }
@@ -215,6 +206,7 @@ namespace VortexInstaller {
 
   UpdateAppWindow::UpdateAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
+    m_Backend.Start();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);
@@ -303,6 +295,7 @@ namespace VortexInstaller {
   }
 
   void UpdateAppWindow::Render() {
+    m_Backend.Poll();
     static float leftPaneWidth = 300.0f;
     const float minPaneWidth = 50.0f;
     const float splitterWidth = 1.5f;

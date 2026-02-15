@@ -49,10 +49,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.continue")).GetData("isClicked") == "true") {
-      std::thread([this]() {
-        VortexInstaller::DeleteVortexVersion();
-        // m_Data->m_UninstallVortexCallback();
-      }).detach();
+      m_Backend.SendCommand("DeleteVortexVersion");
       m_SelectedChildName = "?loc:loc.child.uninstallation";
       this->SetChildState("?loc:loc.child.uninstallation", true);
     }
@@ -116,6 +113,7 @@ namespace VortexInstaller {
       const std::string &name,
       const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
+    m_Backend.Start();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);
@@ -204,6 +202,7 @@ namespace VortexInstaller {
   }
 
   void VortexUninstallAppWindow::Render() {
+    m_Backend.Poll();
     static float leftPaneWidth = 300.0f;
     const float minPaneWidth = 50.0f;
     const float splitterWidth = 1.5f;

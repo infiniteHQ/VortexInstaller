@@ -6,6 +6,7 @@
 #define CHERRY_V1
 #include "../../../../../lib/cherry/cherry.hpp"
 #include "../../../../common/common.hpp"
+#include "../../../backend_client.hpp"
 
 namespace VortexInstaller {
   struct VortexInstallAppChild {
@@ -39,7 +40,7 @@ namespace VortexInstaller {
     void RenderInstall();
 
     std::unordered_map<std::string, VortexInstallAppChild> m_Childs;
-
+    BackendClient m_Backend;
     std::string m_SelectedChildName;
     std::shared_ptr<VortexInstallerData> m_Data;
 

@@ -124,6 +124,7 @@ namespace VortexInstaller {
       if (selected <= m_Data->m_VortexPools.size()) {
         m_Data->g_DefaultInstallPath = m_Data->m_VortexPools[selected];
       }
+      m_Backend.SendPatch();
 
       m_SelectedChildName = "?loc:loc.child.license";
       this->SetChildState("?loc:loc.child.license", true);
@@ -168,12 +169,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.accept")).GetData("isClicked") == "true") {
-      std::thread([this]() {
-        VortexInstaller::InstallVortexVersion();
-        // if (m_Data->m_InstallVortexCallback) {
-        //   m_Data->m_InstallVortexCallback();
-        // }
-      }).detach();
+      m_Backend.SendCommand("InstallVortexVersion");
       m_SelectedChildName = "?loc:loc.child.installation";
     }
   }
@@ -249,6 +245,7 @@ namespace VortexInstaller {
 
   VortexInstallAppWindow::VortexInstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
+    m_Backend.Start();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);
@@ -339,6 +336,8 @@ namespace VortexInstaller {
   }
 
   void VortexInstallAppWindow::Render() {
+    m_Backend.Poll();
+
     static float leftPaneWidth = 300.0f;
     const float minPaneWidth = 50.0f;
     const float splitterWidth = 1.5f;
