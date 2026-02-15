@@ -328,6 +328,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "\\bin\\resources\\imgs\\favicon.ico")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -343,6 +344,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "\\bin\\resources\\imgs\\favicon_updater.ico")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -358,6 +360,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "\\bin\\resources\\imgs\\favicon_uninstaller.ico")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -372,6 +375,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "/bin/resources/imgs/icon.png")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -385,6 +389,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "/bin/resources/imgs/icon_update.png")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -398,6 +403,7 @@ bool VortexInstaller::InstallVortexLauncher() {
             installPath + "/bin/resources/imgs/icon_crash.png")) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to create Start Menu shortcut.";
+      PatchData();
       return false;
     }
   }
@@ -419,10 +425,9 @@ bool VortexInstaller::InstallVortexLauncher() {
 }
 
 void VortexInstaller::UpdateVortexLauncher() {
-  auto &installerData = *g_InstallerData;
-
   VortexInstaller::GetContext()->state_n = 0;
   VortexInstaller::GetContext()->state = "Initialization...";
+  PatchData();
 
   // Rename old vortex
   std::string old_vx_path = MakeVortexLauncherFolderOld(VortexInstaller::GetContext()->g_DefaultInstallPath);
@@ -438,6 +443,7 @@ void VortexInstaller::UpdateVortexLauncher() {
   }
 
   VortexInstaller::GetContext()->finished = true;
+  PatchData();
 }
 
 bool VortexInstaller::InstallVortexVersion() {
@@ -445,6 +451,7 @@ bool VortexInstaller::InstallVortexVersion() {
 
   // VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Initialization...";
+  PatchData();
 
   std::string tempDir;
 #ifdef _WIN32
@@ -457,6 +464,7 @@ bool VortexInstaller::InstallVortexVersion() {
   if (VortexInstaller::GetContext()->g_UseNet) {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Downloading files...";
+    PatchData();
 
     std::string dlpath = VortexInstaller::GetContext()->g_RequestTarballPath;
     std::string sumpath = VortexInstaller::GetContext()->g_RequestSumPath;
@@ -482,11 +490,13 @@ bool VortexInstaller::InstallVortexVersion() {
       std::cerr << "Error: Failed to download files." << std::endl;
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to download files.";
+      PatchData();
       return false;
     }
 
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Verifying integrity...";
+    PatchData();
 
     std::filesystem::current_path(tempDir);
 
@@ -499,10 +509,12 @@ bool VortexInstaller::InstallVortexVersion() {
     if (system(checkSumCommand.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Integrity check failed.";
+      PatchData();
       return false;
     }
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Ensure clean install path...";
+    PatchData();
 
     std::filesystem::path path(installPath);
     try {
@@ -512,11 +524,13 @@ bool VortexInstaller::InstallVortexVersion() {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to prepare installation folder.";
+      PatchData();
       return false;
     }
 
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Extracting files...";
+    PatchData();
 
     std::string finalLink;
     std::string uncompressCommand;
@@ -529,11 +543,13 @@ bool VortexInstaller::InstallVortexVersion() {
     if (system(uncompressCommand.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to extract tarball.";
+      PatchData();
       return false;
     }
 
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Running vortex test...";
+    PatchData();
 
     std::string testLauncher;
 #ifdef _WIN32
@@ -544,18 +560,22 @@ bool VortexInstaller::InstallVortexVersion() {
     if (system(testLauncher.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Launcher test failed.";
+      PatchData();
       return false;
     }
 
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Installation completed successfully.";
     VortexInstaller::GetContext()->result = "success";
+    PatchData();
   } else {
-    if (VortexInstaller::GetContext()->m_BuiltinLauncherExist)
+    if (VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
       VortexInstaller::GetContext()->result = "fail";
-    VortexInstaller::GetContext()->state =
-        "Error: Network usage is disabled and there no "
-        "builtin launcher. Cannot proceed with installation.";
+      VortexInstaller::GetContext()->state =
+          "Error: Network usage is disabled and there no "
+          "builtin launcher. Cannot proceed with installation.";
+      PatchData();
+    }
   }
 
   CleanUpTemporaryDirectory(tempDir);
@@ -578,9 +598,11 @@ void VortexInstaller::DeleteVortexVersion() {
 
   VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Verify Vortex Launcher...";
+  PatchData();
   if (std::filesystem::exists(manifestPath)) {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Deleting Vortex Launcher...";
+    PatchData();
     try {
       if (isValidPath(installPath)) {
         VXI_LOG("Folder deletion attempt: " << installPath);
@@ -595,6 +617,7 @@ void VortexInstaller::DeleteVortexVersion() {
             failed = true;
             VortexInstaller::GetContext()->state = "Error while deleting the folder: " + std::string(e.what());
             VXI_LOG("Error: " << e.what());
+            PatchData();
           }
         } else {
           VXI_LOG("Unsafe path detected, skipping deletion: " << path);
@@ -606,17 +629,20 @@ void VortexInstaller::DeleteVortexVersion() {
       VortexInstaller::GetContext()->result = "fail";
       failed = true;
       VortexInstaller::GetContext()->state = "Error while deleting the Vortex Launcher folder";
+      PatchData();
     }
   } else {
     VortexInstaller::GetContext()->result = "fail";
     failed = true;
     VortexInstaller::GetContext()->state = "Error: Path to Vortex Launcher invalid !";
+    PatchData();
   }
 
   if (!failed) {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Deleted succefully !";
     VortexInstaller::GetContext()->result = "success";
+    PatchData();
   }
 }
 
@@ -645,13 +671,15 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
 #endif
 
     VortexInstaller::GetContext()->state_n++;
-    VortexInstaller::GetContext()->state = "Vérification du Vortex Launcher...";
+    VortexInstaller::GetContext()->state = "Verifying Vortex Launcher...";
+    PatchData();
     if (std::filesystem::exists(manifestPath)) {
       VXI_LOG("Fichier manifest.json finded at : " << manifestPath);
       VXI_LOG("Deleting folder : " << installPath);
 
       VortexInstaller::GetContext()->state_n++;
       VortexInstaller::GetContext()->state = "Deleting Vortex Launcher...";
+      PatchData();
       try {
         if (isValidPath(installPath)) {
 #if defined(_WIN32) || defined(_WIN64)
@@ -674,11 +702,13 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
         VortexInstaller::GetContext()->result = "fail";
         failed = true;
         VortexInstaller::GetContext()->state = "Error while deleting the Vortex Launcher folder";
+        PatchData();
       }
     } else {
       VortexInstaller::GetContext()->result = "fail";
       failed = true;
       VortexInstaller::GetContext()->state = "Error: Path to Vortex Launcher invalid !";
+      PatchData();
     }
   }
 
@@ -686,6 +716,7 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
     std::string installPath = VortexInstaller::GetContext()->g_VortexPath;
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Deleting Vortex...";
+    PatchData();
 
     if (isValidPath(installPath)) {
       try {
@@ -697,12 +728,14 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
         VortexInstaller::GetContext()->result = "fail";
         failed = true;
         VortexInstaller::GetContext()->state = "Failed while deleting the Vortex Launcher folder !";
+        PatchData();
       }
     } else {
       // std::cerr << "Vortex Launcher not found at path : " << installPath);
       VortexInstaller::GetContext()->result = "fail";
       failed = true;
       VortexInstaller::GetContext()->state = "Failed ! Vortex Launcher path is invalid !";
+      PatchData();
     }
   }
 
@@ -710,6 +743,7 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
     std::string installPath = VortexInstaller::GetContext()->g_VortexDataPath;
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Deleting Vortex datas...";
+    PatchData();
 
     if (isValidPath(installPath)) {
       try {
@@ -719,11 +753,13 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
         VortexInstaller::GetContext()->result = "fail";
         failed = true;
         VortexInstaller::GetContext()->state = "Failed while deleting Vortex datas !";
+        PatchData();
       }
     } else {
       VortexInstaller::GetContext()->result = "fail";
       failed = true;
       VortexInstaller::GetContext()->state = "Path to Vortex datas is invalid";
+      PatchData();
     }
   }
 
@@ -731,6 +767,7 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Deleted succefully !";
     VortexInstaller::GetContext()->result = "success";
+    PatchData();
   }
 }
 
@@ -1190,6 +1227,7 @@ std::string VortexInstaller::MakeVortexLauncherFolderOld(const std::string &path
 
   VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Checking path...";
+  PatchData();
 
   if (endsWith(installPath, "VortexLauncher") || endsWith(installPath, "VortexLauncher/")) {
     if (std::filesystem::exists(manifestPath)) {
@@ -1202,11 +1240,13 @@ std::string VortexInstaller::MakeVortexLauncherFolderOld(const std::string &path
           VortexInstaller::GetContext()->state_n++;
           VortexInstaller::GetContext()->state = "Removing existing old folder...";
           VXI_LOG("Removing existing folder: " + newPath);
+          PatchData();
           std::filesystem::remove_all(newPath);
         }
 
         VortexInstaller::GetContext()->state_n++;
         VortexInstaller::GetContext()->state = "Rename path to old...";
+        PatchData();
         std::filesystem::rename(installPath, newPath);
         VXI_LOG("Folder renamed to : " + newPath);
 
@@ -1237,6 +1277,7 @@ void VortexInstaller::DeleteOldVortexLauncher(const std::string &path) {
 
   VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Check old vortex folder...";
+  PatchData();
 
   if (folderName != "VortexLauncherOld") {
     VXI_LOG("DeleteOldVortexLauncher aborted: not a VortexLauncherOld folder -> " << path);
@@ -1253,6 +1294,7 @@ void VortexInstaller::DeleteOldVortexLauncher(const std::string &path) {
   try {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Delete old vortex folder...";
+    PatchData();
 
     std::error_code ec;
     if (std::filesystem::remove_all(folderPath, ec) == static_cast<std::uintmax_t>(-1)) {
