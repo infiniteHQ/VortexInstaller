@@ -34,6 +34,7 @@ int main() {
         if (msg.contains("data"))
           VortexInstaller::GetContext()->PatchFromJson(msg["data"]);
 
+        VortexInstaller::GetContext()->g_PollkitApproved = true;
         nlohmann::json out;
         out["type"] = "refresh";
         out["data"] = VortexInstaller::GetContext()->ToJson();

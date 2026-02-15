@@ -113,6 +113,8 @@ class VortexInstallerNet {
 };
 
 struct VortexInstallerData {
+  bool g_PollkitApproved = false;
+
   // --- Paths & env ---
   std::string g_VortexDataPath = "";
   std::string g_VortexPath = "";
@@ -169,11 +171,13 @@ struct VortexInstallerData {
 
   /* ===================== IPC / SYNC ===================== */
 
-  // UI -> Backend (patch partiel)
+  // UI -> Backend
   void PatchFromJson(const nlohmann::json &patch) {
 #define PATCH(field)          \
   if (patch.contains(#field)) \
     field = patch[#field];
+
+    PATCH(g_PollkitApproved)
 
     // --- Paths & env ---
     PATCH(g_VortexDataPath)
@@ -260,7 +264,8 @@ struct VortexInstallerData {
 
   nlohmann::json ToJson() const {
     std::lock_guard<std::mutex> lock(mutex);
-    return { // --- Paths & env ---
+    return { { "g_PollkitApproved", g_PollkitApproved },
+             // --- Paths & env ---
              { "g_VortexDataPath", g_VortexDataPath },
              { "g_VortexPath", g_VortexPath },
              { "g_DefaultInstallPath", g_DefaultInstallPath },
@@ -328,8 +333,7 @@ struct VortexInstallerData {
                  { "arch", m_BuiltinLauncher.arch },
                  { "platform", m_BuiltinLauncher.platform },
                  { "tarball", m_BuiltinLauncher.tarball },
-                 { "sum", m_BuiltinLauncher.sum } } }
-    };
+                 { "sum", m_BuiltinLauncher.sum } } } };
   }
 };
 

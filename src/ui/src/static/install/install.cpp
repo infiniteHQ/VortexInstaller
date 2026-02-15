@@ -34,6 +34,10 @@ namespace VortexInstaller {
     CherryNextComponent.SetProperty("size_x", std::to_string(CherryGUI::GetContentRegionAvail().x - 6.0f));
     CherryKit::InputString("", &VortexInstaller::GetContext()->g_DefaultInstallPath);
 
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), "You need to sign as admin to continue...");
+    }
+
     std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");
     ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
@@ -52,6 +56,11 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
+
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::BeginDisabled();
+    }
+
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.continue")).GetData("isClicked") == "true") {
       m_SelectedChildName = "?loc:loc.child.license";
       this->SetChildState("?loc:loc.child.main", true);
@@ -62,6 +71,10 @@ namespace VortexInstaller {
       }
 
       m_Backend.SendPatch();
+    }
+
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::EndDisabled();
     }
   }
 
@@ -627,6 +640,7 @@ namespace VortexInstaller {
   InstallAppWindow::InstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
     m_Backend.Start();
+    m_Backend.SendPatch();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);
