@@ -10,9 +10,17 @@
 #include <string>
 #include <thread>
 
+#ifndef VORTEXINSTALLER_API
+#define VORTEXINSTALLER_API
+
 #include "../common/common.hpp"
 
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
+
+#if (!defined(PATH_MAX) || PATH_MAX < 1024)
+#undef PATH_MAX
+#define PATH_MAX 1024
+#endif
 
 #if defined(_WIN32)
 #include <windows.h>
@@ -74,4 +82,9 @@ namespace VortexInstaller {
 
   int GetDefaultSelectedLanguage();
   std::string DetectSystemLanguage();
+
+  std::string FindManifestJson(const std::filesystem::path &startPath, int maxDepth = 10);
+
 }  // namespace VortexInstaller
+
+#endif  // VORTEXINSTALLER_API

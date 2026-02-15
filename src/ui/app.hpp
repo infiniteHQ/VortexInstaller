@@ -14,8 +14,6 @@
 #include "./src/static/uninstall_vx/uninstall_vx.hpp"
 #include "./src/static/update/update.hpp"
 
-static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
-
 Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   Cherry::ApplicationSpecification spec;
   std::shared_ptr<Layer> layer = std::make_shared<Layer>();

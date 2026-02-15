@@ -4,7 +4,7 @@
 #include <string>
 #include <thread>
 
-#include "../ui/installer/app.hpp"
+#include "./ui/app.hpp"
 
 static std::string g_OldLauncherVersion;
 
@@ -44,14 +44,15 @@ int main(int argc, char *argv[]) {
   parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
 
   if (g_InstallerData->g_WorkingPath.empty()) {
-    g_InstallerData->g_WorkingPath = CookPath("");
+    // TODO Clarify and secure this.
+    g_InstallerData->g_WorkingPath = VortexInstaller::CookPath("");
     std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
   }
 
   std::cout << "Action: " << g_InstallerData->g_Action << std::endl;
   std::cout << "Path: " << g_InstallerData->g_WorkingPath << std::endl;
 
-  std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
+  std::string manifestPath = VortexInstaller::FindManifestJson(g_InstallerData->g_WorkingPath);
   if (!manifestPath.empty()) {
     std::cout << "Found manifest.json at: " << manifestPath << std::endl;
     g_InstallerData->g_WorkingPath = manifestPath.substr(0, manifestPath.find_last_of("/\\"));

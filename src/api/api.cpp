@@ -839,7 +839,7 @@ std::string VortexInstaller::GetTopLevelDir(const std::string &tarballFile) {
   return "";
 }
 
-std::string VortexInstaller::GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip = 1) {
+std::string VortexInstaller::GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip) {
   std::string topLevelDir = GetTopLevelDir(tarballFile);
   if (topLevelDir.empty()) {
     std::cerr << "Failed to find top-level directory in tarball." << std::endl;
@@ -883,7 +883,7 @@ bool VortexInstaller::IsSafePath(const std::filesystem::path &path) {
 }
 
 std::string
-VortexInstaller::GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip = 1) {
+VortexInstaller::GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip) {
   std::string command;
 
 #ifdef _WIN32
@@ -1319,4 +1319,22 @@ std::string VortexInstaller::GetPath(const std::string &path) {
 #else
   return VortexInstaller::CookPath(path);
 #endif
+}
+
+std::string VortexInstaller::FindManifestJson(const std::filesystem::path &startPath, int maxDepth) {
+  std::filesystem::path currentPath = startPath;
+  int depth = 0;
+
+  while (!currentPath.empty() && depth < maxDepth) {
+    std::filesystem::path manifestPath = currentPath / "manifest.json";
+
+    if (std::filesystem::exists(manifestPath)) {
+      return manifestPath.string();
+    }
+
+    currentPath = currentPath.parent_path();
+    ++depth;
+  }
+
+  return "";
 }

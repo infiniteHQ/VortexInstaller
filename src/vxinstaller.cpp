@@ -4,7 +4,7 @@
 #include <string>
 #include <thread>
 
-#include "../ui/installer/app.hpp"
+#include "./ui/app.hpp"
 
 static std::string version_name;
 static std::string dist;

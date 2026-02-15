@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 
-#include "../ui/installer/app.hpp"
+#include "./ui/app.hpp"
 
 namespace fs = std::filesystem;
 
@@ -79,8 +79,8 @@ int main(int argc, char *argv[]) {
 
   parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath);
 
-  DetectPlatform();
-  DetectArch();
+  VortexInstaller::DetectPlatform();
+  VortexInstaller::DetectArch();
 
   std::thread([=]() {
     if (g_InstallerData->net.CheckNet()) {
@@ -143,11 +143,11 @@ int main(int argc, char *argv[]) {
           std::cout << body << std::endl;
         }
 
-        std::string manifestPath = findManifestJson(g_InstallerData->g_WorkingPath);
+        std::string manifestPath = VortexInstaller::FindManifestJson(g_InstallerData->g_WorkingPath);
         if (!manifestPath.empty()) {
           std::cout << "Found manifest.json at: " << manifestPath << std::endl;
 
-          g_InstallerData->g_ManifestVersion = getManifestVersion(manifestPath);
+          g_InstallerData->g_ManifestVersion = VortexInstaller::GetManifestVersion(manifestPath);
           if (!g_InstallerData->g_ManifestVersion.empty()) {
             g_InstallerData->g_ManifestVersion = normalizeVersion(g_InstallerData->g_ManifestVersion);
             std::string requestVersion = normalizeVersion(g_InstallerData->g_RequestVersion);
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]) {
   }).detach();
 
   if (g_InstallerData->g_WorkingPath.empty()) {
-    g_InstallerData->g_WorkingPath = CookPath("");
+    g_InstallerData->g_WorkingPath = VortexInstaller::CookPath("");
     std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
   }
 

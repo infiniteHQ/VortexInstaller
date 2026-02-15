@@ -3,8 +3,9 @@
 #include <iostream>
 #include <string>
 #include <thread>
+#include <vector>
 
-#include "../ui/installer/app.hpp"
+#include "./ui/app.hpp"
 
 std::vector<int> SeparateVersion(const std::string &version) {
   std::vector<int> versionParts;
@@ -62,8 +63,8 @@ int main(int argc, char *argv[]) {
 
   g_InstallerData->g_Action = "install";
 
-  DetectPlatform();
-  DetectArch();
+  VortexInstaller::DetectPlatform();
+  VortexInstaller::DetectArch();
 
   std::thread([=]() {
     if (g_InstallerData->net.CheckNet()) {

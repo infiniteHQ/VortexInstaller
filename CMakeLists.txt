@@ -23,13 +23,13 @@ else()
     add_link_options(/OPT:REF /OPT:ICF /LTCG)
 endif()
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ui/installer ui_installer_build)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/src/ui ui_installer_build)
 if (NOT TARGET httpcl)
     add_subdirectory(lib/httpcl)
 endif()
 
 # --- vortex_installer ---
-add_executable(vortex_installer src/installer.cpp src/base.cpp)
+add_executable(vortex_installer src/installer.cpp src/api/api.cpp)
 target_link_libraries(vortex_installer PRIVATE installer httpcl cherry)
 if (WIN32)
     target_link_libraries(vortex_installer PRIVATE urlmon)
@@ -39,7 +39,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # --- vortex_update ---
-add_executable(vortex_update src/updater.cpp src/base.cpp)
+add_executable(vortex_update src/updater.cpp src/api/api.cpp)
 target_link_libraries(vortex_update PRIVATE installer httpcl cherry)
 if (WIN32)
     target_link_libraries(vortex_update PRIVATE urlmon)
@@ -49,7 +49,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # --- vortex_uninstall ---
-add_executable(vortex_uninstall src/uninstall.cpp)
+add_executable(vortex_uninstall src/uninstall.cpp src/api/api.cpp)
 target_link_libraries(vortex_uninstall PRIVATE installer httpcl cherry)
 if (WIN32)
     target_link_libraries(vortex_uninstall PRIVATE urlmon)
@@ -59,7 +59,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # --- vxinstaller ---
-add_executable(vxinstaller src/vxinstaller.cpp src/base.cpp)
+add_executable(vxinstaller src/vxinstaller.cpp src/api/api.cpp)
 target_link_libraries(vxinstaller PRIVATE installer httpcl cherry)
 if (WIN32)
     target_link_libraries(vxinstaller PRIVATE urlmon)
@@ -69,7 +69,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # --- vxuninstall ---
-add_executable(vxuninstall src/vxuninstall.cpp)
+add_executable(vxuninstall src/vxuninstall.cpp src/api/api.cpp)
 target_link_libraries(vxuninstall PRIVATE installer httpcl cherry)
 if (WIN32)
     target_link_libraries(vxuninstall PRIVATE urlmon)

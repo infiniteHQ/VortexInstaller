@@ -107,22 +107,4 @@ static void printManifest(const std::string &manifestPath) {
   manifestFile.close();
 }
 
-static std::string findManifestJson(const std::filesystem::path &startPath, int maxDepth = 10) {
-  std::filesystem::path currentPath = startPath;
-  int depth = 0;
-
-  while (!currentPath.empty() && depth < maxDepth) {
-    std::filesystem::path manifestPath = currentPath / "manifest.json";
-
-    if (std::filesystem::exists(manifestPath)) {
-      return manifestPath.string();
-    }
-
-    currentPath = currentPath.parent_path();
-    ++depth;
-  }
-
-  return "";
-}
-
 #endif  // BASE_VORTEXINSTALLER_H
