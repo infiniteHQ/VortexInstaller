@@ -15,8 +15,6 @@
 
 #include "../common/common.hpp"
 
-static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
-
 #if (!defined(PATH_MAX) || PATH_MAX < 1024)
 #undef PATH_MAX
 #define PATH_MAX 1024
@@ -36,6 +34,9 @@ static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 #endif
 
 namespace VortexInstaller {
+  void CreateContext();
+  std::shared_ptr<VortexInstallerData> GetContext();
+
   // Main installer api
   bool InstallVortexLauncher();
   void UpdateVortexLauncher();

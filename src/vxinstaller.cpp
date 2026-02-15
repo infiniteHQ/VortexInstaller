@@ -16,11 +16,11 @@ static std::vector<std::string> version_pools;
 void RefreshEnvironmentVortexVersionsPools() {
   std::string path;
 #if defined(_WIN32) || defined(_WIN64)
-  path = g_InstallerData->g_HomeDirectory + "\\.vx\\configs\\";
+  path = VortexInstaller::GetContext()->g_HomeDirectory + "\\.vx\\configs\\";
 #endif
 
 #if defined(__linux__) || defined(__APPLE__)
-  path = g_InstallerData->g_HomeDirectory + "/.vx/configs/";
+  path = VortexInstaller::GetContext()->g_HomeDirectory + "/.vx/configs/";
 #endif
 
   std::string json_file;
@@ -76,36 +76,36 @@ void parseArguments(int argc, char *argv[]) {
     }
 
     if (arg.find("--home=") == 0) {
-      g_InstallerData->g_HomeDirectory = arg.substr(7);
+      VortexInstaller::GetContext()->g_HomeDirectory = arg.substr(7);
     }
   }
 }
 
 int main(int argc, char *argv[]) {
-  g_InstallerData = std::make_shared<VortexInstallerData>();
+  VortexInstaller::CreateContext();
 
-  g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
+  VortexInstaller::GetContext()->g_WorkingPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
   parseArguments(argc, argv);
 
-  g_InstallerData->g_Action = "vxinstall";
+  VortexInstaller::GetContext()->g_Action = "vxinstall";
 
   RefreshEnvironmentVortexVersionsPools();
-  g_InstallerData->m_VortexPools = version_pools;
+  VortexInstaller::GetContext()->m_VortexPools = version_pools;
   std::thread([=]() {
-    if (g_InstallerData->net.CheckNet()) {
-      g_InstallerData->g_Request = true;
+    if (VortexInstaller::GetContext()->net.CheckNet()) {
+      VortexInstaller::GetContext()->g_Request = true;
     }
   }).detach();
 
   std::thread([=]() {
-    while (!g_InstallerData->g_NetFetched) {
-      if (g_InstallerData->g_Request) {
+    while (!VortexInstaller::GetContext()->g_NetFetched) {
+      if (VortexInstaller::GetContext()->g_Request) {
         std::string url =
             "http://api.infinite.si:9000/api/vortexupdates/"
             "get_filtered_v_versions?platform=" +
             platform + "&dist=" + dist + "&arch=" + arch + "&name=" + version_name;
 
-        std::string body = g_InstallerData->net.GET(url);
+        std::string body = VortexInstaller::GetContext()->net.GET(url);
         auto json_response = nlohmann::json::parse(body);
         std::vector<VortexVersion> versions;
 
@@ -118,8 +118,8 @@ int main(int argc, char *argv[]) {
           v.dist = item["dist"].get<std::string>();
           v.path = item["path"].get<std::string>();
           v.sum = item["sum"].get<std::string>();
-          g_InstallerData->g_RequestTarballPath = v.path;
-          g_InstallerData->g_RequestSumPath = v.sum;  // TODO
+          VortexInstaller::GetContext()->g_RequestTarballPath = v.path;
+          VortexInstaller::GetContext()->g_RequestSumPath = v.sum;  // TODO
           v.platform = item["platform"].get<std::string>();
           v.date = item["date"].get<std::string>();
           v.created_at = item["created_at"].get<std::string>();
@@ -139,11 +139,11 @@ int main(int argc, char *argv[]) {
 
         for (auto &v : versions) {
           if (v.name == version_name && v.arch == arch) {
-            g_InstallerData->m_SelectedVortexVersion = v;
+            VortexInstaller::GetContext()->m_SelectedVortexVersion = v;
             break;
           }
         }
-        g_InstallerData->g_NetFetched = true;
+        VortexInstaller::GetContext()->g_NetFetched = true;
       }
 
       std::this_thread::sleep_for(std::chrono::seconds(2));

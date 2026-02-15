@@ -18,30 +18,30 @@ void parseArguments(int argc, char *argv[], std::string &path) {
   }
 
   if (path.empty()) {
-    path = g_InstallerData->g_DefaultInstallPath;
+    path = VortexInstaller::GetContext()->g_DefaultInstallPath;
   }
 }
 
 int main(int argc, char *argv[]) {
-  g_InstallerData = std::make_shared<VortexInstallerData>();
-  g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
+  VortexInstaller::CreateContext();
+  VortexInstaller::GetContext()->g_WorkingPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
 
-  g_InstallerData->g_Action = "vxuninstall";
-  parseArguments(argc, argv, g_InstallerData->g_WorkingPath);
+  VortexInstaller::GetContext()->g_Action = "vxuninstall";
+  parseArguments(argc, argv, VortexInstaller::GetContext()->g_WorkingPath);
 
-  if (g_InstallerData->g_WorkingPath.empty()) {
-    g_InstallerData->g_WorkingPath = VortexInstaller::CookPath("");
-    std::cout << "Path derived from executable: " << g_InstallerData->g_WorkingPath << std::endl;
+  if (VortexInstaller::GetContext()->g_WorkingPath.empty()) {
+    VortexInstaller::GetContext()->g_WorkingPath = VortexInstaller::CookPath("");
+    std::cout << "Path derived from executable: " << VortexInstaller::GetContext()->g_WorkingPath << std::endl;
   }
 
-  std::cout << "Action: " << g_InstallerData->g_Action << std::endl;
-  std::cout << "Path: " << g_InstallerData->g_WorkingPath << std::endl;
+  std::cout << "Action: " << VortexInstaller::GetContext()->g_Action << std::endl;
+  std::cout << "Path: " << VortexInstaller::GetContext()->g_WorkingPath << std::endl;
 
-  std::string manifestPath = VortexInstaller::FindManifestJson(g_InstallerData->g_WorkingPath);
+  std::string manifestPath = VortexInstaller::FindManifestJson(VortexInstaller::GetContext()->g_WorkingPath);
   if (!manifestPath.empty()) {
     std::cout << "Found manifest.json at: " << manifestPath << std::endl;
 
-    g_InstallerData->g_WorkingPath = manifestPath.substr(0, manifestPath.find_last_of("/\\"));
+    VortexInstaller::GetContext()->g_WorkingPath = manifestPath.substr(0, manifestPath.find_last_of("/\\"));
 
   } else {
     std::cerr << "manifest.json not found!" << std::endl;

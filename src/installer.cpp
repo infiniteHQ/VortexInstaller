@@ -52,61 +52,69 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
   }
 
   if (path.empty()) {
-    path = g_InstallerData->g_DefaultInstallPath;
+    path = VortexInstaller::GetContext()->g_DefaultInstallPath;
   }
 }
 
 int main(int argc, char *argv[]) {
-  g_InstallerData = std::make_shared<VortexInstallerData>();
+  std::cout << "SDFSD" << std::endl;
+  VortexInstaller::CreateContext();
 
-  g_InstallerData->g_WorkingPath = g_InstallerData->g_DefaultInstallPath;
+  std::cout << "333" << std::endl;
+  VortexInstaller::GetContext()->g_WorkingPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
 
-  g_InstallerData->g_Action = "install";
+  std::cout << "555" << std::endl;
+  VortexInstaller::GetContext()->g_Action = "install";
 
+  std::cout << "666" << std::endl;
   VortexInstaller::DetectPlatform();
   VortexInstaller::DetectArch();
 
+  std::cout << "345345" << std::endl;
   std::thread([=]() {
-    if (g_InstallerData->net.CheckNet()) {
-      g_InstallerData->g_Request = true;
+    if (VortexInstaller::GetContext()->net.CheckNet()) {
+      VortexInstaller::GetContext()->g_Request = true;
     }
   }).detach();
 
   std::thread([=]() {
-    while (!g_InstallerData->g_NetFetched) {
-      if (g_InstallerData->g_Request) {
-        std::string dist = g_InstallerData->g_Distribution + "_" + g_InstallerData->g_Platform;
-        std::string url =
-            "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist + "&arch=" + g_InstallerData->g_Arch;
+    while (!VortexInstaller::GetContext()->g_NetFetched) {
+      if (VortexInstaller::GetContext()->g_Request) {
+        std::string dist = VortexInstaller::GetContext()->g_Distribution + "_" + VortexInstaller::GetContext()->g_Platform;
+        std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist +
+                          "&arch=" + VortexInstaller::GetContext()->g_Arch;
 
-        std::string body = g_InstallerData->net.GET(url);
+        std::string body = VortexInstaller::GetContext()->net.GET(url);
 
         try {
-          g_InstallerData->jsonResponse = nlohmann::json::parse(body);
+          VortexInstaller::GetContext()->jsonResponse = nlohmann::json::parse(body);
 
-          if (!g_InstallerData->jsonResponse.empty() && g_InstallerData->jsonResponse.is_array()) {
-            std::string values_str = g_InstallerData->jsonResponse[0]["values"];
+          if (!VortexInstaller::GetContext()->jsonResponse.empty() &&
+              VortexInstaller::GetContext()->jsonResponse.is_array()) {
+            std::string values_str = VortexInstaller::GetContext()->jsonResponse[0]["values"];
 
-            g_InstallerData->g_RequestValues = nlohmann::json::parse(values_str);
+            VortexInstaller::GetContext()->g_RequestValues = nlohmann::json::parse(values_str);
 
-            if (g_InstallerData->g_RequestValues.contains("path") && g_InstallerData->g_RequestValues["path"].is_string()) {
-              g_InstallerData->g_RequestTarballPath = g_InstallerData->g_RequestValues["path"];
-              VXI_LOG("Tarball Path: " << g_InstallerData->g_RequestTarballPath);
+            if (VortexInstaller::GetContext()->g_RequestValues.contains("path") &&
+                VortexInstaller::GetContext()->g_RequestValues["path"].is_string()) {
+              VortexInstaller::GetContext()->g_RequestTarballPath = VortexInstaller::GetContext()->g_RequestValues["path"];
+              VXI_LOG("Tarball Path: " << VortexInstaller::GetContext()->g_RequestTarballPath);
             } else {
               VXI_LOG("Error: 'path' key missing or not a string");
             }
 
-            if (g_InstallerData->g_RequestValues.contains("sum") && g_InstallerData->g_RequestValues["sum"].is_string()) {
-              g_InstallerData->g_RequestSumPath = g_InstallerData->g_RequestValues["sum"];
-              VXI_LOG("Sum Path: " << g_InstallerData->g_RequestSumPath);
+            if (VortexInstaller::GetContext()->g_RequestValues.contains("sum") &&
+                VortexInstaller::GetContext()->g_RequestValues["sum"].is_string()) {
+              VortexInstaller::GetContext()->g_RequestSumPath = VortexInstaller::GetContext()->g_RequestValues["sum"];
+              VXI_LOG("Sum Path: " << VortexInstaller::GetContext()->g_RequestSumPath);
             } else {
               VXI_LOG("Error: 'sum' key missing or not a string");
             }
 
-            if (g_InstallerData->g_RequestValues.contains("version") &&
-                g_InstallerData->g_RequestValues["version"].is_string()) {
-              g_InstallerData->g_RequestVersion = g_InstallerData->g_RequestValues["version"];
-              VXI_LOG("Version: " << g_InstallerData->g_RequestVersion);
+            if (VortexInstaller::GetContext()->g_RequestValues.contains("version") &&
+                VortexInstaller::GetContext()->g_RequestValues["version"].is_string()) {
+              VortexInstaller::GetContext()->g_RequestVersion = VortexInstaller::GetContext()->g_RequestValues["version"];
+              VXI_LOG("Version: " << VortexInstaller::GetContext()->g_RequestVersion);
             } else {
               VXI_LOG("Error: 'version' key missing or not a string");
             }
@@ -118,19 +126,21 @@ int main(int argc, char *argv[]) {
         }
 
         // Check if the local builtin launcher is equals or higher to the net
-        if (g_InstallerData->m_BuiltinLauncherExist)
-          if (CompareVersions(g_InstallerData->g_RequestVersion, g_InstallerData->m_BuiltinLauncher.version)) {
-            g_InstallerData->g_UseNet = false;
-            g_InstallerData->m_BuiltinLauncherNewer = true;
+        if (VortexInstaller::GetContext()->m_BuiltinLauncherExist)
+          if (CompareVersions(
+                  VortexInstaller::GetContext()->g_RequestVersion,
+                  VortexInstaller::GetContext()->m_BuiltinLauncher.version)) {
+            VortexInstaller::GetContext()->g_UseNet = false;
+            VortexInstaller::GetContext()->m_BuiltinLauncherNewer = true;
           } else {
-            g_InstallerData->m_NetLauncherNewer = true;
+            VortexInstaller::GetContext()->m_NetLauncherNewer = true;
           }
 
-        if (g_InstallerData->m_BuiltinLauncher.version == g_InstallerData->g_RequestVersion) {
-          g_InstallerData->g_UseNet = false;
-          g_InstallerData->m_BuiltinLauncherNewer = true;
+        if (VortexInstaller::GetContext()->m_BuiltinLauncher.version == VortexInstaller::GetContext()->g_RequestVersion) {
+          VortexInstaller::GetContext()->g_UseNet = false;
+          VortexInstaller::GetContext()->m_BuiltinLauncherNewer = true;
         }
-        g_InstallerData->g_NetFetched = true;
+        VortexInstaller::GetContext()->g_NetFetched = true;
       }
       std::this_thread::sleep_for(std::chrono::seconds(2));
     }
@@ -152,8 +162,8 @@ int main(int argc, char *argv[]) {
       launcher.tarball = manifest_json.at("tarball").get<std::string>();
       launcher.sum = manifest_json.at("sum").get<std::string>();
 
-      g_InstallerData->m_BuiltinLauncherExist = true;
-      g_InstallerData->m_BuiltinLauncher = launcher;
+      VortexInstaller::GetContext()->m_BuiltinLauncherExist = true;
+      VortexInstaller::GetContext()->m_BuiltinLauncher = launcher;
 
       std::cout << "Manifest loaded successfully!" << std::endl;
     } catch (const std::exception &e) {
@@ -163,7 +173,12 @@ int main(int argc, char *argv[]) {
     std::cerr << "Manifest file does not exist!" << std::endl;
   }
 
-  parseArguments(argc, argv, g_InstallerData->g_Action, g_InstallerData->g_WorkingPath, g_InstallerData->g_HomeDirectory);
+  parseArguments(
+      argc,
+      argv,
+      VortexInstaller::GetContext()->g_Action,
+      VortexInstaller::GetContext()->g_WorkingPath,
+      VortexInstaller::GetContext()->g_HomeDirectory);
 
   CherryRun(argc, argv);
   return 0;

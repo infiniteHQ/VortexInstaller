@@ -1,5 +1,14 @@
 #include "api.hpp"
 
+static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
+void VortexInstaller::CreateContext() {
+  g_InstallerData = std::make_shared<VortexInstallerData>();
+}
+
+std::shared_ptr<VortexInstallerData> VortexInstaller::GetContext() {
+  return g_InstallerData;
+}
+
 // 5 Steps
 bool VortexInstaller::InstallVortexLauncher() {
   auto &installerData = *g_InstallerData;
