@@ -32,7 +32,7 @@ namespace VortexInstaller {
     CherryNextComponent.SetProperty("color_text", "#777777FF");
     CherryKit::TextWrapped(Cherry::GetLocale("loc.install.install_path"));
     CherryNextComponent.SetProperty("size_x", std::to_string(CherryGUI::GetContentRegionAvail().x - 6.0f));
-    CherryKit::InputString("", &m_Data->g_DefaultInstallPath);
+    CherryKit::InputString("", &VortexInstaller::GetContext()->g_DefaultInstallPath);
 
     std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");
     ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
@@ -56,8 +56,8 @@ namespace VortexInstaller {
       m_SelectedChildName = "?loc:loc.child.license";
       this->SetChildState("?loc:loc.child.main", true);
 
-      CheckExistingInstallation(m_Data);
-      if (m_Data->m_FolderAlreadyExist) {
+      CheckExistingInstallation(VortexInstaller::GetContext());
+      if (VortexInstaller::GetContext()->m_FolderAlreadyExist) {
         CanInstall = false;
       }
     }
@@ -117,10 +117,13 @@ namespace VortexInstaller {
 
     CherryKit::SeparatorText(Cherry::GetLocale("loc.install.install_summary"));
 
-    if (m_Data->m_BuiltinLauncherNewer && m_Data->g_Request && m_Data->m_BuiltinLauncherExist) {
+    if (VortexInstaller::GetContext()->m_BuiltinLauncherNewer && VortexInstaller::GetContext()->g_Request &&
+        VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
       Cherry::SetNextComponentProperty("color_text", "#555555");
       CherryKit::TextWrapped(Cherry::GetLocale("loc.install.builder_is_newer"));
-    } else if (!m_Data->m_BuiltinLauncherNewer && m_Data->g_Request && m_Data->m_BuiltinLauncherExist) {
+    } else if (
+        !VortexInstaller::GetContext()->m_BuiltinLauncherNewer && VortexInstaller::GetContext()->g_Request &&
+        VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
       Cherry::SetNextComponentProperty("color_text", "#555555");
       CherryKit::TextWrapped(Cherry::GetLocale("loc.install.builder_is_older"));
     }
@@ -128,55 +131,55 @@ namespace VortexInstaller {
     ImVec2 available_size = CherryGUI::GetContentRegionAvail();
     float button_width = (available_size.x - CherryGUI::GetStyle().ItemSpacing.x) / 2 - 42.0f;
 
-    if (!m_Data->g_Request) {
-      m_Data->g_UseNet = false;
+    if (!VortexInstaller::GetContext()->g_Request) {
+      VortexInstaller::GetContext()->g_UseNet = false;
       CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.offline_mode").c_str());
     }
-    if (!m_Data->g_NetFetched && m_Data->g_Request) {
-      m_Data->g_UseNet = false;
+    if (!VortexInstaller::GetContext()->g_NetFetched && VortexInstaller::GetContext()->g_Request) {
+      VortexInstaller::GetContext()->g_UseNet = false;
       CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.wait_fetch").c_str());
     }
 
-    if (!m_Data->m_BuiltinLauncherExist && !m_Data->g_Request) {
-      m_Data->g_UseNet = true;
+    if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
+      VortexInstaller::GetContext()->g_UseNet = true;
       CherryGUI::TextColored(Cherry::HexToRGBA("#FF3535FF"), Cherry::GetLocale("loc.install.no_builtin").c_str());
     }
 
-    if (m_Data->m_NetLauncherNewer) {
-      m_Data->g_UseNet = true;
+    if (VortexInstaller::GetContext()->m_NetLauncherNewer) {
+      VortexInstaller::GetContext()->g_UseNet = true;
     }
 
-    if (!m_Data->m_BuiltinLauncherExist && !m_Data->g_Request) {
-      m_Data->result = "fail";
-      m_Data->state = Cherry::GetLocale("loc.error.no_internet_and_builtin");
+    if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
+      VortexInstaller::GetContext()->result = "fail";
+      VortexInstaller::GetContext()->state = Cherry::GetLocale("loc.error.no_internet_and_builtin");
       m_SelectedChildName = "?loc:loc.child.installation";
     }
 
-    if (m_Data->g_NetFetched) {
+    if (VortexInstaller::GetContext()->g_NetFetched) {
       bool clicked = false;
 
-      std::string label =
-          Cherry::GetLocale("loc.install.net_download") + "\n(VortexLauncher " + m_Data->g_RequestVersion + ")";
+      std::string label = Cherry::GetLocale("loc.install.net_download") + "\n(VortexLauncher " +
+                          VortexInstaller::GetContext()->g_RequestVersion + ")";
       // CherryGUI::PushTextWrapPos(CherryGUI::GetCursorPos().x + button_width);
 
       // auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label,
       // Cherry::GetPath("resources/imgs/net.png"));
 
-      /*if (m_Data->g_UseNet) {
+      /*if (VortexInstaller::GetContext()->g_UseNet) {
         // btn->SetBorderColorIdle("#B1FF31FF");
         Cherry::SetNextComponentProperty("color_border", "#B1FF31FF");
       }*/
 
       /*if (btn->Render("__1")) {
-        m_Data->g_UseNet = true;
+        VortexInstaller::GetContext()->g_UseNet = true;
       }*/
       /*CherryNextComponent.SetProperty("size_x", button_width);
       if (CherryKit::ButtonImageText(label,
       Cherry::GetPath("resources/imgs/net.png")).GetData("isClicked") == "true") {
-        m_Data->g_UseNet = true;
+        VortexInstaller::GetContext()->g_UseNet = true;
       }*/
 
-      if (m_Data->g_UseNet) {
+      if (VortexInstaller::GetContext()->g_UseNet) {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#B1FF31FF"));
       } else {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#343434"));
@@ -198,7 +201,7 @@ namespace VortexInstaller {
               -1,
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
-        m_Data->g_UseNet = true;
+        VortexInstaller::GetContext()->g_UseNet = true;
       }
       CherryGUI::PopStyleColor(5);
 
@@ -212,13 +215,13 @@ namespace VortexInstaller {
       // auto btn = std::make_shared<Cherry::ImageTextButtonSimple>(label, label,
       // Cherry::GetPath("resources/imgs/net.png"));
 
-      /*if (m_Data->g_UseNet) {
+      /*if (VortexInstaller::GetContext()->g_UseNet) {
         // btn->SetBorderColorIdle("#B1FF31FF");
         Cherry::SetNextComponentProperty("color_border", "#B1FF31FF");
       }
 
       if (btn->Render("__1")) {
-        m_Data->g_UseNet = true;
+        VortexInstaller::GetContext()->g_UseNet = true;
       }
 
       CherryNextComponent.SetProperty("size_x", button_width);
@@ -226,7 +229,7 @@ namespace VortexInstaller {
       Cherry::GetPath("resources/imgs/net.png")).GetData("isClicked") == "true") {
       }*/
 
-      if (m_Data->g_UseNet) {
+      if (VortexInstaller::GetContext()->g_UseNet) {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#B1FF31FF"));
       } else {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#343434"));
@@ -248,7 +251,7 @@ namespace VortexInstaller {
               -1,
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
-        m_Data->g_UseNet = true;
+        VortexInstaller::GetContext()->g_UseNet = true;
       }
       CherryGUI::PopStyleColor(5);
 
@@ -263,18 +266,20 @@ namespace VortexInstaller {
 
       std::string label = Cherry::GetLocale("loc.install.no_local_launcher");
 
-      if (m_Data->m_BuiltinLauncherExist) {
-        label = Cherry::GetLocale("loc.install.builtin_install") + "\n(Latest " + m_Data->m_BuiltinLauncher.platform +
-                " w/ " + m_Data->m_BuiltinLauncher.arch + " v. " + m_Data->m_BuiltinLauncher.version + ")";
+      if (VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
+        label = Cherry::GetLocale("loc.install.builtin_install") + "\n(Latest " +
+                VortexInstaller::GetContext()->m_BuiltinLauncher.platform + " w/ " +
+                VortexInstaller::GetContext()->m_BuiltinLauncher.arch + " v. " +
+                VortexInstaller::GetContext()->m_BuiltinLauncher.version + ")";
       }
 
       CherryGUI::PushTextWrapPos(CherryGUI::GetCursorPos().x + button_width);
 
-      if (!m_Data->m_BuiltinLauncherExist) {
+      if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
         CherryGUI::BeginDisabled();
       }
 
-      if (!m_Data->g_UseNet && m_Data->m_BuiltinLauncherExist) {
+      if (!VortexInstaller::GetContext()->g_UseNet && VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#B1FF31FF"));
       } else {
         CherryGUI::PushStyleColor(ImGuiCol_Border, Cherry::HexToRGBA("#343434"));
@@ -296,11 +301,11 @@ namespace VortexInstaller {
               -1,
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
-        m_Data->g_UseNet = false;
+        VortexInstaller::GetContext()->g_UseNet = false;
       }
       CherryGUI::PopStyleColor(5);
 
-      if (!m_Data->m_BuiltinLauncherExist) {
+      if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist) {
         CherryGUI::EndDisabled();
       }
       CherryGUI::PopTextWrapPos();
@@ -458,8 +463,9 @@ namespace VortexInstaller {
 
     CherryKit::Separator();
 
-    if (m_Data->m_FolderAlreadyExist) {
-      std::string label_install = Cherry::GetLocale("loc.install.install_path_is") + " : " + m_Data->g_DefaultInstallPath;
+    if (VortexInstaller::GetContext()->m_FolderAlreadyExist) {
+      std::string label_install =
+          Cherry::GetLocale("loc.install.install_path_is") + " : " + VortexInstaller::GetContext()->g_DefaultInstallPath;
       CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), label_install.c_str());
       CherryGUI::Separator();
       CherryGUI::TextColored(
@@ -509,26 +515,27 @@ namespace VortexInstaller {
   }
 
   void InstallAppWindow::RenderInstall() {
-    float progress = static_cast<float>(m_Data->state_n) / 5.0f;
-    ImVec4 progressBarColor = (m_Data->result == "success" || m_Data->result == "processing")
-                                  ? Cherry::HexToRGBA("#B1FF31FF")
-                                  : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
+    float progress = static_cast<float>(VortexInstaller::GetContext()->state_n) / 5.0f;
+    ImVec4 progressBarColor =
+        (VortexInstaller::GetContext()->result == "success" || VortexInstaller::GetContext()->result == "processing")
+            ? Cherry::HexToRGBA("#B1FF31FF")
+            : ImVec4(0.8f, 0.18f, 0.18f, 1.0f);
 
     CherryKit::Space(40.0f);
-    if (m_Data->result == "processing") {
+    if (VortexInstaller::GetContext()->result == "processing") {
       CherryKit::TitleTwo(CherryApp.GetLocale("loc.install.result_processing"));
-    } else if (m_Data->result == "success") {
+    } else if (VortexInstaller::GetContext()->result == "success") {
       CherryKit::TitleTwo(CherryApp.GetLocale("loc.install.result_success"));
-    } else if (m_Data->result == "fail") {
+    } else if (VortexInstaller::GetContext()->result == "fail") {
       CherryKit::TitleTwo(CherryApp.GetLocale("loc.install.result_failed"));
     }
 
     CherryGUI::PushStyleColor(ImGuiCol_PlotHistogram, progressBarColor);
     CherryGUI::ProgressBar(progress, ImVec2(-1.0f, 0.0f), "");
-    CherryGUI::Text(m_Data->state.c_str());
+    CherryGUI::Text(VortexInstaller::GetContext()->state.c_str());
     CherryGUI::PopStyleColor();
 
-    if (m_Data->result == "processing") {
+    if (VortexInstaller::GetContext()->result == "processing") {
       CherryGUI::BeginDisabled();
       std::string text = CherryApp.GetLocale("loc.close");
       ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
@@ -543,14 +550,14 @@ namespace VortexInstaller {
         m_SelectedChildName = "?loc:loc.child.license";
         this->SetChildState("?loc:loc.child.main", true);
 
-        CheckExistingInstallation(m_Data);
-        if (m_Data->m_FolderAlreadyExist) {
+        CheckExistingInstallation(VortexInstaller::GetContext());
+        if (VortexInstaller::GetContext()->m_FolderAlreadyExist) {
           CanInstall = false;
         }
       }
       CherryGUI::EndDisabled();
 
-    } else if (m_Data->result == "success") {
+    } else if (VortexInstaller::GetContext()->result == "success") {
       std::string text = CherryApp.GetLocale("loc.launch_launcher") + CherryApp.GetLocale("loc.close");
       ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
       CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
@@ -572,7 +579,7 @@ namespace VortexInstaller {
       if (CherryKit::ButtonText(CherryApp.GetLocale("loc.launch_launcher")).GetData("isClicked") == "true") {
         // Start launcher
         std::thread([=]() {
-          std::string installPath = m_Data->g_DefaultInstallPath;
+          std::string installPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
 
 #if defined(_WIN32)
           std::string cmd = "\"" + installPath + "\\bin\\vortex_launcher.exe\"";
@@ -586,7 +593,7 @@ namespace VortexInstaller {
         Cherry::Application().Get().Close();
       }
 
-    } else if (m_Data->result == "fail") {
+    } else if (VortexInstaller::GetContext()->result == "fail") {
       std::string text = CherryApp.GetLocale("loc.close");
       ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
       CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);

@@ -1,5 +1,7 @@
 #include "api.hpp"
 
+#include "../common/common.hpp"
+
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;
 void VortexInstaller::CreateContext() {
   g_InstallerData = std::make_shared<VortexInstallerData>();
@@ -14,8 +16,12 @@ bool VortexInstaller::InstallVortexLauncher() {
   auto &installerData = *g_InstallerData;
 
   // installerData.state_n++;
-  installerData.state = "Initialization...";
+  VortexInstaller::GetContext()->state = "Initialization...";
 
+  nlohmann::json out;
+  out["type"] = "refresh";
+  out["data"] = VortexInstaller::GetContext()->ToJson();
+  std::cout << out.dump() << std::endl;
   std::string tempDir;
 #ifdef _WIN32
   tempDir = std::filesystem::temp_directory_path().string() + "\\vortex_installer";

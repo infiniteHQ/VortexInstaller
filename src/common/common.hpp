@@ -162,14 +162,6 @@ struct VortexInstallerData {
   // --- Pools ---
   std::vector<std::string> m_VortexPools;
 
-  // --- UI callbacks (UI ONLY) ---
-  // std::function<void()> m_InstallCallback;
-  // std::function<void()> m_UpdateCallback;
-  // std::function<void()> m_DowngradeCallback;
-  // std::function<void()> m_InstallVortexCallback;
-  // std::function<void()> m_UninstallVortexCallback;
-  // std::function<void(const bool &, const bool &, const bool &)> m_DeleteCallback;
-
   // --- Complex objects (NOT serialized directly) ---
   VortexInstallerNet net;
   VortexVersion m_SelectedVortexVersion;
@@ -189,6 +181,7 @@ struct VortexInstallerData {
     PATCH(g_Action)
     PATCH(g_Distribution)
     PATCH(g_UseNet)
+    PATCH(state)
 
 #undef PATCH
   }
