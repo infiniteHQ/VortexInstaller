@@ -91,6 +91,24 @@ void BackendClient::SendCommand(const std::string& cmd) {
   write(write_fd, msg.c_str(), msg.size());
 #endif
 }
+
+void BackendClient::SendPatch() {
+  std::lock_guard<std::mutex> lock(io_mutex);
+
+  nlohmann::json j;
+  j["type"] = "patch";
+  j["data"] = VortexInstaller::GetContext()->ToJson();
+
+  std::string msg = j.dump() + "\n";
+
+#ifdef _WIN32
+  DWORD written;
+  WriteFile(hWrite, msg.c_str(), (DWORD)msg.size(), &written, nullptr);
+#else
+  write(write_fd, msg.c_str(), msg.size());
+#endif
+}
+
 void BackendClient::Poll() {
   char buf[1024];
 

@@ -175,13 +175,83 @@ struct VortexInstallerData {
   if (patch.contains(#field)) \
     field = patch[#field];
 
-    PATCH(g_WorkingPath)
+    // --- Paths & env ---
+    PATCH(g_VortexDataPath)
+    PATCH(g_VortexPath)
     PATCH(g_DefaultInstallPath)
-    PATCH(g_SelectedLanguage)
-    PATCH(g_Action)
+    PATCH(g_WorkingPath)
+    PATCH(g_HomeDirectory)
+
+    // --- Install context ---
     PATCH(g_Distribution)
-    PATCH(g_UseNet)
+    PATCH(g_Action)
+    PATCH(g_Platform)
+    PATCH(g_Arch)
+
+    // --- Versions / manifest ---
+    PATCH(g_ManifestVersion)
+    PATCH(g_RequestVersion)
+    PATCH(g_RequestTarballPath)
+    PATCH(g_RequestSumPath)
+
+    // --- Localization ---
+    PATCH(g_PreviousSelectedLanguage)
+    PATCH(g_SelectedLanguage)
+
+    // --- State ---
     PATCH(state)
+    PATCH(result)
+    PATCH(state_n)
+    PATCH(finished)
+
+    // --- Network ---
+    PATCH(g_Request)
+    PATCH(g_NetFetched)
+    PATCH(g_NetAvailable)
+    PATCH(g_UseNet)
+
+    // --- JSON raw ---
+    if (patch.contains("jsonResponse") && patch["jsonResponse"].is_object())
+      jsonResponse = patch["jsonResponse"];
+    if (patch.contains("g_RequestValues") && patch["g_RequestValues"].is_object())
+      g_RequestValues = patch["g_RequestValues"];
+
+    // --- Version logic ---
+    PATCH(g_VortexLauncherOutdated)
+    PATCH(m_BuiltinLauncherExist)
+    PATCH(m_BuiltinLauncherNewer)
+    PATCH(m_NetLauncherNewer)
+    PATCH(m_FolderAlreadyExist)
+
+    // --- Pools ---
+    if (patch.contains("m_VortexPools") && patch["m_VortexPools"].is_array())
+      m_VortexPools = patch["m_VortexPools"].get<std::vector<std::string>>();
+
+    // --- Complex objects ---
+    if (patch.contains("m_SelectedVortexVersion") && patch["m_SelectedVortexVersion"].is_object()) {
+      const auto &v = patch["m_SelectedVortexVersion"];
+      PATCH(m_SelectedVortexVersion.id)
+      PATCH(m_SelectedVortexVersion.version)
+      PATCH(m_SelectedVortexVersion.name)
+      PATCH(m_SelectedVortexVersion.arch)
+      PATCH(m_SelectedVortexVersion.dist)
+      PATCH(m_SelectedVortexVersion.path)
+      PATCH(m_SelectedVortexVersion.sum)
+      PATCH(m_SelectedVortexVersion.platform)
+      PATCH(m_SelectedVortexVersion.date)
+      PATCH(m_SelectedVortexVersion.banner)
+      PATCH(m_SelectedVortexVersion.proper_name)
+      PATCH(m_SelectedVortexVersion.created_at)
+    }
+
+    if (patch.contains("m_BuiltinLauncher") && patch["m_BuiltinLauncher"].is_object()) {
+      const auto &b = patch["m_BuiltinLauncher"];
+      PATCH(m_BuiltinLauncher.version)
+      PATCH(m_BuiltinLauncher.arch)
+      PATCH(m_BuiltinLauncher.platform)
+      PATCH(m_BuiltinLauncher.tarball)
+      PATCH(m_BuiltinLauncher.sum)
+    }
 
 #undef PATCH
   }
@@ -190,7 +260,76 @@ struct VortexInstallerData {
 
   nlohmann::json ToJson() const {
     std::lock_guard<std::mutex> lock(mutex);
-    return { { "state", state }, { "state_n", state_n }, { "result", result }, { "finished", finished } };
+    return { // --- Paths & env ---
+             { "g_VortexDataPath", g_VortexDataPath },
+             { "g_VortexPath", g_VortexPath },
+             { "g_DefaultInstallPath", g_DefaultInstallPath },
+             { "g_WorkingPath", g_WorkingPath },
+             { "g_HomeDirectory", g_HomeDirectory },
+
+             // --- Install context ---
+             { "g_Distribution", g_Distribution },
+             { "g_Action", g_Action },
+             { "g_Platform", g_Platform },
+             { "g_Arch", g_Arch },
+
+             // --- Versions / manifest ---
+             { "g_ManifestVersion", g_ManifestVersion },
+             { "g_RequestVersion", g_RequestVersion },
+             { "g_RequestTarballPath", g_RequestTarballPath },
+             { "g_RequestSumPath", g_RequestSumPath },
+
+             // --- Localization ---
+             { "g_PreviousSelectedLanguage", g_PreviousSelectedLanguage },
+             { "g_SelectedLanguage", g_SelectedLanguage },
+
+             // --- State ---
+             { "state", state },
+             { "result", result },
+             { "state_n", state_n },
+             { "finished", finished },
+
+             // --- Network ---
+             { "g_Request", g_Request },
+             { "g_NetFetched", g_NetFetched },
+             { "g_NetAvailable", g_NetAvailable },
+             { "g_UseNet", g_UseNet },
+
+             // --- JSON raw ---
+             { "jsonResponse", jsonResponse },
+             { "g_RequestValues", g_RequestValues },
+
+             // --- Version logic ---
+             { "g_VortexLauncherOutdated", g_VortexLauncherOutdated },
+             { "m_BuiltinLauncherExist", m_BuiltinLauncherExist },
+             { "m_BuiltinLauncherNewer", m_BuiltinLauncherNewer },
+             { "m_NetLauncherNewer", m_NetLauncherNewer },
+             { "m_FolderAlreadyExist", m_FolderAlreadyExist },
+
+             // --- Pools ---
+             { "m_VortexPools", m_VortexPools },
+
+             // --- Complex objects ---
+             { "m_SelectedVortexVersion",
+               { { "id", m_SelectedVortexVersion.id },
+                 { "version", m_SelectedVortexVersion.version },
+                 { "name", m_SelectedVortexVersion.name },
+                 { "arch", m_SelectedVortexVersion.arch },
+                 { "dist", m_SelectedVortexVersion.dist },
+                 { "path", m_SelectedVortexVersion.path },
+                 { "sum", m_SelectedVortexVersion.sum },
+                 { "platform", m_SelectedVortexVersion.platform },
+                 { "date", m_SelectedVortexVersion.date },
+                 { "banner", m_SelectedVortexVersion.banner },
+                 { "proper_name", m_SelectedVortexVersion.proper_name },
+                 { "created_at", m_SelectedVortexVersion.created_at } } },
+             { "m_BuiltinLauncher",
+               { { "version", m_BuiltinLauncher.version },
+                 { "arch", m_BuiltinLauncher.arch },
+                 { "platform", m_BuiltinLauncher.platform },
+                 { "tarball", m_BuiltinLauncher.tarball },
+                 { "sum", m_BuiltinLauncher.sum } } }
+    };
   }
 };
 

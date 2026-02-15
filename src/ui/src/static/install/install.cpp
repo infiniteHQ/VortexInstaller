@@ -60,6 +60,8 @@ namespace VortexInstaller {
       if (VortexInstaller::GetContext()->m_FolderAlreadyExist) {
         CanInstall = false;
       }
+
+      m_Backend.SendPatch();
     }
   }
 

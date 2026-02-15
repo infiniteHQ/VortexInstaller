@@ -15,6 +15,7 @@ class BackendClient {
   ~BackendClient();
 
   void Start();
+  void SendPatch();
   void SendCommand(const std::string& cmd);
   void Poll();
 

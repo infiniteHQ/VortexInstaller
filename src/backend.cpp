@@ -33,6 +33,12 @@ int main() {
       if (type == "patch") {
         if (msg.contains("data"))
           VortexInstaller::GetContext()->PatchFromJson(msg["data"]);
+
+        nlohmann::json out;
+        out["type"] = "refresh";
+        out["data"] = VortexInstaller::GetContext()->ToJson();
+        std::cout << out.dump() << std::endl;
+
       } else if (type == "command") {
         if (msg.contains("name") && msg["name"].is_string()) {
           const std::string cmd = msg["name"];

@@ -46,6 +46,7 @@ namespace VortexInstaller {
   std::string MakeVortexLauncherFolderOld(const std::string &path);
   void DeleteOldVortexLauncher(const std::string &path);
   std::string RevertOldVortexLauncher(const std::string &path);
+  void PatchData();
 
   // Utilities
   std::string CookPath(std::string_view input_path);
