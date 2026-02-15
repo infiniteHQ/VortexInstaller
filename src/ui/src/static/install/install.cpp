@@ -499,14 +499,7 @@ namespace VortexInstaller {
       if (CherryKit::ButtonText(CherryApp.GetLocale("loc.confirg_install")).GetData("isClicked") == "true") {
         m_SelectedChildName = "?loc:loc.child.installation";
 
-        std::thread mainThread([this]() {
-          VortexInstaller::InstallVortexLauncher();
-          // if (m_Data->m_InstallCallback) {
-          //   m_Data->m_InstallCallback();
-          // }
-        });
-
-        mainThread.detach();
+        m_Backend.SendCommand("InstallVortexLauncher");
       }
 
       if (!CanInstall) {
@@ -625,6 +618,7 @@ namespace VortexInstaller {
 
   InstallAppWindow::InstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
+    m_Backend.Start();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);
@@ -717,6 +711,8 @@ namespace VortexInstaller {
   }
 
   void InstallAppWindow::Render() {
+    m_Backend.Poll();
+
     static float leftPaneWidth = 300.0f;
     const float minPaneWidth = 50.0f;
     const float splitterWidth = 1.5f;

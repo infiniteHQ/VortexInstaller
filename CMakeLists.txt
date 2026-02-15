@@ -28,6 +28,20 @@ if (NOT TARGET httpcl)
     add_subdirectory(lib/httpcl)
 endif()
 
+# --- vortex_installer_backend ---
+add_executable(vortex_installer_backend
+  src/backend.cpp
+  src/api/api.cpp
+)
+
+target_link_libraries(vortex_installer_backend PRIVATE httpcl)
+if (WIN32)
+    target_link_libraries(vortex_installer_backend PRIVATE urlmon)
+endif()
+if(UNIX AND NOT APPLE)
+    target_link_libraries(vortex_installer_backend PRIVATE CURL::libcurl)
+endif()
+
 # --- vortex_installer ---
 add_executable(vortex_installer src/installer.cpp src/api/api.cpp)
 target_link_libraries(vortex_installer PRIVATE installer httpcl cherry)

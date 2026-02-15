@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <iostream>
+#include <mutex>
 #include <string>
 #include <thread>
 #include <vector>
@@ -56,7 +57,7 @@ class VortexInstallerNet {
     naettReq *req = nullptr;
 
     if (method == "GET") {
-      std::cout << "GET request\n";
+      std::cerr << "GET request\n";
 
       const char *URL = url.c_str();
       req = naettRequest_va(URL, 2, naettMethod("GET"), naettHeader("accept", "*/*"));
@@ -110,13 +111,6 @@ class VortexInstallerNet {
     return result;
   }
 };
-
-/*
-  IMPORTANT :
-  - Cette struct est partagée UI / backend
-  - Les callbacks ne sont JAMAIS sérialisés
-  - Le backend ignore tout ce qui est UI-only
-*/
 
 struct VortexInstallerData {
   // --- Paths & env ---
@@ -199,32 +193,11 @@ struct VortexInstallerData {
 #undef PATCH
   }
 
-  // Backend -> UI (refresh complet ou partiel)
-  void ApplyRefresh(const nlohmann::json &data) {
-    PatchFromJson(data);  // même logique
+  mutable std::mutex mutex;
 
-    if (data.contains("state"))
-      state = data["state"];
-    if (data.contains("state_n"))
-      state_n = data["state_n"];
-    if (data.contains("result"))
-      result = data["result"];
-    if (data.contains("finished"))
-      finished = data["finished"];
-  }
-
-  // Export état partageable
   nlohmann::json ToJson() const {
-    return { { "g_WorkingPath", g_WorkingPath },
-             { "g_DefaultInstallPath", g_DefaultInstallPath },
-             { "g_SelectedLanguage", g_SelectedLanguage },
-             { "g_Action", g_Action },
-             { "g_Distribution", g_Distribution },
-             { "g_UseNet", g_UseNet },
-             { "state", state },
-             { "state_n", state_n },
-             { "result", result },
-             { "finished", finished } };
+    std::lock_guard<std::mutex> lock(mutex);
+    return { { "state", state }, { "state_n", state_n }, { "result", result }, { "finished", finished } };
   }
 };
 

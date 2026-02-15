@@ -19,6 +19,7 @@ file(
     GLOB_RECURSE
     UI_installer
     CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/backend_client.cpp" 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h" 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp" 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"

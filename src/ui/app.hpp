@@ -147,7 +147,7 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
 
   // VortexInstaller::GetContext()->m_InstallCallback = InstallVortexLauncher;
   // VortexInstaller::GetContext()->m_DeleteCallback = DeleteVortexLauncher;
-  //// VortexInstaller::GetContext()->m_UpdateCallback = UpdateVortexLauncher;
+  // VortexInstaller::GetContext()->m_UpdateCallback = UpdateVortexLauncher;
   // VortexInstaller::GetContext()->m_InstallVortexCallback = InstallVortexVersion;
   // VortexInstaller::GetContext()->m_UninstallVortexCallback = DeleteVortexVersion;
 
@@ -172,9 +172,6 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   app->SetLocale("en");
 
   app->PushLayer(layer);
-  app->SetMenubarCallback([app, layer]() {
-
-  });
 
   c_InstallerInterface = std::make_shared<InstallerInterface>(VortexInstaller::GetContext());
 
