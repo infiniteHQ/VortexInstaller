@@ -7,7 +7,6 @@
 #ifndef _WIN32
 #include <fcntl.h>
 #include <sys/wait.h>
-
 void BackendClient::Start() {
   int in_pipe[2];   // UI -> backend
   int out_pipe[2];  // backend -> UI
@@ -16,6 +15,7 @@ void BackendClient::Start() {
     throw std::runtime_error("pipe() failed");
 
   pid_t pid = fork();
+
   if (pid < 0)
     throw std::runtime_error("fork() failed");
 
@@ -23,25 +23,27 @@ void BackendClient::Start() {
     // --- Child (backend) ---
     dup2(in_pipe[0], STDIN_FILENO);
     dup2(out_pipe[1], STDOUT_FILENO);
-
     close(in_pipe[1]);
+
     close(out_pipe[0]);
+    execlp(
+        "pkexec",
+        "pkexec",
+        VortexInstaller::GetPath("./vortex_installer_backend").c_str(),
 
-    execlp("pkexec", "pkexec", VortexInstaller::GetPath("./vortex_installer_backend").c_str(), nullptr);
-
+        nullptr);
     _exit(1);
   }
 
   // --- Parent (UI) ---
   close(in_pipe[0]);
   close(out_pipe[1]);
-
   write_fd = in_pipe[1];
-  read_fd = out_pipe[0];
 
-  // non-blocking read
+  read_fd = out_pipe[0];  // non-blocking read
   fcntl(read_fd, F_SETFL, O_NONBLOCK);
 }
+
 #endif
 #ifdef _WIN32
 void BackendClient::Start() {
