@@ -48,6 +48,7 @@ if [ "$NO_INSTALLER" = false ]; then
     # VortexInstaller
     pyinstaller $PY_OPTS --name VortexInstaller --icon=icon.png \
         --add-data "vortex_installer:." \
+        --add-data "vortex_installer_backend:." \
         --add-data "resources:resources" \
         $BUILTIN_FLAG \
         main.py

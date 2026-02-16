@@ -36,8 +36,7 @@ int main() {
 
         VortexInstaller::GetContext()->g_PollkitApproved = true;
         nlohmann::json out;
-        out["type"] = "refresh";
-        out["data"] = VortexInstaller::GetContext()->ToJson();
+        out["type"] = "approved";
         std::cout << out.dump() << std::endl;
 
       } else if (type == "command") {
@@ -45,14 +44,23 @@ int main() {
           const std::string cmd = msg["name"];
           if (cmd == "InstallVortexLauncher") {
             VortexInstaller::InstallVortexLauncher();
+          } else if (cmd == "InstallVortexVersion") {
+            VortexInstaller::InstallVortexVersion();
+          } else if (cmd == "DeleteVortexLauncher") {
+            // TODO : Get infos from the data
+            VortexInstaller::DeleteVortexLauncher(false, false, false);
+          } else if (cmd == "DeleteVortexVersion") {
+            VortexInstaller::DeleteVortexVersion();
+          } else if (cmd == "UpdateVortexLauncher") {
+            VortexInstaller::UpdateVortexLauncher();
           }
         }
+      } else if (type == "refresh") {
+        json out;
+        out["type"] = "refresh";
+        out["data"] = VortexInstaller::GetContext()->ToJson();
+        std::cout << out.dump() << std::endl;
       }
-
-      json out;
-      out["type"] = "refresh";
-      out["data"] = VortexInstaller::GetContext()->ToJson();
-      std::cout << out.dump() << std::endl;
 
     } catch (const json::exception&) {
       continue;

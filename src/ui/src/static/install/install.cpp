@@ -519,6 +519,8 @@ namespace VortexInstaller {
 
       if (CherryKit::ButtonText(CherryApp.GetLocale("loc.confirg_install")).GetData("isClicked") == "true") {
         m_SelectedChildName = "?loc:loc.child.installation";
+
+        m_Backend.SendPatch();
         m_Backend.SendCommand("InstallVortexLauncher");
       }
 

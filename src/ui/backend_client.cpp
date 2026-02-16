@@ -144,6 +144,8 @@ void BackendClient::Poll() {
 
     if (msg["type"] == "refresh") {
       VortexInstaller::GetContext()->PatchFromJson(msg["data"]);
+    } else if (msg["type"] == "approved") {
+      VortexInstaller::GetContext()->g_PollkitApproved = true;
     }
   }
 }
