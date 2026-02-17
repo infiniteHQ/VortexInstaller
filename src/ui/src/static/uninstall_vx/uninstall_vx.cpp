@@ -125,6 +125,7 @@ namespace VortexInstaller {
       const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
     m_Backend.Start();
+    m_Backend.SendPatch();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);

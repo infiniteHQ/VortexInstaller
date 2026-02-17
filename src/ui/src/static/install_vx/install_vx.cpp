@@ -173,6 +173,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.accept")).GetData("isClicked") == "true") {
+      m_Backend.SendPatch();
       m_Backend.SendCommand("InstallVortexVersion");
       m_SelectedChildName = "?loc:loc.child.installation";
     }
@@ -250,6 +251,7 @@ namespace VortexInstaller {
   VortexInstallAppWindow::VortexInstallAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
     m_Backend.Start();
+    m_Backend.SendPatch();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);

@@ -57,20 +57,14 @@ void parseArguments(int argc, char *argv[], std::string &action, std::string &pa
 }
 
 int main(int argc, char *argv[]) {
-  std::cout << "SDFSD" << std::endl;
   VortexInstaller::CreateContext();
 
-  std::cout << "333" << std::endl;
   VortexInstaller::GetContext()->g_WorkingPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
-
-  std::cout << "555" << std::endl;
   VortexInstaller::GetContext()->g_Action = "install";
 
-  std::cout << "666" << std::endl;
   VortexInstaller::DetectPlatform();
   VortexInstaller::DetectArch();
 
-  std::cout << "345345" << std::endl;
   std::thread([=]() {
     if (VortexInstaller::GetContext()->net.CheckNet()) {
       VortexInstaller::GetContext()->g_Request = true;

@@ -62,6 +62,7 @@ if [ "$NO_INSTALLER" = false ]; then
     cd build/bin
     pyinstaller $PY_OPTS --name VortexUpdater --icon=icon.png \
         --add-data "vortex_update:." \
+        --add-data "vortex_installer_backend:." \
         --add-data "resources:resources" \
         main.py
     rm VortexUpdater.spec icon.png main.py org.vortex.updater.policy
@@ -73,6 +74,7 @@ if [ "$NO_INSTALLER" = false ]; then
     cd build/bin
     pyinstaller $PY_OPTS --name VersionUninstaller --icon=icon.png \
         --add-data "vxuninstall:." \
+        --add-data "vortex_installer_backend:." \
         --add-data "resources:resources" \
         main.py
     rm VersionUninstaller.spec icon.png main.py
@@ -84,6 +86,7 @@ if [ "$NO_INSTALLER" = false ]; then
     cd build/bin
     pyinstaller $PY_OPTS --name VortexUninstaller --icon=icon.png \
         --add-data "vortex_uninstall:." \
+        --add-data "vortex_installer_backend:." \
         --add-data "resources:resources" \
         main.py
     rm VortexUninstaller.spec icon.png main.py
@@ -95,6 +98,7 @@ if [ "$NO_INSTALLER" = false ]; then
     cd build/bin
     pyinstaller $PY_OPTS --name VersionInstaller --icon=icon.png \
         --add-data "vxinstaller:." \
+        --add-data "vortex_installer_backend:." \
         --add-data "resources:resources" \
         main.py
     rm VersionInstaller.spec icon.png main.py

@@ -12,11 +12,16 @@ def main():
 
     exe_path = os.path.join(app_path, "vxinstaller")
 
+    forwarded_args = sys.argv[1:]
+
+    vxinstaller_cmd = [
+        exe_path,
+        f"--workdir={executable_path}",
+        *forwarded_args
+    ]
+
     try:
-        subprocess.run(
-            [exe_path, f"--workdir={executable_path}"],
-            check=True
-        )
+        subprocess.run(vxinstaller_cmd, check=True)
     except subprocess.CalledProcessError as e:
         print(f"Error while executing Vortex Installer: {exe_path}: {e}")
     except FileNotFoundError:

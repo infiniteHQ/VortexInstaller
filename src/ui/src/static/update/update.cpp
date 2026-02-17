@@ -87,6 +87,7 @@ namespace VortexInstaller {
         Cherry::SetNextComponentProperty("color_text", "#121212FF");
         if (CherryKit::ButtonText("Update").GetData("isClicked") == "true") {
           m_SelectedChildName = "?loc:loc.child.update";
+          m_Backend.SendPatch();
           m_Backend.SendCommand("UpdateVortexLauncher");
         }
       }
@@ -142,6 +143,7 @@ namespace VortexInstaller {
   UpdateAppWindow::UpdateAppWindow(const std::string &name, const std::shared_ptr<VortexInstallerData> &data)
       : m_Data(data) {
     m_Backend.Start();
+    m_Backend.SendPatch();
     m_AppWindow = std::make_shared<Cherry::AppWindow>(name, name);
     m_AppWindow->SetIcon(Cherry::GetPath("resources/imgs/icons/misc/icon_home.png"));
     m_AppWindow->SetClosable(false);

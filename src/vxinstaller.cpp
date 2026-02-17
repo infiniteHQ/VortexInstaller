@@ -51,7 +51,7 @@ void RefreshEnvironmentVortexVersionsPools() {
       version_pools.push_back(pool);
     }
   } catch (const std::exception &e) {
-    std::cerr << "Error: " << e.what() << std::endl;
+    std::cerr << "Error while analysing vortex_versions_pools file : " << e.what() << std::endl;
   }
 }
 
