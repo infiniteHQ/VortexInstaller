@@ -33,7 +33,7 @@ bool VortexInstaller::InstallVortexLauncher() {
   std::filesystem::create_directories(tempDir);
 
 #if defined(_WIN32)
-  std::string pathStr = CherryPath("resources/deps/VC_redist.x64.exe");
+  std::string pathStr = VortexInstaller::GetPath("resources/deps/VC_redist.x64.exe");
 
   std::wstring redistPath(pathStr.begin(), pathStr.end());
 
@@ -877,6 +877,7 @@ void VortexInstaller::DetectArch() {
 #endif
 }
 
+#ifndef _WIN32
 std::string VortexInstaller::GetTopLevelDir(const std::string &tarballFile) {
   std::string command = "tar -tzf " + tarballFile;
   std::array<char, 128> buffer;
@@ -929,6 +930,7 @@ std::string VortexInstaller::GetFinalLink(const std::string &tarballFile, const 
     return "";
   }
 }
+#endif // _WIN32
 
 bool VortexInstaller::IsSafePath(const std::filesystem::path &path) {
   const std::vector<std::filesystem::path> dangerous_paths = { "/",    "/bin",  "/boot", "/dev",  "/etc", "/lib", "/lib64",
@@ -1018,7 +1020,7 @@ bool VortexInstaller::CreateShortcut(
     const std::string &shortcutPath,
     const std::string &description,
     const std::string &iconPath,
-    int iconIndex = 0) {
+    int iconIndex) {
   HRESULT hres;
   IShellLinkW *pShellLink = nullptr;
 
@@ -1383,7 +1385,7 @@ std::string VortexInstaller::convertPathToWindowsStyle(const std::string &path) 
 
 std::string VortexInstaller::GetPath(const std::string &path) {
 #ifdef _WIN32
-  return convertPathToWindowsStyle(Application::CookPath(path));
+  return convertPathToWindowsStyle(VortexInstaller::CookPath(path));
 #else
   return VortexInstaller::CookPath(path);
 #endif

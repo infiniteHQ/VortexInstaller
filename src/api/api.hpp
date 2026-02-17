@@ -61,8 +61,11 @@ namespace VortexInstaller {
   std::string NormalizePath(const std::string &path);
   void DetectPlatform();
   void DetectArch();
+  
+#ifndef _WIN32
   std::string GetTopLevelDir(const std::string &tarballFile);
   std::string GetFinalLink(const std::string &tarballFile, const std::string &installPath, int strip = 1);
+#endif // _WIN32
 
   bool IsSafePath(const std::filesystem::path &path);
   std::string GetUncompressCommand(const std::string &tarballFile, const std::string &installPath, int strip = 1);
@@ -71,12 +74,23 @@ namespace VortexInstaller {
   static void CreateFolder(const std::string &path);
 
   std::string ReplaceSpacesWithUnderscores(const std::string &str);
+
+  
+#ifdef _WIN32
+  bool CreateShortcut(
+    const std::string &targetPath,
+    const std::string &shortcutPath,
+    const std::string &description,
+    const std::string &iconPath,
+    int iconIndex = 0);
+#else
   bool CreateShortcut(
       const std::string &name,
       const std::string &targetPath,
       const std::string &shortcutPath,
       const std::string &description,
       const std::string &iconPath);
+#endif
 
 #if defined(_WIN32)
   bool InstallRedistributable(const std::wstring &filePath);
