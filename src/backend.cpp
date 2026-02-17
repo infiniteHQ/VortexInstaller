@@ -10,7 +10,7 @@ static bool is_only_whitespace(const std::string& s) {
   return s.find_first_not_of(" \t\r\n") == std::string::npos;
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   VortexInstaller::CreateContext();
 
   std::string line;
@@ -70,3 +70,13 @@ int main() {
 
   return 0;
 }
+
+#ifdef _WIN32
+#include <windows.h>
+
+extern int main(int argc, char *argv[]);
+
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+  return main(__argc, __argv);
+}
+#endif

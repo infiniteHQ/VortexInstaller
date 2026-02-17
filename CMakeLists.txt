@@ -93,6 +93,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 if(WIN32)
+    set_target_properties(vortex_installer_backend PROPERTIES WIN32_EXECUTABLE TRUE)
     set_target_properties(vortex_installer PROPERTIES WIN32_EXECUTABLE TRUE)
     set_target_properties(vortex_update PROPERTIES WIN32_EXECUTABLE TRUE)
     set_target_properties(vortex_uninstall PROPERTIES WIN32_EXECUTABLE TRUE)
