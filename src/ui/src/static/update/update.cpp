@@ -56,6 +56,10 @@ namespace VortexInstaller {
       text = CherryApp.GetLocale("loc.update") + CherryApp.GetLocale("loc.close");
     }
 
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), Cherry::GetLocale("loc.need_privileges").c_str());
+    }
+
     ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 52.0f);
     CherryKit::TextSimple("Distribution : " + m_Data->g_Distribution);
@@ -72,7 +76,7 @@ namespace VortexInstaller {
 
     CherryGUI::SameLine();
 
-    if (!m_Data->g_VortexLauncherOutdated) {
+    if (!m_Data->g_VortexLauncherOutdated || !VortexInstaller::GetContext()->g_PollkitApproved) {
       CherryGUI::BeginDisabled();
     }
 
@@ -88,78 +92,9 @@ namespace VortexInstaller {
       }
     }
 
-    if (!m_Data->g_VortexLauncherOutdated) {
+    if (!m_Data->g_VortexLauncherOutdated || !VortexInstaller::GetContext()->g_PollkitApproved) {
       CherryGUI::EndDisabled();
     }
-    /*std::string label = "Update now !";
-    ImVec2 to_remove = CherryGUI::CalcTextSize(label.c_str());
-
-    if (m_Data->g_VortexLauncherOutdated) {
-      CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x -
-  50);
-      /*{
-        auto accept = std::make_shared<Cherry::CustomButtonSimple>(label.c_str(),
-  label.c_str()); accept->SetProperty("color_bg", "#B1FF31FF");
-        accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-        CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-        if (accept->Render("__confirm")) {
-          m_SelectedChildName = "Update";
-
-          std::thread mainThread([this]() {
-            if (m_Data->m_UpdateCallback) {
-              m_Data->m_UpdateCallback();
-            }
-          });
-
-          mainThread.detach();
-        }
-        CherryGUI::PopStyleColor();
-      }*
-
-    Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
-    Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
-    Cherry::SetNextComponentProperty("color_text", "#121212FF");
-    if (CherryKit::ButtonText(label).GetData("isClicked") == "true") {
-      m_SelectedChildName = "Update";
-
-      std::thread mainThread([this]() {
-        if (m_Data->m_UpdateCallback) {
-          m_Data->m_UpdateCallback();
-        }
-      });
-
-      mainThread.detach();
-    }
-  }
-  else {
-    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x -
-  50);
-    /*{
-      auto accept = std::make_shared<Cherry::CustomButtonSimple>("Confirm",
-  "Close"); accept->SetProperty("color_bg", "#B1FF31FF");
-      accept->SetProperty("color_bg_hovered", "#C3FF53FF");
-      CherryGUI::PushStyleColor(ImGuiCol_Text, Cherry::HexToRGBA("#121212FF"));
-      if (accept->Render("__confirm")) {
-        Cherry::Application::Get().Close();
-      }
-      CherryGUI::PopStyleColor();
-    }*
-    std::string text = CherryApp.GetLocale("loc.quit");
-    ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
-    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x -
-  50); CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 35.0f);
-    CherryNextProp("color", "#222222");
-    CherryKit::Separator();
-    CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x -
-  40);
-
-    CherryNextProp("color_text", "#B1FF31");
-    if
-  (CherryKit::ButtonText(CherryApp.GetLocale("loc.quit")).GetData("isClicked") ==
-  "true") { Cherry::Application::Get().Close();
-    }
-  }
-  */
   }
 
   void UpdateAppWindow::RenderUpdate() {

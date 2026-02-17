@@ -92,6 +92,10 @@ namespace VortexInstaller {
 
     CherryGUI::PopStyleColor();
 
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), Cherry::GetLocale("loc.need_privileges").c_str());
+    }
+
     std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");
     ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosY(CherryGUI::GetContentRegionMax().y - 100.0f);
@@ -114,7 +118,7 @@ namespace VortexInstaller {
 
     CherryGUI::SameLine();
 
-    if (m_Data->m_SelectedVortexVersion.version == "") {
+    if (m_Data->m_SelectedVortexVersion.version == "" || !VortexInstaller::GetContext()->g_PollkitApproved) {
       CherryGUI::BeginDisabled();
     }
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
@@ -129,7 +133,7 @@ namespace VortexInstaller {
       m_SelectedChildName = "?loc:loc.child.license";
       this->SetChildState("?loc:loc.child.license", true);
     }
-    if (m_Data->m_SelectedVortexVersion.version == "") {
+    if (m_Data->m_SelectedVortexVersion.version == "" || !VortexInstaller::GetContext()->g_PollkitApproved) {
       CherryGUI::EndDisabled();
     }
   }

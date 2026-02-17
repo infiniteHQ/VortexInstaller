@@ -53,6 +53,10 @@ namespace VortexInstaller {
       CherryKit::Separator();
     }
 
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), Cherry::GetLocale("loc.need_privileges").c_str());
+    }
+
     std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");
     ImVec2 to_remove = CherryGUI::CalcTextSize(text.c_str());
     CherryGUI::SetCursorPosX(CherryGUI::GetContentRegionMax().x - to_remove.x - 50);
@@ -67,6 +71,9 @@ namespace VortexInstaller {
     }
 
     CherryGUI::SameLine();
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::BeginDisabled();
+    }
 
     Cherry::SetNextComponentProperty("color_bg", "#B1FF31FF");
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
@@ -74,6 +81,10 @@ namespace VortexInstaller {
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.continue")).GetData("isClicked") == "true") {
       m_SelectedChildName = "?loc:loc.child.confirm_action";
       this->SetChildState("?loc:loc.child.confirm_action", true);
+    }
+
+    if (!VortexInstaller::GetContext()->g_PollkitApproved) {
+      CherryGUI::EndDisabled();
     }
   }
 
