@@ -22,7 +22,7 @@ xcopy /E /I /Y ..\src\ui\assets\resources .\build\bin\resources
 xcopy /E /I /Y ..\src\ui\assets\resources .\build\bin\resources_nodeps
 rmdir /S /Q .\build\bin\resources_nodeps\deps
 
-xcopy /E /I /Y ..\src\ui\\assets\builtin .\build\bin\builtin
+xcopy /E /I /Y ..\src\ui\assets\builtin .\build\bin\builtin
 copy ..\misc\windows\installer\icon.png .\build\bin\
 copy ..\misc\windows\installer\main.py .\build\bin\
 copy ..\misc\windows\installer\admin_manifest.xml build\bin\
@@ -40,6 +40,7 @@ if exist manifest.json (
 
 call pyinstaller --noconsole --onefile --name VortexInstaller --icon=icon.png ^
     --add-data "vortex_installer.exe;." ^
+    --add-data "vortex_installer_backend.exe;." ^
     --add-data "resources;resources" ^
     %BUILTIN_FLAG% ^
     --manifest=admin_manifest.xml ^
@@ -56,6 +57,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUpdater --icon=icon.png ^
     --add-data "vortex_update.exe;." ^
+    --add-data "vortex_installer_backend.exe;." ^
     --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
@@ -71,6 +73,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionUninstaller --icon=icon.png ^
     --add-data "vxuninstall.exe;." ^
+    --add-data "vortex_installer_backend.exe;." ^
     --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
@@ -86,6 +89,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VortexUninstaller --icon=icon.png ^
     --add-data "vortex_uninstall.exe;." ^
+    --add-data "vortex_installer_backend.exe;." ^
     --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
@@ -101,6 +105,7 @@ cd build\bin
 
 call pyinstaller --onefile --name VersionInstaller --icon=icon.png ^
     --add-data "vxinstaller.exe;." ^
+    --add-data "vortex_installer_backend.exe;." ^
     --add-data "resources_nodeps;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
