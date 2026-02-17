@@ -105,7 +105,6 @@ bool VortexInstaller::InstallVortexLauncher() {
 
       try {
         std::filesystem::remove_all(path);
-        std::cout << "Folder deleted : " << installPath << std::endl;
       } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error deleting folder: " << e.what() << std::endl;
         VortexInstaller::GetContext()->result = "fail";
@@ -117,7 +116,6 @@ bool VortexInstaller::InstallVortexLauncher() {
 
     try {
       std::filesystem::create_directories(path);
-      std::cout << "New folder created : " << installPath << std::endl;
     } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       VortexInstaller::GetContext()->result = "fail";
@@ -154,7 +152,6 @@ bool VortexInstaller::InstallVortexLauncher() {
     GetFinalLink(tarballFile, installPath);
 #endif
 
-    std::cout << "INSTALL PATH : " << installPath << std::endl;
     if (system(uncompressCommand.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Failed to extract tarball.";
@@ -177,7 +174,6 @@ bool VortexInstaller::InstallVortexLauncher() {
       PatchData();
       return false;
     }
-    std::cout << "FQ3" << std::endl;
 
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Installation completed successfully.";
@@ -207,6 +203,7 @@ bool VortexInstaller::InstallVortexLauncher() {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Verifying integrity...";
     PatchData();
+
     std::filesystem::current_path(tempDir);
 
     if (!std::filesystem::exists(tarballFile)) {
@@ -218,9 +215,10 @@ bool VortexInstaller::InstallVortexLauncher() {
     }
 
     /*if (!std::filesystem::exists(sumFile)) {
-        std::cerr << "Error: Sum file does not exist at " << sumFile <<
-    std::endl; VortexInstaller::GetContext()->result = "fail"; VortexInstaller::GetContext()->state = "Error:
-    Missing sum file."; return false;
+      std::cerr << "Error: Sum file does not exist at " << sumFile << std::endl;
+      VortexInstaller::GetContext()->result = "fail";
+      VortexInstaller::GetContext()->state = "Error: Missing sum file.";
+      return false;
     }*/
 
     std::string checkSumCommand;
@@ -239,6 +237,7 @@ bool VortexInstaller::InstallVortexLauncher() {
     VortexInstaller::GetContext()->state_n++;
     VortexInstaller::GetContext()->state = "Ensure clean install path...";
     PatchData();
+
     std::filesystem::path path(installPath);
 
     if (std::filesystem::exists(path)) {
@@ -249,7 +248,6 @@ bool VortexInstaller::InstallVortexLauncher() {
 
       try {
         std::filesystem::remove_all(path);
-        std::cout << "Folder deleted : " << installPath << std::endl;
       } catch (const std::filesystem::filesystem_error &e) {
         std::cerr << "Error deleting folder: " << e.what() << std::endl;
         VortexInstaller::GetContext()->result = "fail";
@@ -261,7 +259,6 @@ bool VortexInstaller::InstallVortexLauncher() {
 
     try {
       std::filesystem::create_directories(path);
-      std::cout << "New folder created : " << installPath << std::endl;
     } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       VortexInstaller::GetContext()->result = "fail";
@@ -298,7 +295,6 @@ bool VortexInstaller::InstallVortexLauncher() {
 #else
     testLauncher = installPath + "/bin/vortex_launcher --test";
 #endif
-    std::cout << "FQ2" << testLauncher << std::endl;
     if (system(testLauncher.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
       VortexInstaller::GetContext()->state = "Error: Launcher test failed.";
@@ -519,7 +515,6 @@ bool VortexInstaller::InstallVortexVersion() {
     std::filesystem::path path(installPath);
     try {
       std::filesystem::create_directories(path);
-      std::cout << "New folder created : " << installPath << std::endl;
     } catch (const std::filesystem::filesystem_error &e) {
       std::cerr << "Error creating folder: " << e.what() << std::endl;
       VortexInstaller::GetContext()->result = "fail";
@@ -594,7 +589,6 @@ void VortexInstaller::DeleteVortexVersion() {
 
   std::string installPath = VortexInstaller::GetContext()->g_WorkingPath;
   std::string manifestPath = installPath + "/manifest.json";
-  std::cout << installPath << std::endl;
 
   VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Verify Vortex Launcher...";
@@ -689,9 +683,7 @@ void VortexInstaller::DeleteVortexLauncher(const bool &vxlauncher, const bool &v
 #endif
           int result = std::system(command.c_str());
 
-          if (result == 0) {
-            std::cout << "Folder deleted: " << installPath << std::endl;
-          } else {
+          if (result != 0) {
             throw std::runtime_error("Failed to delete folder using command: " + command);
           }
         } else {
@@ -931,7 +923,6 @@ std::string VortexInstaller::GetFinalLink(const std::string &tarballFile, const 
   }
 
   if (std::filesystem::exists(finalPath) && std::filesystem::is_directory(finalPath)) {
-    std::cout << "Successfully uncompressed to: " << finalPath << std::endl;
     return finalPath;
   } else {
     std::cerr << "Uncompression failed or destination path does not exist." << std::endl;
@@ -1002,10 +993,10 @@ void VortexInstaller::CreateFolder(const std::string &path) {
       std::string cmd = "mkdir " + path;
       system(cmd.c_str());
     } catch (const std::exception &ex) {
-      std::cout << "Failed to create the folder : " << ex.what() << std::endl;
+      std::cerr << "Failed to create the folder : " << ex.what() << std::endl;
     }
   } else {
-    std::cout << "Path already exist : " << path << std::endl;
+    std::cerr << "Path already exist : " << path << std::endl;
   }
 }
 
@@ -1086,7 +1077,6 @@ bool VortexInstaller::CreateShortcut(
       std::cerr << "Error while deleting the old shorcut." << std::endl;
       return false;
     }
-    std::cout << "Old shortcut deleted" << std::endl;
   }
 
   std::string content =

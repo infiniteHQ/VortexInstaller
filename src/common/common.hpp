@@ -173,6 +173,7 @@ struct VortexInstallerData {
 
   // UI -> Backend
   void PatchFromJson(const nlohmann::json &patch) {
+    std::lock_guard<std::mutex> lock(mutex);
 #define PATCH(field)          \
   if (patch.contains(#field)) \
     field = patch[#field];
@@ -249,12 +250,18 @@ struct VortexInstallerData {
     }
 
     if (patch.contains("m_BuiltinLauncher") && patch["m_BuiltinLauncher"].is_object()) {
-      const auto &b = patch["m_BuiltinLauncher"];
-      PATCH(m_BuiltinLauncher.version)
-      PATCH(m_BuiltinLauncher.arch)
-      PATCH(m_BuiltinLauncher.platform)
-      PATCH(m_BuiltinLauncher.tarball)
-      PATCH(m_BuiltinLauncher.sum)
+      const auto &inner = patch["m_BuiltinLauncher"];
+#define PATCH_INNER(field)    \
+  if (inner.contains(#field)) \
+    m_BuiltinLauncher.field = inner[#field];
+
+      PATCH_INNER(version)
+      PATCH_INNER(arch)
+      PATCH_INNER(platform)
+      PATCH_INNER(tarball)
+      PATCH_INNER(sum)
+
+#undef PATCH_INNER
     }
 
 #undef PATCH
