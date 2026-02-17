@@ -1,5 +1,4 @@
 #include <iostream>
-#include <nlohmann/json.hpp>
 #include <string>
 
 #include "./api/api.hpp"

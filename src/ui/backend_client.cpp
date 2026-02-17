@@ -1,6 +1,5 @@
 #include "backend_client.hpp"
 
-#include <nlohmann/json.hpp>
 #include <stdexcept>
 
 #include "../api/api.hpp"
