@@ -161,6 +161,11 @@ struct VortexInstallerData {
   bool m_NetLauncherNewer = false;
   bool m_FolderAlreadyExist = false;
 
+  // --- Delete flags ---
+  bool m_DeleteVortexLauncher = false;
+  bool m_DeleteVortex = false;
+  bool m_DeleteVortexDatas = false;
+
   // --- Pools ---
   std::vector<std::string> m_VortexPools;
 
@@ -208,6 +213,11 @@ struct VortexInstallerData {
     PATCH(result)
     PATCH(state_n)
     PATCH(finished)
+
+    // --- Delete flags ---
+    PATCH(m_DeleteVortexDatas)
+    PATCH(m_DeleteVortex)
+    PATCH(m_DeleteVortexLauncher)
 
     // --- Network ---
     PATCH(g_Request)
@@ -307,6 +317,11 @@ struct VortexInstallerData {
              { "result", result },
              { "state_n", state_n },
              { "finished", finished },
+
+             // --- Delete flags ---
+             { "m_DeleteVortexDatas", m_DeleteVortexDatas },
+             { "m_DeleteVortex", m_DeleteVortex },
+             { "m_DeleteVortexLauncher", m_DeleteVortexLauncher },
 
              // --- Network ---
              { "g_Request", g_Request },

@@ -24,29 +24,32 @@ namespace VortexInstaller {
       CherryKit::Separator();
       CherryKit::Space(5.0f);
       CherryGUI::Checkbox(
-          Cherry::GetLocale("loc.uninstall.checkbox_uninstall_launcher").c_str(), &this->m_DeleteVortexLauncher);
+          Cherry::GetLocale("loc.uninstall.checkbox_uninstall_launcher").c_str(),
+          &VortexInstaller::GetContext()->m_DeleteVortexLauncher);
       std::string label = Cherry::GetLocale("loc.uninstall.checkbox_uninstall_launcher_summary") + " \"" +
                           m_Data->g_DefaultInstallPath + "\"";
       CherryGUI::TextWrapped(label.c_str());
       CherryKit::Space(5.0f);
-      // Cherry::MenuItemTextSeparator("");
       CherryKit::Separator();
     }
 
     {
       CherryKit::Space(5.0f);
-      CherryGUI::Checkbox(Cherry::GetLocale("loc.uninstall.checkbox_uninstall_versions").c_str(), &this->m_DeleteVortex);
+      CherryGUI::Checkbox(
+          Cherry::GetLocale("loc.uninstall.checkbox_uninstall_versions").c_str(),
+          &VortexInstaller::GetContext()->m_DeleteVortex);
       std::string label =
           Cherry::GetLocale("loc.uninstall.checkbox_uninstall_launcher_summary") + " \"" + m_Data->g_VortexPath + "\"";
       CherryGUI::TextWrapped(label.c_str());
-      // Cherry::MenuItemTextSeparator("");
       CherryKit::Space(5.0f);
       CherryKit::Separator();
     }
 
     {
       CherryKit::Space(5.0f);
-      CherryGUI::Checkbox(Cherry::GetLocale("loc.uninstall.checkbox_uninstall_datas").c_str(), &this->m_DeleteVortexDatas);
+      CherryGUI::Checkbox(
+          Cherry::GetLocale("loc.uninstall.checkbox_uninstall_datas").c_str(),
+          &VortexInstaller::GetContext()->m_DeleteVortexDatas);
       std::string label = Cherry::GetLocale("loc.uninstall.checkbox_uninstall_datas_summary");
       CherryGUI::TextWrapped(label.c_str());
       CherryKit::Space(5.0f);
@@ -79,6 +82,7 @@ namespace VortexInstaller {
     Cherry::SetNextComponentProperty("color_bg_hovered", "#C3FF53FF");
     Cherry::SetNextComponentProperty("color_text", "#121212FF");
     if (CherryKit::ButtonText(CherryApp.GetLocale("loc.continue")).GetData("isClicked") == "true") {
+      m_Backend.SendPatch();
       m_SelectedChildName = "?loc:loc.child.confirm_action";
       this->SetChildState("?loc:loc.child.confirm_action", true);
     }

@@ -47,8 +47,10 @@ int main() {
           } else if (cmd == "InstallVortexVersion") {
             VortexInstaller::InstallVortexVersion();
           } else if (cmd == "DeleteVortexLauncher") {
-            // TODO : Get infos from the data
-            VortexInstaller::DeleteVortexLauncher(false, false, false);
+            VortexInstaller::DeleteVortexLauncher(
+                VortexInstaller::GetContext()->m_DeleteVortexLauncher,
+                VortexInstaller::GetContext()->m_DeleteVortex,
+                VortexInstaller::GetContext()->m_DeleteVortexDatas);
           } else if (cmd == "DeleteVortexVersion") {
             VortexInstaller::DeleteVortexVersion();
           } else if (cmd == "UpdateVortexLauncher") {
