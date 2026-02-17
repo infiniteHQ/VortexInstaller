@@ -146,28 +146,34 @@ namespace VortexInstaller {
     ImVec2 available_size = CherryGUI::GetContentRegionAvail();
     float button_width = (available_size.x - CherryGUI::GetStyle().ItemSpacing.x) / 2 - 42.0f;
 
-    if (!VortexInstaller::GetContext()->g_Request) {
-      VortexInstaller::GetContext()->g_UseNet = false;
-      CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.offline_mode").c_str());
-    }
-    if (!VortexInstaller::GetContext()->g_NetFetched && VortexInstaller::GetContext()->g_Request) {
-      VortexInstaller::GetContext()->g_UseNet = false;
-      CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.wait_fetch").c_str());
-    }
+    static bool initialized = false;
 
-    if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
-      VortexInstaller::GetContext()->g_UseNet = true;
-      CherryGUI::TextColored(Cherry::HexToRGBA("#FF3535FF"), Cherry::GetLocale("loc.install.no_builtin").c_str());
-    }
+    if (!initialized) {
+      if (!VortexInstaller::GetContext()->g_Request) {
+        VortexInstaller::GetContext()->g_UseNet = false;
+        CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.offline_mode").c_str());
+      }
+      if (!VortexInstaller::GetContext()->g_NetFetched && VortexInstaller::GetContext()->g_Request) {
+        VortexInstaller::GetContext()->g_UseNet = false;
+        CherryGUI::TextColored(Cherry::HexToRGBA("#555555FF"), Cherry::GetLocale("loc.install.wait_fetch").c_str());
+      }
 
-    if (VortexInstaller::GetContext()->m_NetLauncherNewer) {
-      VortexInstaller::GetContext()->g_UseNet = true;
-    }
+      if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
+        VortexInstaller::GetContext()->g_UseNet = true;
+        CherryGUI::TextColored(Cherry::HexToRGBA("#FF3535FF"), Cherry::GetLocale("loc.install.no_builtin").c_str());
+      }
 
-    if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
-      VortexInstaller::GetContext()->result = "fail";
-      VortexInstaller::GetContext()->state = Cherry::GetLocale("loc.error.no_internet_and_builtin");
-      m_SelectedChildName = "?loc:loc.child.installation";
+      if (VortexInstaller::GetContext()->m_NetLauncherNewer) {
+        VortexInstaller::GetContext()->g_UseNet = true;
+      }
+
+      if (!VortexInstaller::GetContext()->m_BuiltinLauncherExist && !VortexInstaller::GetContext()->g_Request) {
+        VortexInstaller::GetContext()->result = "fail";
+        VortexInstaller::GetContext()->state = Cherry::GetLocale("loc.error.no_internet_and_builtin");
+        m_SelectedChildName = "?loc:loc.child.installation";
+      }
+
+      initialized = true;
     }
 
     if (VortexInstaller::GetContext()->g_NetFetched) {
@@ -217,6 +223,8 @@ namespace VortexInstaller {
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
         VortexInstaller::GetContext()->g_UseNet = true;
+        m_Backend.SendPatch();
+        m_Backend.Refresh();
       }
       CherryGUI::PopStyleColor(5);
 
@@ -267,6 +275,8 @@ namespace VortexInstaller {
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
         VortexInstaller::GetContext()->g_UseNet = true;
+        m_Backend.SendPatch();
+        m_Backend.Refresh();
       }
       CherryGUI::PopStyleColor(5);
 
@@ -317,6 +327,8 @@ namespace VortexInstaller {
               ImVec4(0, 0, 0, 0),
               ImVec4(1, 1, 1, 1))) {
         VortexInstaller::GetContext()->g_UseNet = false;
+        m_Backend.SendPatch();
+        m_Backend.Refresh();
       }
       CherryGUI::PopStyleColor(5);
 

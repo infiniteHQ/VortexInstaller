@@ -18,6 +18,7 @@ class BackendClient {
   void SendPatch();
   void SendCommand(const std::string& cmd);
   void Poll();
+  void Refresh();
 
  private:
   std::mutex io_mutex;
