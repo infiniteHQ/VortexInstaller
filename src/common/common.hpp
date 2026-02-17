@@ -235,18 +235,25 @@ struct VortexInstallerData {
     // --- Complex objects ---
     if (patch.contains("m_SelectedVortexVersion") && patch["m_SelectedVortexVersion"].is_object()) {
       const auto &v = patch["m_SelectedVortexVersion"];
-      PATCH(m_SelectedVortexVersion.id)
-      PATCH(m_SelectedVortexVersion.version)
-      PATCH(m_SelectedVortexVersion.name)
-      PATCH(m_SelectedVortexVersion.arch)
-      PATCH(m_SelectedVortexVersion.dist)
-      PATCH(m_SelectedVortexVersion.path)
-      PATCH(m_SelectedVortexVersion.sum)
-      PATCH(m_SelectedVortexVersion.platform)
-      PATCH(m_SelectedVortexVersion.date)
-      PATCH(m_SelectedVortexVersion.banner)
-      PATCH(m_SelectedVortexVersion.proper_name)
-      PATCH(m_SelectedVortexVersion.created_at)
+
+#define PATCH_V(field)    \
+  if (v.contains(#field)) \
+    m_SelectedVortexVersion.field = v[#field];
+
+      PATCH_V(id)
+      PATCH_V(version)
+      PATCH_V(name)
+      PATCH_V(arch)
+      PATCH_V(dist)
+      PATCH_V(path)
+      PATCH_V(sum)
+      PATCH_V(platform)
+      PATCH_V(date)
+      PATCH_V(banner)
+      PATCH_V(proper_name)
+      PATCH_V(created_at)
+
+#undef PATCH_V
     }
 
     if (patch.contains("m_BuiltinLauncher") && patch["m_BuiltinLauncher"].is_object()) {

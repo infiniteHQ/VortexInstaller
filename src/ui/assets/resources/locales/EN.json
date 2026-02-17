@@ -32,7 +32,8 @@
         {"loc.continue":"Continue"},
         {"loc.confirg_install":"Confirm and install"},
         {"loc.error.no_internet_and_builtin": "Error: Network usage is disabled and there no builtin launcher. Cannot proceed with installation."},
-        
+        {"loc.need_privileges":"You need to sign as admin to continue..."},
+
         {"loc.install":"Confirm and install"},
         {"loc.install.select_packages":"Select packages"},
         {"loc.install.title":"Select your packages to install"},

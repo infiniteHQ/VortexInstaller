@@ -32,7 +32,7 @@
         {"loc.continue":"Continuar"},
         {"loc.confirg_install":"Confirmar e instalar"},
         {"loc.error.no_internet_and_builtin": "Error: El uso de la red está desactivado y no hay un launcher incorporado. No se puede continuar con la instalación."},
-        
+        {"loc.need_privileges":"Debe iniciar sesión como administrador para continuar..."},
         {"loc.install":"Confirmar e instalar"},
         {"loc.install.select_packages":"Seleccionar paquetes"},
         {"loc.install.title":"Selecciona los paquetes a instalar"},

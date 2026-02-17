@@ -32,7 +32,7 @@
         {"loc.continue":"Fortsæt"},
         {"loc.confirg_install":"Bekræft og installer"},
         {"loc.error.no_internet_and_builtin": "Fejl: Netværksbrug er deaktiveret, og ingen indbygget launcher findes. Kan ikke fortsætte installationen."},
-        
+        {"loc.need_privileges":"Du skal logge ind som administrator for at fortsætte..."},
         {"loc.install":"Bekræft og installer"},
         {"loc.install.select_packages":"Vælg pakker"},
         {"loc.install.title":"Vælg pakker, der skal installeres"},

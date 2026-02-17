@@ -32,7 +32,7 @@
         {"loc.continue":"Jatka"},
         {"loc.confirg_install":"Vahvista ja asenna"},
         {"loc.error.no_internet_and_builtin": "Virhe: Verkon käyttö on poistettu käytöstä eikä sisäänrakennettua käynnistäjää ole. Asennusta ei voi jatkaa."},
-        
+        {"loc.need_privileges":"Sinun on kirjauduttava sisään järjestelmänvalvojana jatkaaksesi..."},
         {"loc.install":"Vahvista ja asenna"},
         {"loc.install.select_packages":"Valitse paketit"},
         {"loc.install.title":"Valitse asennettavat paketit"},

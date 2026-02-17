@@ -32,7 +32,7 @@
         {"loc.continue":"Continuer"},
         {"loc.confirg_install":"Confirmer et installer"},
         {"loc.error.no_internet_and_builtin": "Erreur : L'utilisation du réseau est désactivée et aucun lanceur intégré n'est disponible. Impossible de poursuivre l'installation."},
-        
+        {"loc.need_privileges":"Vous devez vous connecter en tant qu'administrateur pour continuer..."},
         {"loc.install":"Confirmer et installer"},
         {"loc.install.select_packages":"Sélectionner les paquets"},
         {"loc.install.title":"Sélectionnez les paquets à installer"},

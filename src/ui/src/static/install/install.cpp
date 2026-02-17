@@ -35,7 +35,7 @@ namespace VortexInstaller {
     CherryKit::InputString("", &VortexInstaller::GetContext()->g_DefaultInstallPath);
 
     if (!VortexInstaller::GetContext()->g_PollkitApproved) {
-      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), "You need to sign as admin to continue...");
+      CherryGUI::TextColored(Cherry::HexToRGBA("FF5555"), Cherry::GetLocale("loc.need_privileges").c_str());
     }
 
     std::string text = CherryApp.GetLocale("loc.continue") + CherryApp.GetLocale("loc.close");

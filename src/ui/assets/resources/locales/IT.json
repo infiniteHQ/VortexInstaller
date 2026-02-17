@@ -32,7 +32,7 @@
         {"loc.continue":"Continua"},
         {"loc.confirg_install":"Conferma e installa"},
         {"loc.error.no_internet_and_builtin": "Errore: l’uso della rete è disabilitato e non è presente un launcher incorporato. Impossibile procedere con l’installazione."},
-        
+        {"loc.need_privileges":"È necessario accedere come amministratore per continuare..."},
         {"loc.install":"Conferma e installa"},
         {"loc.install.select_packages":"Seleziona pacchetti"},
         {"loc.install.title":"Seleziona i pacchetti da installare"},

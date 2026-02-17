@@ -32,7 +32,7 @@
         {"loc.continue":"Weiter"},
         {"loc.confirg_install":"Bestätigen und installieren"},
         {"loc.error.no_internet_and_builtin": "Fehler: Netzwerknutzung ist deaktiviert und kein eingebauter Launcher vorhanden. Installation kann nicht fortgesetzt werden."},
-        
+        {"loc.need_privileges":"Sie müssen sich als Administrator anmelden, um fortzufahren..."},
         {"loc.install":"Bestätigen und installieren"},
         {"loc.install.select_packages":"Pakete auswählen"},
         {"loc.install.title":"Wählen Sie die zu installierenden Pakete"},

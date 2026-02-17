@@ -32,7 +32,7 @@
         {"loc.continue":"Fortsätt"},
         {"loc.confirg_install":"Bekräfta och installera"},
         {"loc.error.no_internet_and_builtin": "Fel: Nätverksanvändning är avstängd och ingen inbyggd launcher finns. Kan inte fortsätta med installationen."},
-        
+        {"loc.need_privileges":"Du måste logga in som administratör för att fortsätta..."},
         {"loc.install":"Bekräfta och installera"},
         {"loc.install.select_packages":"Välj paket"},
         {"loc.install.title":"Välj paket att installera"},
