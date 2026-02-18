@@ -13,9 +13,11 @@ def get_embedded_path(rel_path: str) -> str:
     else:
         base = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, rel_path)
-
+    
 def launch_uninstaller_embedded(exe_name_in_package, target_folder_to_delete, user_home):
     src_exe = get_embedded_path(exe_name_in_package)
+    src_backend = get_embedded_path("vortex_installer_backend.exe")
+    
     if not os.path.exists(src_exe):
         raise FileNotFoundError(src_exe)
 
@@ -25,6 +27,10 @@ def launch_uninstaller_embedded(exe_name_in_package, target_folder_to_delete, us
 
     runner_exe = os.path.join(runner_dir, "vortex_uninstall.exe")
     shutil.copy2(src_exe, runner_exe)
+
+    if os.path.exists(src_backend):
+        dst_backend = os.path.join(runner_dir, "vortex_installer_backend.exe")
+        shutil.copy2(src_backend, dst_backend)
 
     src_resources = get_embedded_path("resources")
     dst_resources = os.path.join(runner_dir, "resources")

@@ -21,14 +21,15 @@ def get_embedded_path(rel_path: str) -> str:
     else:
         base = os.path.dirname(os.path.abspath(__file__))
     return os.path.join(base, rel_path)
-
 def launch_updater_embedded(exe_name_in_package, target_install_dir):
     """
-   Copy updater
+    Copy updater
     """
     src_exe = get_embedded_path(exe_name_in_package)
+    src_backend = get_embedded_path("vortex_installer_backend.exe") 
+
     if not os.path.exists(src_exe):
-        raise FileNotFoundError(src_exe)
+        raise FileNotFoundError(f"Updater introuvable : {src_exe}")
 
     tmp_root = tempfile.gettempdir()
     runner_dir = os.path.join(
@@ -39,6 +40,12 @@ def launch_updater_embedded(exe_name_in_package, target_install_dir):
 
     runner_exe = os.path.join(runner_dir, "vortex_update.exe")
     shutil.copy2(src_exe, runner_exe)
+
+    if os.path.exists(src_backend):
+        dst_backend = os.path.join(runner_dir, "vortex_installer_backend.exe")
+        shutil.copy2(src_backend, dst_backend)
+    else:
+        print(f"WARNING : Backend not founded {src_backend}")
 
     src_resources = get_embedded_path("resources")
     dst_resources = os.path.join(runner_dir, "resources")
