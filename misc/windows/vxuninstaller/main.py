@@ -25,7 +25,7 @@ def main():
     else:
         app_path = os.path.dirname(os.path.abspath(__file__))
 
-    exe_path = os.path.join(app_path, "vxuninstaller.exe")
+    exe_path = os.path.join(app_path, "vxuninstall.exe")
 
     uninstaller_args = [exe_path] + sys.argv[1:]
 
