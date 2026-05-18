@@ -58,7 +58,7 @@ cd build\bin
 call pyinstaller --onefile --name VortexUpdater --icon=icon.png ^
     --add-data "vortex_update.exe;." ^
     --add-data "vortex_installer_backend.exe;." ^
-    --add-data "resources_nodeps;resources" ^
+    --add-data "resources;resources" ^
     %MANIFEST_FLAG% ^
     --manifest=admin_manifest.xml ^
     main.py
