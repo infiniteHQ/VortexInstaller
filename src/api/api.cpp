@@ -530,6 +530,7 @@ bool VortexInstaller::InstallVortexVersion() {
     std::string finalLink;
     std::string uncompressCommand;
 #ifdef _WIN32
+    finalLink = installPath;
     uncompressCommand = "cmd /C tar -xzf \"" + tarballFile + "\" --strip-components=2 -C \"" + installPath + "\"";
 #else
     finalLink = GetFinalLink(tarballFile, installPath, 2);
@@ -548,13 +549,13 @@ bool VortexInstaller::InstallVortexVersion() {
 
     std::string testLauncher;
 #ifdef _WIN32
-    testLauncher = installPath + "\\bin\\vortex.exe --test";
+    testLauncher = "\"" + finalLink + "\\bin\\vortex.exe\" --test";
 #else
     testLauncher = "cd \"" + finalLink + "\" && ./bin/vortex -test";
 #endif
     if (system(testLauncher.c_str()) != 0) {
       VortexInstaller::GetContext()->result = "fail";
-      VortexInstaller::GetContext()->state = "Error: Launcher test failed.";
+      VortexInstaller::GetContext()->state = "Error: Editor test failed.";
       PatchData();
       return false;
     }
