@@ -1,5 +1,9 @@
 #include "api.hpp"
 
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+
 #include "../common/common.hpp"
 
 static std::shared_ptr<VortexInstallerData> g_InstallerData = nullptr;

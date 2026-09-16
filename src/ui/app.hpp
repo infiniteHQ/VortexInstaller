@@ -48,7 +48,6 @@ static std::shared_ptr<InstallerInterface> c_InstallerInterface;
 
 Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   Cherry::ApplicationSpecification spec;
-  std::shared_ptr<Layer> layer = std::make_shared<Layer>();
 
   spec.Height = 500;
   spec.Width = 800;
@@ -170,8 +169,6 @@ Cherry::Application *Cherry::CreateApplication(int argc, char **argv) {
   app->SetDefaultLocale("en");
 
   app->SetLocale("en");
-
-  app->PushLayer(layer);
 
   c_InstallerInterface = std::make_shared<InstallerInterface>(VortexInstaller::GetContext());
 
