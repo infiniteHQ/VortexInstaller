@@ -7,6 +7,15 @@
 
 #include "./ui/app.hpp"
 
+#ifdef __APPLE__
+#include <chrono>
+#include <cstdlib>
+#include <filesystem>
+#include <sstream>
+
+#define VXI_MAC_LOG(x) (std::cerr << "[vortex-mac] " << x << std::endl)
+#endif
+
 std::vector<int> SeparateVersion(const std::string &version) {
   std::vector<int> versionParts;
   std::stringstream ss(version);
@@ -65,20 +74,74 @@ int main(int argc, char *argv[]) {
   VortexInstaller::DetectPlatform();
   VortexInstaller::DetectArch();
 
+#ifdef __APPLE__
+  {
+    std::shared_ptr<VortexInstallerData> ctx = VortexInstaller::GetContext();
+    if (const char *v = std::getenv("VORTEX_PLATFORM")) {
+      ctx->g_Platform = v;
+    } else if (ctx->g_Platform.empty() || ctx->g_Platform == "linux") {
+      ctx->g_Platform = "macos";
+    }
+
+    if (const char *v = std::getenv("VORTEX_ARCH")) {
+      ctx->g_Arch = v;
+    } else if (ctx->g_Arch.empty()) {
+#if defined(__aarch64__) || defined(__arm64__)
+      ctx->g_Arch = "arm64";
+#else
+      ctx->g_Arch = "x86_64";
+#endif
+    }
+    VXI_MAC_LOG("platform=" << ctx->g_Platform << " arch=" << ctx->g_Arch << " distribution='" << ctx->g_Distribution << "'");
+  }
+#endif
+
   std::thread([=]() {
     if (VortexInstaller::GetContext()->net.CheckNet()) {
       VortexInstaller::GetContext()->g_Request = true;
     }
+#ifdef __APPLE__
+    else {
+      VXI_MAC_LOG("CheckNet() failed: no network detected");
+    }
+#endif
   }).detach();
 
   std::thread([=]() {
+#ifdef __APPLE__
+    int mac_attempts = 0;
+#endif
     while (!VortexInstaller::GetContext()->g_NetFetched) {
       if (VortexInstaller::GetContext()->g_Request) {
         std::string dist = VortexInstaller::GetContext()->g_Distribution + "_" + VortexInstaller::GetContext()->g_Platform;
+#ifdef __APPLE__
+        if (const char *d = std::getenv("VORTEX_DIST")) {
+          dist = d;
+        } else if (VortexInstaller::GetContext()->g_Distribution.empty()) {
+          dist = VortexInstaller::GetContext()->g_Platform;
+        }
+#endif
         std::string url = "https://api.infinite.si/api/vortexupdates/get_vl_versions?dist=" + dist +
                           "&arch=" + VortexInstaller::GetContext()->g_Arch;
 
+#ifdef __APPLE__
+        VXI_MAC_LOG("calling net.GET(" << url << ") attempt " << (mac_attempts + 1));
+        auto mac_t0 = std::chrono::steady_clock::now();
+#endif
         std::string body = VortexInstaller::GetContext()->net.GET(url);
+
+#ifdef __APPLE__
+        VXI_MAC_LOG(
+            "net.GET returned " << body.size() << " bytes in "
+                                << std::chrono::duration_cast<std::chrono::milliseconds>(
+                                       std::chrono::steady_clock::now() - mac_t0)
+                                       .count()
+                                << " ms: " << body.substr(0, 300));
+        if (body.empty() && ++mac_attempts < 3) {
+          std::this_thread::sleep_for(std::chrono::seconds(2));
+          continue;
+        }
+#endif
 
         try {
           VortexInstaller::GetContext()->jsonResponse = nlohmann::json::parse(body);
@@ -134,6 +197,14 @@ int main(int argc, char *argv[]) {
           VortexInstaller::GetContext()->g_UseNet = false;
           VortexInstaller::GetContext()->m_BuiltinLauncherNewer = true;
         }
+#ifdef __APPLE__
+        VXI_MAC_LOG(
+            "parsed: tarball='" << VortexInstaller::GetContext()->g_RequestTarballPath << "' sum='"
+                                << VortexInstaller::GetContext()->g_RequestSumPath << "' version='"
+                                << VortexInstaller::GetContext()->g_RequestVersion
+                                << "' UseNet=" << VortexInstaller::GetContext()->g_UseNet
+                                << " builtinExist=" << VortexInstaller::GetContext()->m_BuiltinLauncherExist);
+#endif
         VortexInstaller::GetContext()->g_NetFetched = true;
       }
       std::this_thread::sleep_for(std::chrono::seconds(2));
@@ -165,6 +236,9 @@ int main(int argc, char *argv[]) {
     }
   } else {
     std::cerr << "Manifest file does not exist!" << std::endl;
+#ifdef __APPLE__
+    std::cerr << "Looked for: " << builtin_manifest << std::endl;
+#endif
   }
 
   parseArguments(

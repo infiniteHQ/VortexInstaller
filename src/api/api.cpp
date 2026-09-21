@@ -22,7 +22,99 @@ void VortexInstaller::PatchData() {
   std::cout << out.dump() << std::endl;
 }
 
-// 5 Steps
+#if defined(__APPLE__)
+#include <cctype>
+#include <fstream>
+
+static std::string MacQuote(const std::string &s) {
+  std::string out = "'";
+  for (char c : s) {
+    if (c == '\'')
+      out += "'\\''";
+    else
+      out += c;
+  }
+  return out + "'";
+}
+
+static std::string MacXmlEscape(const std::string &s) {
+  std::string out;
+  for (char c : s) {
+    switch (c) {
+      case '&': out += "&amp;"; break;
+      case '<': out += "&lt;"; break;
+      case '>': out += "&gt;"; break;
+      default: out += c;
+    }
+  }
+  return out;
+}
+
+// Creates <appsDir>/<appName>.app: a thin bundle whose executable just execs execPath.
+static bool CreateMacAppBundle(
+    const std::string &appName,
+    const std::string &execPath,
+    const std::string &appsDir,
+    const std::string &iconPng) {
+  namespace fs = std::filesystem;
+  std::error_code ec;
+
+  fs::path app = fs::path(appsDir) / (appName + ".app");
+  fs::path macosDir = app / "Contents" / "MacOS";
+  fs::path resDir = app / "Contents" / "Resources";
+
+  fs::remove_all(app, ec);
+  fs::create_directories(macosDir, ec);
+  if (ec) return false;
+  fs::create_directories(resDir, ec);
+  if (ec) return false;
+
+  fs::path script = macosDir / "launcher";
+  {
+    std::ofstream f(script);
+    f << "#!/bin/sh\nexec " << MacQuote(execPath) << " \"$@\"\n";
+    if (!f) return false;
+  }
+  fs::permissions(
+      script,
+      fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read |
+          fs::perms::others_exec,
+      ec);
+  if (ec) return false;
+
+  bool hasIcon = false;
+  if (!iconPng.empty() && fs::exists(iconPng, ec)) {
+    std::string cmd = "sips -s format icns " + MacQuote(iconPng) + " --out " +
+                      MacQuote((resDir / "icon.icns").string()) + " >/dev/null 2>&1";
+    hasIcon = (system(cmd.c_str()) == 0);
+  }
+
+  std::string bundleId = "com.vortex.";
+  for (char c : appName)
+    if (std::isalnum(static_cast<unsigned char>(c)))
+      bundleId += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+      
+  std::ofstream plist(app / "Contents" / "Info.plist");
+  plist << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+           "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
+           "\"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">\n"
+           "<plist version=\"1.0\">\n<dict>\n"
+           "  <key>CFBundleName</key><string>" << MacXmlEscape(appName) << "</string>\n"
+           "  <key>CFBundleDisplayName</key><string>" << MacXmlEscape(appName) << "</string>\n"
+           "  <key>CFBundleIdentifier</key><string>" << bundleId << "</string>\n"
+           "  <key>CFBundleExecutable</key><string>launcher</string>\n"
+           "  <key>CFBundlePackageType</key><string>APPL</string>\n"
+           "  <key>CFBundleVersion</key><string>1.0</string>\n"
+           "  <key>CFBundleShortVersionString</key><string>1.0</string>\n";
+  if (hasIcon)
+    plist << "  <key>CFBundleIconFile</key><string>icon</string>\n";
+  plist << "  <key>NSHighResolutionCapable</key><true/>\n"
+           "</dict>\n</plist>\n";
+  plist.close();
+  return !plist.fail();
+}
+#endif
+
 bool VortexInstaller::InstallVortexLauncher() {
   // VortexInstaller::GetContext()->state_n++;
   VortexInstaller::GetContext()->state = "Initialization...";
@@ -62,6 +154,17 @@ bool VortexInstaller::InstallVortexLauncher() {
     std::string sumpath = VortexInstaller::GetContext()->g_RequestSumPath;
     std::string installPath = VortexInstaller::GetContext()->g_DefaultInstallPath;
 
+#ifdef __APPLE__
+    if (dlpath.empty() || sumpath.empty()) {
+      std::cerr << "Error: empty release URL (tarball: '" << dlpath << "', sum: '" << sumpath
+                << "'). No macOS build in the release manifest?" << std::endl;
+      VortexInstaller::GetContext()->result = "fail";
+      VortexInstaller::GetContext()->state = "Error: No release available for this platform.";
+      PatchData();
+      return false;
+    }
+#endif
+
     std::string tarballFile = tempDir + "/" + dlpath.substr(dlpath.find_last_of("/\\") + 1);
     std::string sumFile = tempDir + "/" + sumpath.substr(sumpath.find_last_of("/\\") + 1);
 
@@ -84,6 +187,8 @@ bool VortexInstaller::InstallVortexLauncher() {
     std::string checkSumCommand;
 #ifdef _WIN32
     checkSumCommand = "CertUtil -hashfile " + tarballFile + " SHA256";
+#elif defined(__APPLE__)
+    checkSumCommand = "shasum -a 256 -c " + MacQuote(sumFile);
 #else
     checkSumCommand = "sha256sum -c " + sumFile;
 #endif
@@ -228,6 +333,8 @@ bool VortexInstaller::InstallVortexLauncher() {
     std::string checkSumCommand;
 #ifdef _WIN32
     checkSumCommand = "CertUtil -hashfile " + tarballFile + " SHA256";
+#elif defined(__APPLE__)
+    checkSumCommand = "cd " + MacQuote(sumPath) + " && shasum -a 256 -c " + MacQuote(sumFile);
 #else
     checkSumCommand = "cd " + sumPath + " && sha256sum -c " + sumFile;
 #endif
@@ -364,6 +471,26 @@ bool VortexInstaller::InstallVortexLauncher() {
       return false;
     }
   }
+#elif defined(__APPLE__)
+  {
+    const struct {
+      const char *name;
+      const char *bin;
+      const char *icon;
+    } apps[] = {
+        {"Vortex Launcher", "/bin/vortex_launcher", "/bin/resources/imgs/icon.png"},
+        {"Update Vortex", "/bin/VortexUpdater", "/bin/resources/imgs/icon_update.png"},
+        {"Uninstall Vortex", "/bin/VortexUninstaller", "/bin/resources/imgs/icon_crash.png"},
+    };
+    for (const auto &a : apps) {
+      if (!CreateMacAppBundle(a.name, installPath + a.bin, "/Applications", installPath + a.icon)) {
+        VortexInstaller::GetContext()->result = "fail";
+        VortexInstaller::GetContext()->state = "Error: Failed to create Applications shortcut.";
+        PatchData();
+        return false;
+      }
+    }
+  }
 #else
   {
     std::string shortcutPath = "/usr/share/applications";
@@ -423,7 +550,6 @@ bool VortexInstaller::InstallVortexLauncher() {
   CleanUpTemporaryDirectory(tempDir);
   return true;
 }
-
 void VortexInstaller::UpdateVortexLauncher() {
   VortexInstaller::GetContext()->state_n = 0;
   VortexInstaller::GetContext()->state = "Initialization...";
