@@ -69,12 +69,17 @@ static bool CreateMacAppBundle(
   fs::create_directories(resDir, ec);
   if (ec) return false;
 
-  fs::path script = macosDir / "launcher";
-  {
-    std::ofstream f(script);
-    f << "#!/bin/sh\nexec " << MacQuote(execPath) << " \"$@\"\n";
-    if (!f) return false;
-  }
+  fs::path execDir = fs::path(execPath).parent_path();
+
+fs::path script = macosDir / "launcher";
+{
+  std::ofstream f(script);
+  f << "#!/bin/sh\n"
+    << "cd " << MacQuote(execDir.string()) << " || exit 1\n"
+    << "export VK_ICD_FILENAMES=" << MacQuote("/Users/diego/VulkanSDK/1.4.321.0/macOS/etc/vulkan/icd.d/MoltenVK_icd.json") << "\n"
+    << "exec " << MacQuote(execPath) << " \"$@\"\n";
+  if (!f) return false;
+}
   fs::permissions(
       script,
       fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read |
@@ -84,16 +89,51 @@ static bool CreateMacAppBundle(
 
   bool hasIcon = false;
   if (!iconPng.empty() && fs::exists(iconPng, ec)) {
-    std::string cmd = "sips -s format icns " + MacQuote(iconPng) + " --out " +
-                      MacQuote((resDir / "icon.icns").string()) + " >/dev/null 2>&1";
-    hasIcon = (system(cmd.c_str()) == 0);
+    fs::path iconset = resDir / "icon.iconset";
+    fs::remove_all(iconset, ec);
+    fs::create_directories(iconset, ec);
+
+    if (!ec) {
+      static const int sizes[] = {16, 32, 64, 128, 256, 512};
+      bool sipsOk = true;
+      for (int sz : sizes) {
+        std::string base = std::to_string(sz);
+        std::string cmd1x = "sips -z " + base + " " + base + " " + MacQuote(iconPng) +
+                             " --out " +
+                             MacQuote((iconset / ("icon_" + base + "x" + base + ".png")).string()) +
+                             " >/dev/null 2>&1";
+        if (system(cmd1x.c_str()) != 0) sipsOk = false;
+
+        std::string sz2 = std::to_string(sz * 2);
+        std::string cmd2x = "sips -z " + sz2 + " " + sz2 + " " + MacQuote(iconPng) +
+                             " --out " +
+                             MacQuote((iconset / ("icon_" + base + "x" + base + "@2x.png")).string()) +
+                             " >/dev/null 2>&1";
+        if (system(cmd2x.c_str()) != 0) sipsOk = false;
+      }
+
+      if (sipsOk) {
+        std::string iconutilCmd = "iconutil -c icns " + MacQuote(iconset.string()) + " -o " +
+                                   MacQuote((resDir / "icon.icns").string()) + " >/dev/null 2>&1";
+        hasIcon = (system(iconutilCmd.c_str()) == 0) && fs::exists(resDir / "icon.icns", ec);
+      }
+    }
+
+    fs::remove_all(iconset, ec);
+
+    // Fallback si le pipeline iconutil échoue pour une raison quelconque.
+    if (!hasIcon) {
+      std::string cmd = "sips -s format icns " + MacQuote(iconPng) + " --out " +
+                        MacQuote((resDir / "icon.icns").string()) + " >/dev/null 2>&1";
+      hasIcon = (system(cmd.c_str()) == 0) && fs::exists(resDir / "icon.icns", ec);
+    }
   }
 
   std::string bundleId = "com.vortex.";
   for (char c : appName)
     if (std::isalnum(static_cast<unsigned char>(c)))
       bundleId += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-      
+
   std::ofstream plist(app / "Contents" / "Info.plist");
   plist << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
            "<!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" "
@@ -111,7 +151,20 @@ static bool CreateMacAppBundle(
   plist << "  <key>NSHighResolutionCapable</key><true/>\n"
            "</dict>\n</plist>\n";
   plist.close();
-  return !plist.fail();
+  if (plist.fail()) return false;
+
+  {
+    std::string touchCmd = "touch " + MacQuote(app.string()) + " >/dev/null 2>&1";
+    system(touchCmd.c_str());
+
+    std::string lsregisterCmd =
+        "/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/"
+        "LaunchServices.framework/Versions/A/Support/lsregister -f " +
+        MacQuote(app.string()) + " >/dev/null 2>&1";
+    system(lsregisterCmd.c_str());
+  }
+
+  return true;
 }
 #endif
 
@@ -550,6 +603,7 @@ bool VortexInstaller::InstallVortexLauncher() {
   CleanUpTemporaryDirectory(tempDir);
   return true;
 }
+
 void VortexInstaller::UpdateVortexLauncher() {
   VortexInstaller::GetContext()->state_n = 0;
   VortexInstaller::GetContext()->state = "Initialization...";
