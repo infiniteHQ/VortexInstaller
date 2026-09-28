@@ -68,18 +68,20 @@ static bool CreateMacAppBundle(
   if (ec) return false;
   fs::create_directories(resDir, ec);
   if (ec) return false;
-
   fs::path execDir = fs::path(execPath).parent_path();
-
-fs::path script = macosDir / "launcher";
-{
-  std::ofstream f(script);
-  f << "#!/bin/sh\n"
-    << "cd " << MacQuote(execDir.string()) << " || exit 1\n"
-    << "export VK_ICD_FILENAMES=" << MacQuote("/Users/diego/VulkanSDK/1.4.321.0/macOS/etc/vulkan/icd.d/MoltenVK_icd.json") << "\n"
-    << "exec " << MacQuote(execPath) << " \"$@\"\n";
-  if (!f) return false;
-}
+  fs::path script = macosDir / "launcher";
+  {
+    std::ofstream f(script);
+    std::string icd = execDir.string() + "/vulkan/icd.d/MoltenVK_icd.json";
+    f << "#!/bin/sh\n"
+      << "cd " << MacQuote(execDir.string()) << " || exit 1\n"
+      << "export VK_ICD_FILENAMES=" << MacQuote(icd) << "\n"
+      << "export VK_DRIVER_FILES=" << MacQuote(icd) << "\n"
+      << "exec " << MacQuote(execPath) << " \"$@\"\n";
+    f.close();
+    if (f.fail()) return false;
+  }
+  
   fs::permissions(
       script,
       fs::perms::owner_all | fs::perms::group_read | fs::perms::group_exec | fs::perms::others_read |
