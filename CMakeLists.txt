@@ -9,7 +9,9 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(BUNDLE_EXECUTABLE true)
 
 find_package(Vulkan REQUIRED)
-find_package(Threads REQUIRED)
+if(APPLE)
+    find_package(Threads REQUIRED)
+endif()
 find_package(OpenSSL REQUIRED)
 
 
@@ -55,6 +57,7 @@ add_executable(vortex_installer_backend
 target_link_libraries(vortex_installer_backend PRIVATE httpcl)
 if(APPLE)
     target_link_libraries(vortex_installer_backend PRIVATE objc)
+    target_link_libraries(vortex_installer_backend PRIVATE Threads::Threads)
 endif()
 
 if (WIN32)
@@ -62,67 +65,76 @@ if (WIN32)
 endif()
 if(UNIX)
     target_link_libraries(vortex_installer_backend PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
 # --- vortex_installer ---
 add_executable(vortex_installer src/installer.cpp src/api/api.cpp)
 target_link_libraries(vortex_installer PRIVATE installer httpcl cherry)
+if(APPLE)
+    target_link_libraries(vortex_installer PRIVATE Threads::Threads)
+endif()
 if (WIN32)
     target_link_libraries(vortex_installer PRIVATE urlmon winhttp)
 endif()
 if(UNIX)
     target_link_libraries(vortex_installer PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
 # --- vortex_update ---
 add_executable(vortex_update src/updater.cpp src/api/api.cpp)
 target_link_libraries(vortex_update PRIVATE installer httpcl cherry)
+if(APPLE)
+    target_link_libraries(vortex_update PRIVATE Threads::Threads)
+endif()
 if (WIN32)
     target_link_libraries(vortex_update PRIVATE urlmon winhttp)
 endif()
 if(UNIX)
     target_link_libraries(vortex_update PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
 # --- vortex_uninstall ---
 add_executable(vortex_uninstall src/uninstall.cpp src/api/api.cpp)
 target_link_libraries(vortex_uninstall PRIVATE installer httpcl cherry)
+if(APPLE)
+    target_link_libraries(vortex_uninstall PRIVATE Threads::Threads)
+endif()
 if (WIN32)
     target_link_libraries(vortex_uninstall PRIVATE urlmon winhttp)
 endif()
 if(UNIX)
     target_link_libraries(vortex_uninstall PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
 # --- vxinstaller ---
 add_executable(vxinstaller src/vxinstaller.cpp src/api/api.cpp)
 target_link_libraries(vxinstaller PRIVATE installer httpcl cherry)
+if(APPLE)
+    target_link_libraries(vxinstaller PRIVATE Threads::Threads)
+endif()
 if (WIN32)
     target_link_libraries(vxinstaller PRIVATE urlmon winhttp)
 endif()
 if(UNIX)
     target_link_libraries(vxinstaller PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
 # --- vxuninstall ---
 add_executable(vxuninstall src/vxuninstall.cpp src/api/api.cpp)
 target_link_libraries(vxuninstall PRIVATE installer httpcl cherry)
+if(APPLE)
+    target_link_libraries(vxuninstall PRIVATE Threads::Threads)
+endif()
 if (WIN32)
     target_link_libraries(vxuninstall PRIVATE urlmon winhttp)
 endif()
 if(UNIX)
     target_link_libraries(vxuninstall PRIVATE CURL::libcurl
-    Threads::Threads
     OpenSSL::Crypto)
 endif()
 
