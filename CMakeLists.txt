@@ -10,10 +10,9 @@ set(BUNDLE_EXECUTABLE true)
 
 find_package(Vulkan REQUIRED)
 if(APPLE)
+    find_package(OpenSSL REQUIRED)
     find_package(Threads REQUIRED)
 endif()
-find_package(OpenSSL REQUIRED)
-
 
 if(APPLE)
     set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -22,12 +21,11 @@ if(APPLE)
     set(CMAKE_USE_PTHREADS_INIT 1)
 endif()
 
-
-
 include_directories(${Vulkan_INCLUDE_DIRS})
 
 if(UNIX)
     find_package(CURL REQUIRED)
+    find_package(OpenSSL REQUIRED)
 endif()
 
 if(NOT MSVC)
