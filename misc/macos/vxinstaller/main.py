@@ -11,7 +11,7 @@ import sys
 import tempfile
 import time
 
-UI_NAME = "vxinstall"
+UI_NAME = "vxinstaller"
 
 ELEVATION_SHIM = os.environ.get("VORTEX_ELEVATION_SHIM", "1") != "0"
 
