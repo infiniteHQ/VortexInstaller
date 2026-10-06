@@ -1052,7 +1052,7 @@ void VortexInstaller::DetectArch() {
 #elif defined(__i386__) || defined(_M_IX86)
   g_InstallerData->g_Arch = "x86";
 #elif defined(__aarch64__) || defined(_M_ARM64)
-  g_InstallerData->g_Arch = "arm64";
+  g_InstallerData->g_Arch = "arm";
 #elif defined(__arm__) || defined(_M_ARM)
   g_InstallerData->g_Arch = "arm";
 #elif defined(__riscv)
